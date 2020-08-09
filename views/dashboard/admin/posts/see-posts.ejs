@@ -1,0 +1,213 @@
+<div class="dashboard-container">
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/posts/new-post">
+            <div class="dashboard-headers"><i class="fas fa-plus"></i>New Post</div>
+        </a>
+        <a href="/dashboard/posts/edit-post">
+            <div class="dashboard-headers"><i class="far fa-edit"></i>Edit Post</div>
+        </a>
+        <a href="/dashboard/posts/see-posts">
+            <div class="dashboard-headers" id="underline"><i class="far fa-eye"></i>See Posts</div>
+        </a>
+    </div>
+    <h2 class="h2-bg"><i class="far fa-eye"></i>See all posts</h2>
+    <div class="container flex-dir-row" id='see-all-main-cont'>
+
+        <div class="container" id="display-all-posts">
+
+        </div>
+    </div>
+</div>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    h2 {
+        justify-content: center;
+    }
+
+    #preview {
+        position: relative;
+    }
+
+    #see-all-main-cont {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    #see-all-main-cont>* {
+        width: 100%;
+        max-height: 90vh;
+        margin: 10px 10px !important;
+    }
+
+    #display-all-posts {
+        justify-content: flex-start;
+        align-self: start;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+
+    .post-edit {
+        align-items: flex-start !important;
+        justify-content: flex-start;
+        align-items: center;
+        border: 1px solid rgb(226, 226, 226);
+        border-radius: 5px;
+        padding: 1rem;
+        width: 100%;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+
+    .post-author {
+        position: initial;
+    }
+
+    .post-title {
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+    .small {
+        z-index: 10;
+        padding: 5px;
+        width: 50px;
+        font-size: 10px;
+        text-align: center;
+    }
+</style>
+<script>
+    //Prevent form from resubmitting when page refreshes
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    let postsArr = [];
+    //Fetch all posts
+    fetch("/getposts", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({ 'post_num': 'all' })
+    })
+        .then(response => response.json())
+        .then((posts) => {
+            if (posts.length !== 0) {
+                posts.forEach(post => {
+                    // console.log(post)
+                    postsArr.push(post)
+                    createPostSection(post.title, post.content, post.author, post.timestamp, post._id)
+                });
+            }
+            else {
+                document.querySelector('#display-all-posts').innerText = 'No available posts yet'
+            }
+        });
+
+    //Show content of each post if clicked
+
+    //New Post, Edit Post, See Posts buttons redirect functionality
+    // const dashboardHeaders = Array.from(document.getElementsByClassName('dashboard-headers'));
+
+    // for (let i = 0; i < dashboardHeaders.length; i++) {
+    //     dashboardHeaders[i].style.cursor = 'pointer';
+    //     if (dashboardHeaders[i].innerText === 'New Post') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/new-post";
+    //         })
+    //     }
+    //     if (dashboardHeaders[i].innerText === 'Edit Post') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/edit-post";
+    //         })
+    //     }
+    //     if (dashboardHeaders[i].innerText === 'See Posts') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/see-posts";
+    //         })
+    //     }
+    // }
+
+    function createPostSection(title, content, author, timestamp, id) {
+        const postSection = document.createElement('div');
+        postSection.className = 'container post-edit';
+        postSection.id = id;
+        postSection.innerHTML = `
+        <div class='post-date'>${reformDate(timestamp)} ${reformTime(timestamp)}</div>
+        <div class='post-title'>Title:${title}</div>
+        <div class='post-content' style="display:none;">${content}</div>
+        <div class='post-author'>Author:${author}</div>
+        <i class="fas fa-trash-alt button-2 small"  title="Delete"></i>
+        `
+        document.querySelector('#display-all-posts').appendChild(postSection)
+
+        //Add event listener
+        //When clicking the post info, the content appears or disappears
+        let open = false;
+        postSection.addEventListener('click', (e) => {
+            if (e.target.className !== 'fas fa-trash-alt button-2 small') {
+                // console.log(e.target.className)
+                if (open === false) {
+                    for (let i = 0; i < postSection.childNodes.length; i++) {
+                        if (postSection.childNodes[i].className === 'post-content' || postSection.childNodes[i].className === 'fas fa-edit button-2 small') {
+
+                            postSection.childNodes[i].style.display = 'block';
+                        }
+                    }
+                    // console.log('open')
+                    open = true;
+                }
+                else if (open === true) {
+                    for (let i = 0; i < postSection.childNodes.length; i++) {
+                        if (postSection.childNodes[i].className === 'post-content' || postSection.childNodes[i].className === 'fas fa-edit button-2 small') {
+
+                            postSection.childNodes[i].style.display = 'none';
+
+                        }
+                    }
+                    // console.log('close')
+                    open = false;
+                }
+            }
+            else if (e.target.className === 'fas fa-trash-alt button-2 small') {
+                if (confirm('Are you sure you want to remove this post?')) {
+                    console.log(e.target.parentNode.id)
+                    fetch("/dashboard/posts/see-posts", {
+                        method: "post",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+
+                        //make sure to serialize your JSON body
+                        body: JSON.stringify({
+                            'id': e.target.parentNode.id
+                        })
+                    })
+                        .then(res => window.location.href = "/dashboard/posts/see-posts")
+                }
+
+            }
+
+        })
+
+    }
+
+    function reformDate(timestamp) {
+        const date = `${timestamp.substring(8, 10)}/${timestamp.substring(5, 7)}/${timestamp.substring(0, 4)}`
+
+        return date
+    }
+
+    function reformTime(timestamp) {
+        const time = `${timestamp.substring(11, 16)}`
+
+        return time
+    }
+</script>

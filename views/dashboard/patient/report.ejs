@@ -1,0 +1,65 @@
+<style>
+    h1 {
+        font-size: 2rem;
+        font-weight: lighter;
+    }
+</style>
+<div class="container  padding-2rem">
+    <div class="container padding-2rem">
+        <h1>Report <%= reported_username %></h1>
+    </div>
+    <div class="container" id="parent">
+        <form class='container'>
+            <textarea placeholder="Type in the reason of this report" class="input-field" name="reason" id="reason"></textarea>
+            <input type="button" class="button" value="Submit">
+        </form>
+        <div class="message-log"></div>
+        <div class="message-log"></div>
+    </div>
+</div>
+
+<script>
+
+    const id = '<%= reported_userId %>'
+    const reason = document.querySelector('#reason');
+
+    document.querySelector('.button').addEventListener('click', () => {
+        fetch("/report/doctor", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id,
+                reason: reason.value
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                const msgDiv = document.createElement('div');
+                if (reason.value === '') {
+                    document.querySelector('.message-log').innerText = `${body.msg}`
+                } else {
+                    document.querySelector('.message-log').innerText = `${body.msg}`
+
+                    document.querySelector('form').remove();
+
+                    createButton('homepage', '/dashboard')
+                    createButton('users profile', `/profiles/${id}`)
+                }
+            });
+    })
+
+    function createButton(place, url) {
+        const button = document.createElement('button');
+        button.innerText = `Return to ${place}`;
+        button.className = 'button';
+        button.addEventListener('click', () => {
+            window.location.href = `${url}`
+        })
+        document.querySelector('#parent').appendChild(button)
+    }
+</script>

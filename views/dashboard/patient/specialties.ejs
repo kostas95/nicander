@@ -1,0 +1,198 @@
+<style>
+    #cont,
+    #super-cont {
+        background-color: #ecf0f1;
+    }
+
+    #super-cont{
+        min-height: 93vh;
+        align-items: center !important;
+        justify-content: flex-start;
+    }
+
+    #cont {
+        border: 1px solid white;
+        align-items: flex-start !important;
+    }
+
+    .parent-div {
+        width: 90%;
+        padding: 1rem;
+        background-color: #fff;
+        margin: 25px 1rem;
+        box-shadow: 0 0 15px 0 rgba(0, 0, 0, .08);
+        justify-content: left !important;
+    }
+
+    #info-container {
+        padding: 10px;
+        width: 50%;
+        align-items: flex-start !important;
+    }
+
+    button {
+        display: inline-block;
+        margin: 0 auto !important;
+        width: auto !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+
+    #fullName {
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    #specialty {
+        color: #6f6d6d;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    #location,
+    #phone {
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="container width-100" id="super-cont">
+    <div class="container width-50" id='cont'>
+        <div class='padding-1rem' id='total'>
+
+        </div>
+        <!-- <% items.forEach(function(image) { %>
+    <img class='hover' id='img-<%=image.id%>' src="data:image/<%=image.img.contentType%>;base64, 
+        <%=image.img.data.toString('base64')%>">
+    <% }) %> -->
+    </div>
+</div>
+
+
+<script>
+    const cont = document.querySelector('#cont');
+    const total = document.querySelector('#total');
+    fetch("/specialties/users", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then((users) => {
+
+            //Display total doctors of this specialty
+            if (users.length > 1) {
+                total.innerHTML = `<strong>${users.length}</strong> Doctors Found<br>
+                Specialty: <strong>${users[0].specialty}</strong>`
+            } else {
+                total.innerHTML = `<strong>${users.length}</strong> Doctor Found<br>
+                Specialty: <strong>${users[0].specialty}</strong>`
+            }
+            users.forEach(user => {
+                console.log(user)
+                const parentDiv = document.createElement('div');
+                parentDiv.className = 'container flex-dir-row parent-div';
+                parentDiv.id = `${user._id}`;
+                cont.appendChild(parentDiv)
+
+                //Null prof image
+                const profImg = document.createElement('img');
+                profImg.className = 'profile-photo-icon';
+                profImg.src = '/img/profile.png'
+                parentDiv.appendChild(profImg);
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'container';
+                infoDiv.id = 'info-container';
+                parentDiv.appendChild(infoDiv)
+
+                //Doctor's full Name
+                const fullName = document.createElement('div');
+                fullName.innerText = `${user.name} ${user.surname}`;
+                fullName.id = 'fullName'
+                infoDiv.appendChild(fullName)
+
+                //Doctor's specialty
+                const specialty = document.createElement('div');
+                specialty.innerText = `${user.specialty}`;
+                specialty.id = 'specialty'
+                infoDiv.appendChild(specialty)
+
+                //Doctor's location
+                const location = document.createElement('div');
+                location.innerText = `${user.str_num}, ${user.location}`;
+                location.id = 'location'
+                infoDiv.appendChild(location)
+
+                //Doctor's phone
+                const phone = document.createElement('div');
+                phone.innerText = `${user.telephone}`;
+                phone.id = 'phone'
+                infoDiv.appendChild(phone)
+                
+                //Doctor's rating
+                const rating = document.createElement('div');
+                rating.innerText = `Rating:${user.rating}`;
+                rating.id = 'rating'
+                infoDiv.appendChild(rating)
+
+                const ratingDiv = document.createElement('div');
+                ratingDiv.className = 'container'
+                parentDiv.appendChild(ratingDiv)
+
+                //View profile button
+                const profButton = document.createElement('button');
+                profButton.innerText = 'View profile'
+                profButton.className = 'button'
+
+                profButton.addEventListener('click', () => {
+                    window.location.href = `/profiles/${user._id}`
+                })
+
+                parentDiv.appendChild(profButton)
+            });
+
+            // Append Images
+
+            //Create an element that contains the image data rendered from server
+            const imgElement = document.createElement('div');
+            //Give a display of none
+            imgElement.style.display = 'none';
+            imgElement.innerHTML = `
+            <% items.forEach(function(image) { %>
+            <img class='profile-img' id='img-<%=image.id%>' src="data:image/<%=image.img.contentType%>;base64, 
+                <%=image.img.data.toString('base64')%>">
+            <% }) %>
+            `
+            //Append to page
+            document.querySelector('#super-cont').appendChild(imgElement);
+
+            //Initialize the array that the above images will be stored
+            let imagesArray;
+
+            //Get the images from the above div and collect them in a collection
+            const imagesCollection = document.querySelectorAll('.profile-img');
+
+            //Remove the above div, it's useless now because we have collected the images 
+            imgElement.remove();
+
+            //Store the image data from a collection to an array
+            imagesArray = Array.from(imagesCollection);
+
+            //Iterate the array
+            imagesArray.forEach(image => {
+                //The id of each image has the form of img-123412412
+                //We split the id into two parts and we get the second one that is the user's id
+                realId = image.id.split(/[-]/)[1];
+                //We set the image's id to the user's id
+                image.id = realId;
+
+                //If a div elements has the user's/image's id, then its first element's (which is the default image) src gets the image's src.
+                document.getElementById(`${image.id}`).firstChild.src = `${image.src}`
+            })
+        });
+
+
+</script>

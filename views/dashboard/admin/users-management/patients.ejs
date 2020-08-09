@@ -1,0 +1,427 @@
+<style>
+    input,
+    select {
+        width: 15vw !important;
+        margin: 10px !important;
+    }
+
+    .last {
+        width: 14vw;
+    }
+
+    .data-cont-head>h2 {
+        width: 10vw;
+    }
+
+    .data-cont:nth-child(2n) {
+        background-color: rgb(238, 238, 238) !important;
+    }
+
+    .data-cont:nth-child(2n+1) {
+        background-color: #fff !important;
+    }
+
+    .data {
+        width: 10vw;
+    }
+
+    #input-container {
+        margin-bottom: 1rem;
+    }
+
+    .fa-circle-o-notch {
+        margin: 3rem;
+    }
+
+    h5 {
+        text-align: center;
+        font-weight: lighter;
+        min-width: 5vw;
+        padding: 10px;
+    }
+
+    .width-100 {
+        align-items: flex-start;
+    }
+
+    #container {
+        padding-top: 1rem;
+    }
+
+    #street,
+    #telephone,
+    #name {
+        display: none;
+    }
+
+    .fa-check,
+    .fa-check::before {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+    }
+
+    #check {
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/users-management/doctors">
+            <div class="dashboard-headers"><i class="fas fa-user-nurse"></i>Doctors</div>
+        </a>
+        <a href="/dashboard/users-management/patients">
+            <div class="dashboard-headers" id="underline"><i class="fas fa-user"></i>Patients</div>
+        </a>
+        <a href="/dashboard/users-management/admins">
+            <div class="dashboard-headers"><i class="fas fa-user-cog"></i></i>Admins</div>
+        </a>
+    </div>
+    <h2 class="h2-bg"><i class="fas fa-user"></i>Patients</h2>
+    <div class="container flex-dir-row width-100">
+        <div class="container filter-container">
+            <div class="container">
+                <div class="container find-by" id="input-container">
+                    <h5>Find by:</h5>
+                    <div class="container flex-dir-row">
+                        <button class="button button-3" id="mail">Email</button>
+                        <button class="button button-3" id="nam">Full Name</button>
+                    </div>
+                    <input type="text" placeholder="Find by email" id="email">
+                    <input type="text" placeholder="Find by full name" id="name">
+                    <input type="text" placeholder="Find by street number" id='street'>
+                    <input type="text" placeholder="Find by telephone number" id="telephone">
+                </div>
+                <div class="container order-by" id="input-container">
+                    <h5>Order by:</h5>
+                    <select value>Order by:
+                        <option value="Registration date" id="registration_date">Registration date</option>
+                        <option value="Email alphabetically" id="email_alphabetically">Email alphabetically</option>
+                        <option value="First name alphabetically" id="fname_alphabetically">First name alphabetically
+                        </option>
+                        <option value="Last name alphabetically" id="lname_alphabetically">Last name alphabetically
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="container width-75">
+            <div class="container" id="container">
+                <div class="container">
+                    <div class="container flex-dir-row data-cont-head margin-right-25px">
+                        <h2 class='heading'>Registration Date</h2>
+                        <h2 class='heading'>Email</h2>
+                        <h2 class='heading'>Name</h2>
+                        <h2 class='heading'>Surname</h2>
+                        <h2 class='heading'>Date of birth</h2>
+                        <h2 class='heading'></h2>
+                    </div>
+                    <!-- <i class="fa fa-circle-o-notch fa-spin" style="font-size:5rem"></i> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    //Buttons choose filter
+    const mail_btn = document.querySelector('#mail');
+    const name_btn = document.querySelector('#nam');
+
+    //Array for doctor users
+    let patientArr = [];
+
+    //Fetch get doctors
+    fetch("/getUsers/admin", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            usertype: 'patient'
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            body.forEach(element => {
+                patientArr.push(element)
+            });
+        });
+
+    //Create data row for each doctor and display it
+    resetToInitial()
+
+    //Input fields filters
+    const email = document.querySelector('#email');
+    const name = document.querySelector('#name');
+
+    //Event listeners for each button
+    mail_btn.addEventListener('click', () => {
+        resetToInitial()
+        displayNone(name);
+        displayNone(street);
+        displayNone(telephone);
+        displayBlock(email);
+    })
+
+    name_btn.addEventListener('click', () => {
+        resetToInitial()
+        displayNone(email);
+        displayNone(street);
+        displayNone(telephone);
+        displayBlock(name);
+    })
+
+    //Event listeners for input fields
+
+    //Email
+    email.addEventListener('keyup', () => {
+        let found = false;
+        removeElements('data-cont');
+        if (email.value === '') {
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else {
+            patientArr.forEach(element => {
+                if (element.email.includes(email.value)) {
+                    patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+                    found = true
+                }
+            });
+            if (found === false) {
+                removeElements('data-cont');
+                const parent = document.createElement('div');
+                parent.className = 'container data-cont msg';
+
+                const element = document.createElement('div');
+                element.className = 'container flex-dir-row padding-1rem';
+                element.style.flexWrap = 'wrap';
+                element.innerHTML = `No patients found with the provided criteria`
+                element.style.fontSize = `20px`
+
+                const container = document.querySelector('#container');
+                parent.appendChild(element);
+                container.appendChild(parent);
+            }
+        }
+    })
+
+    //Full name
+    name.addEventListener('keyup', () => {
+        let found = false;
+        removeElements('data-cont');
+        if (name.value === '') {
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else {
+            // removeElements('data-cont');
+            patientArr.forEach(element => {
+                if (element.name.includes(name.value) || element.surname.includes(name.value)) {
+                    patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+                    found = true
+                }
+            });
+            if (found === false) {
+                removeElements('data-cont');
+                const parent = document.createElement('div');
+                parent.className = 'container data-cont msg';
+
+                const element = document.createElement('div');
+                element.className = 'container flex-dir-row';
+                element.style.flexWrap = 'wrap';
+                element.innerHTML = `No patients found with the provided criteria`
+                element.style.fontSize = `20px`
+
+                const container = document.querySelector('#container');
+                parent.appendChild(element);
+                container.appendChild(parent);
+            }
+        }
+    })
+
+    //Sort patients
+    //Event listeners for select options
+    const registrationDate = document.getElementById('registration_date');
+    const authorization = document.getElementById('authorization');
+    const emailAlphabetically = document.getElementById('email_alphabetically');
+    const fnameAlphabetically = document.getElementById('fname_alphabetically');
+    const lnameAlphabetically = document.getElementById('lname_alphabetically');
+
+
+    //Event listener for select
+    var option = document.querySelector('select');
+    option.addEventListener('change', function () {
+        if (this.value === 'Registration date') {
+            patientArr.sort(function (a, b) { return (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0); });
+            removeElements('data-cont');
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else if (this.value === 'Authorization') {
+            patientArr.sort(function (a, b) { return (a.authorized > b.authorized) ? 1 : ((b.authorized > a.authorized) ? -1 : 0); });
+            removeElements('data-cont');
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else if (this.value === 'Email alphabetically') {
+            patientArr.sort(function (a, b) { return (a.email > b.email) ? 1 : ((b.email > a.email) ? -1 : 0); });
+            removeElements('data-cont');
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else if (this.value === 'First name alphabetically') {
+            patientArr.sort(function (a, b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); });
+            removeElements('data-cont');
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+        else if (this.value === 'Last name alphabetically') {
+            patientArr.sort(function (a, b) { return (a.surname > b.surname) ? 1 : ((b.surname > a.surname) ? -1 : 0); });
+            removeElements('data-cont');
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }
+    }, false);
+
+    //Delete button functionality
+    const parentElement = document.querySelector('.width-75');
+
+    parentElement.addEventListener('click', (e) => {
+        if (e.target.className.includes('del_btn')) {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'block';
+
+            setTimeout(function () {
+                if (e.target && e.target.nextSibling) {
+                    e.target.style.display = 'block';
+                    e.target.nextSibling.style.display = 'none';
+                }
+            }, 5000);
+
+            parentElement.addEventListener('click', (e) => {
+                if (e.target.className.includes('confirm')) {
+                    //Fetch get doctors
+                    fetch("/delUser", {
+                        method: "post",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+
+                        //make sure to serialize your JSON body
+                        body: JSON.stringify({
+                            id: e.target.id
+                        })
+                    })
+                        .then(response => response.json())
+                        .then((body) => {
+                            console.log(body)
+                            e.target.parentElement.innerHTML = `
+                            <div class='container  flex-dir-row padding-1rem width-100'>
+                                <div style='padding:5px'>${body.msg}</div>
+                                <div id='check' class='container'>
+                                    <i class="fas fa-check"></i>    
+                                </div>
+                            </div>
+                            `
+                        });
+                }
+            })
+        }
+    })
+
+    function patientElement(id, date, email, name, surname, dd, mm, yy, authorized) {
+        const parent = document.createElement('div');
+        parent.className = 'container data-cont';
+
+        const element = document.createElement('div');
+        element.className = 'container flex-dir-row';
+        element.style.flexWrap = 'wrap';
+        element.innerHTML = `
+            <div class='data'>${date.substring(0, 10)}</div> 
+            <div class='data'>${email}</div>
+            <div class='data'>${name}</div>
+            <div class='data'>${surname}</div>
+            <div class='data'>${yy}-${mm}-${dd}</div>
+            <button class='data del_btn' id='${id}'>Delete</div>
+            <button style = 'display:none' class='data confirm' id='${id}'>Are you sure?</button>
+            <a title='View profile' href='/profiles/${id}'><i class="far fa-user-circle"></i></a>
+            `
+        const container = document.querySelector('#container');
+        parent.appendChild(element);
+        container.appendChild(parent);
+    }
+
+    function removeElements(className) {
+        const elements = document.getElementsByClassName(className);
+        let arr = Array.from(elements);
+        arr.forEach(element => {
+            element.remove()
+        })
+    }
+
+    function displayNone(element) {
+        element.style.display = 'none';
+    }
+
+    function displayBlock(element) {
+        element.style.display = 'block';
+    }
+
+    function createSpinner() {
+        const spinner = document.createElement('i');
+        spinner.className = 'fa fa-circle-o-notch fa-spin'
+        spinner.style = 'font-size:5rem'
+
+        document.querySelector('.data-cont-head').parentElement.appendChild(spinner)
+    }
+
+    function resetToInitial() {
+        disableButtons()
+        createSpinner();
+        removeElements('data-cont');
+        setTimeout(function () {
+            enableButtons()
+            document.querySelector('.fa-circle-o-notch').remove()
+            patientArr.forEach(element => {
+                patientElement(element._id, element.date, element.email, element.name, element.surname, element.dd, element.mm, element.yy, element.authorized)
+            });
+        }, 1000);
+    }
+
+    function disableButtons() {
+        mail_btn.disabled = true;
+        name_btn.disabled = true;
+    }
+
+    function enableButtons() {
+        mail_btn.disabled = false;
+        name_btn.disabled = false;
+    }
+
+    function compare(a, b) {
+        if (a.email < b.email) {
+            return -1;
+        }
+        if (a.email > b.email) {
+            return 1;
+        }
+        return 0;
+    }
+</script>

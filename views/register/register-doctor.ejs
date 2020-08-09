@@ -1,0 +1,309 @@
+<style>
+    .width-99 {
+        width: 99% !important;
+    }
+
+    #register-container {
+        justify-content: center;
+        align-items: center;
+    }
+
+    input,
+    label {
+        width: 20vw !important;
+    }
+
+    #form-container h2 {
+        width: 100%;
+    }
+
+    #mm,
+    #yy,
+    #dd {
+        width: 5vw;
+    }
+
+    #postal_code {
+        width: 20vw;
+    }
+
+    #form-container {
+        padding-right: 5rem;
+        border-right: 5px solid #f8f9fa;
+    }
+</style>
+
+<div class="container">
+    <div id='login-header' class="container flex-dir-row">
+        <div class="container" id='log-container'>
+            <i class="fas fa-user-plus fa-2x"></i>
+            <h3>Register to Nicander now</h3>
+        </div>
+    </div>
+    <div id="register-container" class="container">
+        <div class="container flex-dir-row">
+
+            <div id="form-container" class="container">
+                <div class="container" id='reg-container'>
+                    <h2>This form must be submitted only by a doctor</h2>
+                </div>
+                <form action="/doctor/register" method="post" class="form container" autocomplete="off">
+                    <div class="container flex-dir-row">
+                        <div class="container">
+                            <label>First Name</label>
+                            <input type="text" id="name" class='input-field' name="name"
+                                value="<%= typeof name != 'undefined' ? name : '' %>">
+                        </div>
+                        <div class="container">
+                            <label>Surname</label>
+                            <input type="text" id="surname" class='input-field' name="surname"
+                                value="<%= typeof surname != 'undefined' ? surname : '' %>">
+                        </div>
+                    </div>
+                    <div class="container flex-dir-row width-99">
+                        <div class="container width-99">
+                            <label>Email</label>
+                            <input type="email" id="email" class='input-field' name='email'
+                                value="<%= typeof email != 'undefined' ? email : '' %>">
+                        </div>
+                        <div class="container">
+                            <label>Telephone number</label>
+                            <input type="tel" id="telephone" class='input-field' name='telephone'
+                                value="<%= typeof telephone != 'undefined' ? telephone : '' %>">
+                        </div>
+                    </div>
+                    <div class="container flex-dir-row">
+                        <div class="container">
+                            <label>Doctor's office location</label>
+                            <input type="text" id="location" name='location' class='input-field'
+                                value="<%= typeof location != 'undefined' ? location : '' %>">
+                        </div>
+                        <div class="container">
+                            <label>Street & number</label>
+                            <input type="text" id="str_num" name="str_num" class='input-field'
+                                value="<%= typeof str_num != 'undefined' ? str_num : '' %>">
+                        </div>
+                    </div>
+                    <div class="container flex-dir-row">
+                        <div class="container">
+                            <label>Password</label>
+                            <input type="password" id="password" name='password' class='input-field'
+                                value="<%= typeof password != 'undefined' ? password : '' %>">
+                        </div>
+                        <div class="container">
+                            <label>Confirm Password</label>
+                            <input type="password" id="c_password" name="c_password" class='input-field'
+                                value="<%= typeof c_password != 'undefined' ? c_password : '' %>">
+                        </div>
+                    </div>
+                    <div class="container flex-dir-row width-99">
+                        <div class="container width-99">
+                            <label class="width-99">Specialty</label>
+                            <select name="specialty" id="specialty" class="width-99">
+                                <option value>Select specialty</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="submit" value="Register" class="button">
+                    <div class="message-log">
+                        <%= error %>
+                    </div>
+                </form>
+            </div>
+            <div class="container">
+                <h2>I am already a member</h2>
+                <p id='haveAccountMsg' class="container flex-dir-row">Do you want to login? <a href="/doctor/login"
+                        id="loginLink">LOGIN HERE!</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.title = 'Doctor Sign Up'
+
+    //Prevent form from resubmitting when page refreshes
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    // Check for blank fields
+    const name = document.getElementById('name');
+    const surname = document.getElementById('surname');
+    const email = document.getElementById('email');
+    const telephone = document.getElementById('telephone');
+    const officeLocation = document.getElementById('location');
+    const str_num = document.getElementById('str_num');
+    const password = document.getElementById('password');
+    const c_password = document.getElementById('c_password');
+    const specialty = document.getElementById('specialty');
+    const message = document.querySelector('.message-log')
+
+    document.querySelector('form').addEventListener('submit', (e) => {
+
+        if (name.value === '' || surname.value === '' || email.value === '' || telephone.value === '' || officeLocation.value === '' || str_num.value === '' || password.value === '' || c_password.value === '' || specialty.value === '') {
+            if (name.value === '') {
+                styleBorder(name, 'red')
+            }
+            else {
+                styleBorder(name, 'rgb(226, 226, 226)')
+            }
+            if (surname.value === '') {
+                styleBorder(surname, 'red')
+            }
+            else {
+                styleBorder(surname, 'rgb(226, 226, 226)')
+            }
+            if (email.value === '') {
+                styleBorder(email, 'red')
+            }
+            else {
+                styleBorder(email, 'rgb(226, 226, 226)')
+            }
+            if (telephone.value === '') {
+                styleBorder(telephone, 'red')
+            }
+            else {
+                styleBorder(telephone, 'rgb(226, 226, 226)')
+            }
+            if (officeLocation.value === '') {
+                styleBorder(officeLocation, 'red')
+            }
+            else {
+                styleBorder(officeLocation, 'rgb(226, 226, 226)')
+            }
+            if (str_num.value === '') {
+                styleBorder(str_num, 'red')
+            }
+            else {
+                styleBorder(str_num, 'rgb(226, 226, 226)')
+            }
+            if (password.value === '') {
+                styleBorder(password, 'red')
+            }
+            else {
+                styleBorder(password, 'rgb(226, 226, 226)')
+            }
+            if (c_password.value === '') {
+                styleBorder(c_password, 'red')
+            }
+            else {
+                styleBorder(c_password, 'rgb(226, 226, 226)')
+            }
+            if (specialty.value === '') {
+                styleBorder(specialty, 'red')
+            }
+            else {
+                styleBorder(specialty, 'rgb(226, 226, 226)')
+            }
+            message.style.display = 'block';
+            message.innerText = 'Please fill all fields correctly!'
+            e.preventDefault()
+        }
+        else if (password.value !== c_password.value) {
+            styleBorder(password, 'red')
+            styleBorder(c_password, 'red')
+            message.style.display = 'block';
+            message.innerText = 'Password and password confirmation do not match!'
+            inputFieldsNormalColor()
+            e.preventDefault()
+        }
+        else if (password.value.length < 5) {
+            styleBorder(password, 'red')
+            styleBorder(c_password, 'red')
+            message.innerText = 'Password must be at least 5 characters'
+            inputFieldsNormalColor()
+            e.preventDefault()
+        }
+        else {
+            name.value = capitalizeFirstLetter(name.value);
+            surname.value = capitalizeFirstLetter(surname.value);
+            officeLocation.value = capitalizeFirstLetter(officeLocation.value);
+        }
+    })
+
+    function styleBorder(field, color) {
+        field.style.border = `1px solid ${color}`
+    }
+
+    function inputFieldsNormalColor() {
+        styleBorder(name, 'rgb(226, 226, 226)')
+        styleBorder(surname, 'rgb(226, 226, 226)')
+        styleBorder(email, 'rgb(226, 226, 226)')
+        styleBorder(telephone, 'rgb(226, 226, 226)')
+        styleBorder(officeLocation, 'rgb(226, 226, 226)')
+        styleBorder(str_num, 'rgb(226, 226, 226)')
+        styleBorder(specialty, 'rgb(226, 226, 226)')
+    }
+
+    const specialties = ['Vascular surgeon - Vascular specialist',
+        'Hematologist',
+        'Allergist',
+        'Gastroenterologist',
+        'General doctor',
+        'Gynecologist - Obstetrician',
+        'Dermatologist - Venereologist',
+        'Dietician - Nutritionist',
+        'Endocrinologist',
+        'Cardiac surgeon',
+        'Cardiologist',
+        'Neurologist',
+        'Neurosurgeon',
+        'Nephrologist',
+        'Oncologist',
+        'Dentist',
+        'Orthopedic - Orthopaedic Surgeon',
+        'Urologist',
+        'Ophthalmologist',
+        'Pathologist',
+        'Pediatrician',
+        'Plastic Surgeon',
+        'Pulmonologist - Tuberculologist',
+        'Rheumatologist',
+        'General surgeon',
+        'Physiotherapist',
+        'Psychiatrist',
+        'Psychologist - Psychotherapist',
+        'Otolaryngologist',
+        'Homeopathic',
+        'Pediatric dentist',
+        'Physiatrist',
+        'Periodontist',
+        'Speech therapist',
+        'Orthodontic',
+        'Prosthetist',
+        'Hyperbaric Medicine - Diving Medicine',
+        'Pediatric surgeon',
+        'Acupuncturist',
+        'Diabetologist',
+        'Child psychiatrist',
+        'Child psychologist',
+        'Oral surgeon',
+        'Pediatric endocrinologist',
+        'Anesthetist',
+        'Hepatologist',
+        'Neuropsychologist',
+        'Mastologist',
+        'Pediatric gastroenterologist',
+        'Podiatrist',
+        'Stomatologist',
+        'Endocrine Surgeon',
+        'Pediatric Cardiologist',
+        'Endodontist',
+        'Pediatric rheumatologist',
+        'Pediatric Otolaryngologist',
+        'Embryologist',
+        'Pediatric diabetologist',
+        'Pediatric pulmonologist']
+
+    for (let i = 0; i < specialties.length; i++) {
+        const option = document.createElement('option');
+        option.value = specialties[i];
+        option.innerText = specialties[i];
+        document.querySelector('#specialty').appendChild(option)
+    }
+
+    function capitalizeFirstLetter(string) {
+        string = string.toLowerCase();
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>

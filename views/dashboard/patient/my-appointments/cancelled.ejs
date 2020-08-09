@@ -1,0 +1,242 @@
+<style>
+    .head-btn {
+        color: rgb(109, 50, 109);
+        font-size: 1.5rem;
+    }
+
+    .head-btn:hover {
+        opacity: 0.7;
+    }
+
+    .font-bigger-lighter {
+        font-size: 1.5rem;
+        font-weight: normal;
+    }
+
+    #appointments,
+    #history,
+    #requests,
+    #cancelled {
+        border-right: 5px solid #f8f9fa;
+        justify-content: left !important;
+        align-items: flex-start !important;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        max-width: 75vw;
+    }
+
+    .appointment-content,
+    .history-content,
+    .requests-content,
+    .cancelled-content {
+        background: #f2f1f1;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        width: 40vw;
+    }
+
+    .min-height {
+        min-height: 93px;
+    }
+
+    .border:nth-child(2) {
+        border-right: 1px solid #cecdcd;
+        border-left: 1px solid #cecdcd;
+    }
+
+    .border:nth-child(1) {
+        align-items: flex-start;
+    }
+
+    .border {
+        flex: 1;
+    }
+
+    #appointments-head,
+    #history-head,
+    #requests-head,
+    #cancelled-head {
+        margin-bottom: 20px;
+    }
+
+    .button {
+        margin-bottom: 5px;
+        font-size: 12px;
+        width: 150px;
+    }
+
+    #name {
+        color: #3498db;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    #specialty {
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+</style>
+
+<div class="container padding-1rem width-100">
+    <div class="container flex-dir-row padding-1rem width-100">
+        <a href="/dashboard/my-appointments"><h1 class="padding-1rem pointer head-btn">Appointments</h1></a>
+        <a href="/dashboard/my-appointments/requests"><h1 class="padding-1rem pointer head-btn">Requests</h1></a>
+        <a href="/dashboard/my-appointments/history"><h1 class="padding-1rem pointer head-btn">History</h1></a>
+        <a href="/dashboard/my-appointments/cancelled"><h1 class="padding-1rem pointer head-btn">Rejected/Cancelled</h1></a>
+    </div>
+    <div class="container padding-2rem width-100 text-left" id="cancelled">
+        <h1 class="font-bigger-lighter text-left" id="cancelled-head">Rejected or cancelled appointments</h1>
+        <h1 class="font-bigger-lighter text-left width-100" id="total"></h1>
+        <div class="container padding-1rem" id="cancelled-content-wrap"></div>
+    </div>
+</div>
+<script>
+
+    const id = `<%= id %>`;
+    const cancelled = document.querySelector('#cancelled-content-wrap');
+    document.getElementsByClassName('head-btn')[3].style.textDecoration = 'underline';
+    let total = []
+
+    fetch("/getAppointments/p", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            patient_id: id,
+            type: 'rejected',
+            type2: 'cancelled'
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.result === 'success') {
+                body.appointments.sort(function (a, b) {
+                    var c = new Date(a.timestamp);
+                    var d = new Date(b.timestamp);
+                    return d - c;
+                }).forEach(appointment => {
+
+                    //Create container that contains the appointment info (doc info, date etc)
+                    const appointmentElement = document.createElement('div');
+                    appointmentElement.className = 'container flex-dir-row appointment-content';
+                    appointmentElement.id = `${appointment._id}`
+
+                    //Create left section of container
+                    let appointmentSection = document.createElement('div');
+                    appointmentSection.className = `container padding-left-right-12px min-height border`
+                    appointmentSection.innerHTML = `
+                        <a id='name' href='/profiles/${appointment.doctor.id}'>${appointment.doctor.name} ${appointment.doctor.surname}</a>
+                        <div id='specialty' class='strong'>${appointment.doctor.specialty}</div>
+                    `
+                    //Append left section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+                    //Create middle section of container
+                    appointmentSection = document.createElement('div');
+                    appointmentSection.className = `container padding-left-right-12px min-height border flex-dir-row strong`
+                    appointmentSection.innerHTML = `
+                        <div><i class="fas fa-calendar-alt"></i></div>
+                        <div class='font-12px'>${appointment.timestamp}</div>
+                    `
+                    //Append middle section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+
+                    //Create right section of container
+                    if (appointment.type === 'cancelled' || appointment.type === 'rejected') {
+
+                        //Push to total arr
+                        total.push(appointment)
+
+
+                        appointmentSection = document.createElement('div');
+                        appointmentSection.className = `container padding-left-right-12px min-height border`
+
+                        const cont = createContainer();
+                        if (appointment.type === 'cancelled') {
+                            cont.innerText = 'Cancelled by user'
+                        } else {
+                            cont.innerText = 'Rejected by doctor'
+                        }
+
+                        appointmentSection.appendChild(cont)
+
+                        cancelled.appendChild(appointmentElement)
+                    }
+
+                    //Append right section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+                    function createContainer() {
+                        const cont = document.createElement('div');
+                        cont.className = 'container';
+
+                        return cont;
+                    }
+
+                    function createButton(id, innerText) {
+                        const btn = document.createElement('button')
+                        btn.className = 'button small'
+                        btn.id = `${id}`
+                        btn.innerText = `${innerText}`
+
+                        return btn;
+                    }
+                });
+            }
+            //Get all the child nodes of container named notification
+            const childrenNodes = Array.from(document.querySelectorAll('.appointment-content'));
+            
+            //Iterate: The first 5 are displayed, the others are not
+            for (let i = 0; i < childrenNodes.length; i++) {
+                if (childrenNodes.length > 5) {
+                    let element = childrenNodes[i];
+                    if (i >= 5) {
+                        element.style.display = 'none';
+                    } else if (i <= 5) {
+                        element.style.display = 'flex';
+                    }
+                }
+            }
+
+            //Init an i value (shows how many items are displayd)
+            let i = 5
+            //Create show more button
+            const showMore = document.createElement('div');
+            showMore.className = 'padding-1rem pointer';
+            showMore.id = 'showMore'
+            showMore.innerText = 'Show more'
+
+            //Show more button event listener
+            showMore.addEventListener('click', () => {
+                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 5)
+                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                const j = i
+                for (i; i < j + 5; i++) {
+                    if (i < childrenNodes.length > 0) {
+                        const element = childrenNodes[i];
+                        element.style.display = 'flex';
+                    } else {
+                        showMore.remove()
+                        break
+                    }
+                }
+            })
+            
+            if (cancelled.innerText === '') {
+                cancelled.innerText = `There are no cancelled appointments at this moment`
+            } else {
+                document.querySelector('#cancelled-content-wrap').appendChild(showMore)
+            }
+
+            document.querySelector('#total').innerText = `Total appointments: ${total.length}`
+        });
+</script>

@@ -1,0 +1,153 @@
+<div class="dashboard-container">
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/posts/new-post"><div class="dashboard-headers" id="underline"><i class="fas fa-plus"></i>New Post</div></a>
+        <a href="/dashboard/posts/edit-post"><div class="dashboard-headers"><i class="far fa-edit"></i>Edit Post</div></a>
+        <a href="/dashboard/posts/see-posts"><div class="dashboard-headers"><i class="far fa-eye"></i>See Posts</div></a>    
+    </div>
+    <h2 class="h2-bg"><i class="fas fa-plus"></i>New post</h2>
+    <div class="container">
+
+        <form action="/dashboard/posts/new-post" method="post" class="form" autocomplete="off">
+            <div id="form-container" class="container">
+                <label>Title</label>
+                <input type="text" id="postTitle" class='input-field' name="postTitle" required>
+                <label>Content</label>
+                <div class="container flex-dir-row" id='writing-palette'>
+                    <i class="fas fa-bold" title="Bold"></i>
+                    <i class="fas fa-italic" title="Italic"></i>
+                    <i class="fas fa-link" title="Add URL"></i>
+                    <i class="fas fa-arrow-down" title="Line Break"></i>
+                </div>
+                <textarea id="postContent" class='input-field' name='postContent' required></textarea>
+                <label>Author</label>
+                <input type="text" id="postAuthor" name='postAuthor' class='input-field' required>
+                <!-- <label>Select image:</label> -->
+                <!-- <input type="file" id="postImg" name="postImg" accept="image/*"> -->
+                <input type="button" value="Preview" class="button-2">
+                <input type="submit" value="Post" class="button">
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+    h2 {
+        justify-content: center;
+    }
+
+    #preview {
+        position: relative;
+    }
+</style>
+<script>
+
+    //Prevent form from resubmitting when page refreshes
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    //New Post, Edit Post, See Posts buttons redirect functionality
+    const dashboardHeaders = Array.from(document.getElementsByClassName('dashboard-headers'));
+
+    for (let i = 0; i < dashboardHeaders.length; i++) {
+        dashboardHeaders[i].style.cursor = 'pointer';
+        if (dashboardHeaders[i].innerText === 'New Post') {
+            dashboardHeaders[i].addEventListener('click', () => {
+                window.location.href = "/dashboard/posts/new-post";
+            })
+        }
+        if (dashboardHeaders[i].innerText === 'Edit Post') {
+            dashboardHeaders[i].addEventListener('click', () => {
+                window.location.href = "/dashboard/posts/edit-post";
+            })
+        }
+        if (dashboardHeaders[i].innerText === 'See Posts') {
+            dashboardHeaders[i].addEventListener('click', () => {
+                window.location.href = "/dashboard/posts/see-posts";
+            })
+        }
+    }
+
+    // Functionality for bold, italic, line break, url
+    // const txtarea = document.querySelector('#postContent');
+    // const body = document.querySelector('body');
+    // body.addEventListener('mousedown', (e) => {
+    //     // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+    //     body.addEventListener('mouseup', (e) => {
+    //         // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+
+
+    //         // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+    //         const beforeChange = txtarea.value.substring(0, txtarea.selectionStart);
+    //         const afterChange = txtarea.value.substring(txtarea.selectionEnd, txtarea.length);
+    //         const toBeChanged = txtarea.value.substring(txtarea.selectionStart, txtarea.selectionEnd);
+
+    //         document.getElementById('writing-palette').addEventListener('click', (e) => {
+    //             // const selectionEnd = txtarea.selectionEnd;
+    //             const postContent = document.getElementById('postContent');
+    //             if (e.target.className === 'fas fa-bold') {
+    //                 // console.log(selectionEnd)
+    //                 // postContent.value += `<b></b>`
+    //                 txtarea.value = `${beforeChange}<b>${toBeChanged}</b>${afterChange}`;
+    //                 // txtarea.focus()
+    //                 // txtarea.selectionEnd= selectionEnd;
+    //             }
+    //             if (e.target.className === 'fas fa-italic') {
+    //                 // postContent.value += `<i></i>`
+    //                 txtarea.value = `${beforeChange}<em>${toBeChanged}</em>${afterChange}`
+    //             }
+    //             if (e.target.className === 'fas fa-link') {
+    //                 // postContent.value += `<a href='https://WWW.EXAMPLE.COM'></a>`
+    //                 txtarea.value = `${beforeChange}${toBeChanged}<a href='https://EXAMPLE.COM'></a>${afterChange}`
+    //             }
+    //             if (e.target.className === 'fas fa-arrow-down') {
+    //                 // postContent.value += `<br>`
+    //                 txtarea.value = `${beforeChange}${toBeChanged}<br>${afterChange}`
+    //             }
+    //         })
+    //     })
+    // })
+
+    // Preview post fucntionality
+    const previewBtn = document.querySelector('.button-2')
+    previewBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (document.getElementById('post')) {
+            document.getElementById('post').remove()
+        }
+
+        const previewSection = document.createElement('div');
+        previewSection.className = 'container';
+        previewSection.id = 'post';
+        previewSection.style.margin = '2rem';
+        previewSection.style.padding = '1rem';
+        previewSection.style.minWidth = '50vw';
+
+        const title = document.querySelector('#postTitle').value;
+        const content = document.querySelector('#postContent').value;
+        const author = document.querySelector('#postAuthor').value;
+
+        previewSection.innerHTML = `
+            <div class='post-date'>${getCurrentDate()}</div></br>
+            <div class='post-title'>${title}</div><br>
+            <div class='post-content'>${content}</div></br>
+            <div class='post-author'>Post written by: ${author}</div>
+        `
+        document.querySelector('.dashboard-container').appendChild(previewSection)
+    
+        window.location='#post';
+    })
+
+    //Functions
+    function getCurrentDate() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = mm + '/' + dd + '/' + yyyy;
+        return today;
+    }
+</script>

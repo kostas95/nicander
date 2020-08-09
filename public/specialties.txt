@@ -1,0 +1,59 @@
+Vascular surgeon - Vascular specialist
+Hematologist
+Allergist
+Gastroenterologist
+General doctor
+Gynecologist - Obstetrician
+Dermatologist - Venereologist
+Dietician - Nutritionist
+Endocrinologist
+Cardiac surgeon
+Cardiologist
+Neurologist
+Neurosurgeon
+Nephrologist
+Oncologist
+Dentist
+Orthopedic - Orthopaedic Surgeon
+Urologist
+Ophthalmologist
+Pathologist
+Pediatrician
+Plastic Surgeon
+Pulmonologist - Tuberculologist
+Rheumatologist
+General surgeon
+Physiotherapist
+Psychiatrist
+Psychologist - Psychotherapist
+Otolaryngologist
+Homeopathic
+Pediatric dentist
+Physiatrist
+Periodontist
+Speech therapist
+Orthodontic
+Prosthetist
+Hyperbaric Medicine - Diving Medicine
+Pediatric surgeon
+Acupuncturist
+Diabetologist
+Child psychiatrist
+Child psychologist
+Oral surgeon
+Pediatric endocrinologist
+Anesthetist
+Hepatologist
+Neuropsychologist
+Mastologist
+Pediatric gastroenterologist
+Podiatrist
+Stomatologist
+Endocrine Surgeon
+Pediatric Cardiologist
+Endodontist
+Pediatric rheumatologist
+Pediatric Otolaryngologist
+Embryologist
+Pediatric diabetologist
+Pediatric pulmonologist

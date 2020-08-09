@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/stylesheets/main.css">
+</head>
+
+<body>
+    <div id="navbar">
+        <div class="navbar-decoration"></div>
+        <ul>
+            <li class="navbar-item">Home</li>
+            <li class="navbar-item">Profile</li>
+            <li class="navbar-item">About</li>
+            <li class="navbar-item">Contact</li>
+            <li class="navbar-item"><a href="/logout">Logout</a></li>
+        </ul>
+        <div class="navbar-decoration"></div>
+    </div>
+    <div class="dashboard-container">
+        <div id="online-users-container">
+            <div id="online-header">
+                <h5>Users online</h5>
+            </div>
+            <div id="online-users">
+
+            </div>
+        </div>
+        <div class="container" id='dashboard-main'>
+            <div id="main-content">
+                <h1 id="dashboard">Dashboard</h1>
+                <div style="display: inline;">Welcome <div id="username" style="display: inline"><%= username %></div>
+                </div>
+
+            </div>
+
+
+            <div id='chat-area' style="display: none;">
+
+                <div id="msg-display">
+                </div>
+                <form id="msg-form">
+                    <textarea placeholder="Type your message here..." rows="5" cols="60" id="text-msg"></textarea>
+                    <input type="submit" id='submit-msg'>
+                </form>
+
+            </div>
+
+
+            <div id='profile-area' style="display: none;">
+                <div class="user-prof-data" id="prof-name"></div>
+                <div class="user-prof-data" id="prof-email"></div>
+                <div class="user-prof-data" id="prof-reg-date"></div>
+
+
+            </div>
+
+
+
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.2/simplepeer.min.js"></script>
+<script>
+    var socket = io();
+
+
+    const username = document.getElementById('username').innerText,
+        id = createNewElement('div', "<%= id %>")
+    let onlineUsersArray = [], receiver = {}
+    const video = document.querySelector('video')
+
+    userData = {
+        username: username,
+        id: id
+    }
+
+    //Send userdata to the server in order to create online_users list
+    socket.emit('sendUserData', {
+        username: username,
+        id: id,
+        online_timestamp: new Date()
+    })
+
+    //Get the online users list and display it in the DOM
+    socket.on('onlineUsers', (data) => {
+        onlineUsersArray = data
+        document.getElementById('online-users').innerHTML = '';
+
+        data.forEach(element => {
+            if (element.id === userData.id) {
+                const userElement = document.createElement('div');
+                userElement.className = 'online-user';
+                userElement.id = `${element.id}`;
+                userElement.innerHTML =
+                    `<div id='online-username'> ${element.username}</div>
+                    `
+                userElement.username = element.username;
+                userElement.online_timestamp = element.online_timestamp;
+                document.querySelector(`#online-users`).insertBefore(userElement, document.querySelector('#online-users').firstChild)
+            } else {
+                createDomElement('div', 'online-user', `${element.id}`,
+                    `  
+                    <div id='online-username'> ${element.username}</div>
+                    <i id='notification' class="fas fa-circle"></i>
+                    <i id='profile-view' class="far fa-user-circle"></i>
+                    <i id='chat' class="far fa-comment"></i>
+                    <i id='video' class="fas fa-video"></i>
+                    
+                    `, '#online-users', `${element.username}`, `${element.online_timestamp}`)
+            }
+
+
+        });
+
+    })
+
+    //Get the list of online users for event delegation when someone wants to click on a users (to see profile or send msg)
+    const usersOnlineChat = document.querySelector('#online-users-container');
+
+    usersOnlineChat.addEventListener('click', (e) => {
+
+        //Click the profile view button for a user
+        if (e.target.id == 'profile-view') {
+            //the receiver is the other guy who we see his profile and we cant send him a message so he RECEIVES our message
+            e.target.parentElement.style.background = 'rgb(206, 182, 205)'
+            e.target.parentElement.style.color = 'rgb(204, 119, 204)'
+            receiver = {
+                name: e.target.parentElement.username,
+                id: e.target.parentElement.id,
+            }
+            fetch("/info", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify(receiver)
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    displayNone('#chat-area');
+                    displayNone('#main-content');
+                    displayBlock('#profile-area');
+
+                    document.querySelector('#prof-name').innerText = 'Name: ' + body.name;
+                    document.querySelector('#prof-email').innerText = 'Email: ' + body.email;
+                    document.querySelector('#prof-reg-date').innerText = 'Registered since: ' + body.date;
+
+                });
+        }
+        //Click the chat button for a user
+        if (e.target.id == 'chat') {
+
+            sender = {
+                senderName: userData.username,
+                senderId: userData.id,
+            }
+
+            receiver = {
+                name: e.target.parentElement.username,
+                id: e.target.parentElement.id,
+            }
+            displayNone('#profile-area');
+            displayNone('#main-content');
+            displayBlock('#chat-area');
+
+            socket.emit('getChat', {
+                sender,
+                receiver
+            })
+
+            socket.on('chatMessages', data => {
+                clearHtml('#msg-display');
+                if (data === null) {
+                    const displayMessageContainer = document.createElement('div');
+                    displayMessageContainer.id = 'dashboard';
+                    displayMessageContainer.innerHTML = `Start a conversation now with <strong>${receiver.name}</strong>`;
+
+                    document.querySelector('#msg-display').appendChild(displayMessageContainer);
+                }
+                else {
+                    data.Messages.forEach(messageInfo => {
+                        const displayMessageContainer = document.createElement('div');
+
+                        if (messageInfo.sentByUser === userData.username)
+                            displayMessageContainer.className = 'message-container sent';
+                        else
+                            displayMessageContainer.className = 'message-container received';
+                        displayMessageContainer.innerHTML = `
+                            <div id='msg-info-container'>
+                                <div id='msg_senderName'>${messageInfo.sentByUser}</div>
+                                <div id='msg_timestamp'>${messageInfo.timestamp.substring(0, 10)} ${messageInfo.timestamp.substring(11, 19)}</div>
+                            </div>
+                            <div id='msg_message'>${messageInfo.body}</div>`
+                        // document.querySelector('#msg-display').appendChild(displayMessageContainer)
+                        document.querySelector('#msg-display').appendChild(displayMessageContainer);
+
+                        var messageDisplay = document.querySelector('#msg-display');
+                        messageDisplay.scrollTop = messageDisplay.scrollHeight - messageDisplay.clientHeight;
+                    })
+                }
+            })
+        }
+        if (e.target.id == 'video') {
+            displayNone('#main-content');
+            displayNone('#chat-area');
+            displayNone('#profile-area');
+
+            sender = {
+                senderName: userData.username,
+                senderId: userData.id,
+            }
+
+            receiver = {
+                name: e.target.parentElement.username,
+                id: e.target.parentElement.id,
+            }
+
+            socket.emit('videoOffer', {
+                sender,
+                receiver
+            })
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `<div class="modal-content">
+                <p>send video call offer to ${receiver.name}</p></div>`
+            document.querySelector('body').appendChild(modal)
+
+        }
+    })
+
+    socket.on('videoOffer', (data) => {
+        console.log(data)
+
+        //create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content"><div>got video call offer from ${data.sender.senderName}</div><button id='acceptCall'>accept</button><button id='declineCall'>decline</button></div>`;
+        document.querySelector('body').appendChild(modal)
+
+        //accept call (click)
+        document.getElementById('acceptCall').addEventListener('click', () => {
+            let uid = generateGuid();
+            console.log('Accepted the offer. Redirect to video chat room')
+            window.location = `./${uid}`;
+            // const iframe = document.createElement('iframe');
+            // iframe.src = `./${uid}`
+            socket.emit('callAnswer', {
+                answer: 'accept',
+                answerFrom: {
+                    id: data.receiver.id,
+                    name: data.receiver.name
+                },
+                answerTo: {
+                    id: data.sender.senderId,
+                    name: data.sender.senderName
+                },
+                uid: uid
+            })
+        })
+
+        //decline call (click)
+        document.getElementById('declineCall').addEventListener('click', () => {
+            socket.emit('callAnswer', {
+                answer: 'decline',
+                answerFrom: {
+                    id: data.receiver.id,
+                    name: data.receiver.name
+                },
+                answerTo: {
+                    id: data.sender.senderId,
+                    name: data.sender.senderName
+                }
+            })
+        })
+    })
+
+    socket.on('videoOfferAnswer', (data) => {
+        console.log(data)
+        //data are:
+        //    {
+        //       answer: 'accept',
+        //       answerFrom: {
+        //           id: data.receiver.id,
+        //           name: data.receiver.name
+        //       },
+        //       answerTo: {
+        //           id: data.sender.senderId,
+        //           name: data.sender.senderName
+        //       }
+        //   }
+        if (data.answer === 'accept') {
+            console.log('The peer accepted the offer so you should get connected to the video room')
+            window.location = `./${data.uid}`;
+        }
+    })
+
+    //Send a message to the server, then the server will take care of it
+    const msgForm = document.querySelector('#msg-form');
+    const textMsg = document.querySelector('#text-msg');
+
+    msgForm.addEventListener('keypress', submitOnEnter)
+
+    msgForm.addEventListener('submit', (e) => {
+        //Construct data of sender
+        sender = {
+            senderName: userData.username,
+            senderId: userData.id,
+            message_info: {
+                message: textMsg.value,
+                timestamp: new Date()
+            }
+        }
+
+        //Send in an object the sender and receiver data
+        socket.emit('txtMsg', {
+            sender,
+            receiver
+        })
+        // console.log(textMsg.value)
+
+        textMsg.value = ''
+        e.preventDefault()
+    })
+
+    socket.on('txtMsgReceived', (data) => {
+        // console.log(data)
+        const displayMessageContainer = document.createElement('div');
+        displayMessageContainer.className = 'message-container received';
+        displayMessageContainer.innerHTML = `
+            <div id='msg-info-container'>
+                <div id='msg_senderName'>${data.sentByUser}</div>
+                <div id='msg_timestamp'>${data.timestamp.substring(0, 10)} ${data.timestamp.substring(11, 19)}</div>
+            </div>
+            <div id='msg_message'>${data.body}</div>`
+        // document.querySelector('#msg-display').appendChild(displayMessageContainer)
+        document.querySelector('#msg-display').appendChild(displayMessageContainer);
+
+        var messageDisplay = document.querySelector('#msg-display');
+        messageDisplay.scrollTop = messageDisplay.scrollHeight - messageDisplay.clientHeight;
+
+        //DOM find who sent the message and enable notification icon on the online list
+        setTimeout(function () {
+            const onlineUsers = document.getElementsByClassName('online-user');
+            arr = Array.from(onlineUsers)
+
+            arr.forEach((user) => {
+                if (user.id === data.sentByUser_id) {
+                    document.querySelector('#notification').style.animation = ' animate1 infinite forwards 5s ease-in-out';
+                    document.querySelector('#notification').style.transition = ' all ease-in-out';
+                }
+            })
+
+        }, 100);
+
+    })
+
+    socket.on('txtMsgSent', (data) => {
+        console.log(data)
+        const displayMessageContainer = document.createElement('div');
+        displayMessageContainer.className = 'message-container sent';
+        displayMessageContainer.innerHTML = `
+            <div id='msg-info-container'>
+                <div id='msg_senderName'>${data.sentByUser}</div>
+                <div id='msg_timestamp'>${data.timestamp.substring(0, 10)} ${data.timestamp.substring(11, 19)}</div>
+            </div>
+            <div id='msg_message'>${data.body}</div>`
+        // document.querySelector('#msg-display').appendChild(displayMessageContainer)
+        document.querySelector('#msg-display').appendChild(displayMessageContainer);
+
+        var messageDisplay = document.querySelector('#msg-display');
+        messageDisplay.scrollTop = messageDisplay.scrollHeight - messageDisplay.clientHeight;
+    })
+
+
+    function createNewElement(element, innerText) {
+        const newEl = document.createElement(element);
+        newEl.innerText = innerText;
+
+        return newEl.innerText
+    }
+
+    function createDomElement(elem, className, id, innerHTML, parentElement, username, online_timestamp) {
+        const element = document.createElement(elem);
+        element.className = className;
+        element.id = id;
+        element.innerHTML = innerHTML;
+        element.username = username;
+        element.online_timestamp = online_timestamp;
+        document.querySelector(parentElement).appendChild(element);
+    }
+
+    function displayBlock(element) {
+        document.querySelector(`${element}`).style.display = 'block';
+    }
+
+    function displayNone(element) {
+        document.querySelector(`${element}`).style.display = 'none';
+    }
+
+    function clearHtml(element) {
+        document.querySelector(`${element}`).innerHTML = '';
+    }
+
+    function submitOnEnter(event) {
+        if (event.which === 13) {
+            event.target.form.dispatchEvent(new Event("submit", { cancelable: true }));
+            event.preventDefault(); // Prevents the addition of a new line in the text field (not needed in a lot of cases)
+        }
+    }
+
+    function generateGuid() {
+        var result, i, j;
+        result = '';
+        for (j = 0; j < 32; j++) {
+            if (j == 8 || j == 12 || j == 16 || j == 20)
+                result = result + '-';
+            i = Math.floor(Math.random() * 16).toString(16).toUpperCase();
+            result = result + i;
+        }
+        return result;
+    }
+</script>

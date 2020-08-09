@@ -1,0 +1,1486 @@
+<style>
+    #id {
+        display: none;
+    }
+
+    #image {
+        display: none;
+        position: absolute;
+        z-index: -1;
+    }
+
+    label {
+        text-align: center;
+        cursor: pointer;
+        bottom: 0px;
+        width: 100%;
+        height: 270px;
+        position: absolute;
+        bottom: 0;
+        text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+        color: #fff;
+    }
+
+    label {
+        display: none;
+    }
+
+    .checkbox_label {
+        display: block;
+        position: initial;
+        height: initial;
+        width: 100%;
+        background-color: #e0f1ff;
+        padding: 5px;
+        margin: 0;
+        margin-bottom: 1px;
+        border-radius: 4px;
+    }
+
+    .checkbox-cont {
+        width: 100% !important;
+    }
+
+    #imgSection {
+        background-color: rgb(255, 255, 255);
+        position: relative;
+        width: 270px;
+        height: 270px;
+        border-radius: 5px;
+    }
+
+    .profile-info>.container>div,
+    .profile-info>.container>a {
+        margin-left: 10px
+    }
+
+    .profile-info>* {
+        justify-content: left !important;
+        align-items: flex-start;
+    }
+
+    h3 {
+        color: rgb(139, 139, 139);
+        font-weight: lighter;
+    }
+
+    #website-edit,
+    #telephone-edit,
+    .fa-check,
+    .fa-times,
+    .fa-plus,
+    .fa-minus {
+        cursor: pointer;
+    }
+
+    #full-name {
+        font-size: 2rem;
+    }
+
+    .fa-check,
+    .fa-times {
+        display: none;
+    }
+
+    .display-block>* {
+        display: block !important;
+        font-size: 2rem;
+        padding: 1rem;
+    }
+
+    #telephone,
+    #website,
+    #location {
+        padding: 5px;
+    }
+
+    #wrap-bgcolor,
+    #telephone,
+    #website {
+        background-color: #d0eaff;
+        color: rgb(54, 54, 54);
+    }
+
+    a {
+        color: rgb(54, 54, 54);
+    }
+
+    .info-wrap {
+        width: 80%;
+        border-radius: 4px;
+        box-shadow: 0 0 20.37px 0.63px rgba(0, 0, 0, .07);
+    }
+
+    h1>i {
+        color: rgb(255, 65, 65);
+    }
+
+    .big-headers,
+    .big-headers>* {
+        padding: 1rem 2px;
+        font-size: 1.5rem;
+    }
+
+    .big-headers {
+        padding: 1rem 1rem 0 1rem;
+        justify-content: left !important;
+    }
+
+    .info-content {
+        display: block;
+        text-align: left;
+    }
+
+    .fa-edit {
+        cursor: pointer;
+        font-size: 1rem;
+        margin-left: 1rem;
+    }
+
+    textarea,
+    input {
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        outline: none;
+        line-height: 1.2rem;
+        font-size: 1.2rem;
+    }
+
+    .specElem {
+        border-radius: 2rem;
+        background: rgb(241, 241, 241);
+        padding: 1rem;
+        color: #000;
+        display: inline;
+        margin: 10px;
+    }
+
+    #specialization {
+        line-height: 5rem;
+        flex-wrap: wrap;
+    }
+
+    .year_input {
+        width: 100px;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    .bullet {
+        position: relative;
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.3rem;
+        margin-top: 10px;
+    }
+
+    ul .bullet::before {
+        content: "";
+        background-color: rgb(175, 175, 175);
+        font-weight: bold;
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-right: 1rem;
+        border-radius: 100%;
+    }
+
+    #delete-account {
+        padding: 10px;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #change_password {
+        cursor: pointer;
+        color: #000;
+    }
+
+    #display {
+        display: block;
+    }
+
+    #msg-modal {
+        color: rgb(0, 209, 0);
+    }
+
+    #schedule {
+        display: none;
+        text-align: center;
+    }
+
+    #days>div {
+        flex: 1;
+    }
+
+    input[type='checkbox'] {
+        display: none
+    }
+
+    .fa-chevron-up{
+        display: none;
+    }
+
+    .fa-chevron-up, .fa-chevron-down{
+        cursor: pointer;
+        margin-left: 1rem;
+    }
+</style>
+<div class="container">
+    <!-- Display profile info section -->
+    <div class="container flex-dir-row width-100 padding-2rem" id='wrap-bgcolor'>
+        <!-- Image section -->
+        <div class="container" id="profile-image">
+            <form action="/dashboard/personal-details/image" method="POST" enctype="multipart/form-data"
+                class="container">
+                <div id="imgSectionWrap" class="hover">
+
+                </div>
+
+                <input type="file" id="image" name="image" value="">
+                <input type="text" id="id" name="id" value="<%= id %>">
+            </form>
+        </div>
+        <div class="container padding-2rem profile-info width-50">
+            <div class="container width-100">
+                <h1 id="full-name"></h1>
+                <h3 id="specialty"></h3>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-star"></i></h1>
+                <div id="rating"></div>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-phone-alt"></i></h1>
+                <a href="" id='telephoneLink'>
+                    <div id="telephone"></div>
+                </a>
+                <i class="fas fa-edit" id='telephone-edit'></i>
+                <i class="fas fa-check" id="telephone-check"></i>
+                <i class="fas fa-times" id="telephone-x"></i>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-link"></i></h1>
+                <a href="" id='websiteLink'>
+                    <div id="website"></div>
+                </a>
+                <i class="fas fa-edit" id='website-edit'></i>
+                <i class="fas fa-check" id="website-check"></i>
+                <i class="fas fa-times" id="website-x"></i>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-map-marker-alt"></i></h1>
+                <div id="location"></div>
+            </div>
+        </div>
+    </div>
+    <div class="container width-100" id="user-info-container">
+        <div class="container padding-2rem width-100">
+            <!-- user description -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-user-md"></i>
+                    <h1>Description</h1>
+                    <i class="fas fa-edit" id='description-edit'></i>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id="description">
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Specialization and Experience -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-book-medical"></i>
+                    <h1>Specialization and Experience</h1>
+                    <i class="fas fa-edit" id='specialization-edit'></i>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='specialization'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Patient reviews -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-award" id='reviews-edit'></i>
+                    <h1>Patient reviews</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='reviews'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Curriculum Vitae and Career -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="far fa-clipboard"></i>
+                    <h1>Curriculum Vitae and Career</h1>
+                    <i class="fas fa-edit" id='cv-edit'></i>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='cv'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Languages -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-globe"></i>
+                    <h1>Languages</h1>
+                    <i class="fas fa-edit" id='language-edit'></i>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='language'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Weekly schedule -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h1>Weekly schedule</h1>
+                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+                <div class="container padding-2rem" id="schedule-desc">
+                    Set your weekly schedule, so your patients know which days and hours they should select, for their appointments' requests
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='schedule'>
+                    <div class="container flex-dir-row">
+                        <button id="show_less" class="button">
+                            Show hours between 8:00 and 20:00
+                        </button>
+                        <button id="show_all" class="button">
+                            Show all hours
+                        </button>
+                    </div>
+                    <div class="container flex-dir-row" id="days">
+                        <div class="container padding-1rem">
+                            <h2>Monday</h2>
+                            <div class="container checkbox-cont" id="Monday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Tuesday</h2>
+                            <div class="container checkbox-cont" id="Tuesday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Wednesday</h2>
+                            <div class="container checkbox-cont" id="Wednesday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Thursday</h2>
+                            <div class="container checkbox-cont" id="Thursday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Friday</h2>
+                            <div class="container checkbox-cont" id="Friday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Saturday</h2>
+                            <div class="container checkbox-cont" id="Saturday"></div>
+                        </div>
+                        <div class="container padding-1rem">
+                            <h2>Sunday</h2>
+                            <div class="container checkbox-cont" id="Sunday"></div>
+                        </div>
+                    </div>
+                    <button class="button" id='schedulesubmit'>Save schedule</button>
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Delete Account & change password -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100" id="delete-account">
+                    <a href="/d/delete">
+                        <div class="padding-1rem">Delete account</div>
+                    </a>
+                    <a id='change_password'>
+                        <div class="padding-1rem">Change password</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    const items = document.createElement('div');
+    items.innerText = `<%= items %>`
+
+    const imgContent = document.createElement('div');
+    const imgSectionWrap = document.querySelector('#imgSectionWrap');
+    imgContent.id = 'imgSection'
+    imgContent.className = 'container hover'
+
+    //Get user id
+    const div = document.createElement('div');
+    const id = div.innerText = `<%= id %>`
+    let user = [];
+    const fullName = document.querySelector('#full-name'), specialty = document.querySelector('#specialty'), rating = document.querySelector('#rating'), telephone = document.querySelector('#telephone'), website = document.querySelector('#website'), locationArea = document.querySelector('#location'), changePwBtn = document.querySelector('#change_password');
+
+    const telephoneEdit = document.querySelector('#telephone-edit');
+    const websiteEdit = document.querySelector('#website-edit');
+
+
+    //Check if items is blank inside
+    //If it is not then display the user image from the database
+    if (items.innerText !== '') {
+        imgContent.innerHTML = `
+            <label class='hover' for="image">Click to update photo</label>
+            <% items.forEach(function(image) { %>
+                <img class='hover' id='profile-photo' src="data:image/<%=image.img.contentType%>;base64, 
+                <%=image.img.data.toString('base64')%>">
+            <% }) %>
+        `
+        imgSectionWrap.appendChild(imgContent)
+    }
+    //If not then display default blank user image from folder
+    else {
+        imgContent.innerHTML = `
+            <label id='label' class='hover' for="image">Click to update photo</label>
+            <img id='profile-photo' class='hover' src="/img/profile.png">
+        `
+        imgSectionWrap.appendChild(imgContent)
+    }
+
+    //When user hovers over the image section then he gets a label that informs him if he wants to update his photo, he must click on the section
+    document.querySelector('body').addEventListener('mouseover', (e) => {
+        if (e.target.className.includes('hover')) {
+            document.querySelector('label').style.display = 'block';
+        }
+        else {
+            document.querySelector('label').style.display = 'none';
+        }
+    })
+
+    //When select one image from folder, then submit immediately
+    document.getElementById("image").onchange = function () {
+        document.querySelector('form').submit();
+    };
+
+    //Get current doctor's info and display them
+    fetch("/getUsers/Doctors/1", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            id: id,
+            type: 'profile'
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            user = JSON.parse(body);
+
+            //Display full name
+            fullName.innerText = `${user.name} ${user.surname}`
+
+            //Display specialty 
+            specialty.innerText = `${user.specialty}`
+
+            //Display telephone number
+            telephone.innerText = `${user.telephone}`
+            telephone.parentElement.href = `tel:+30${user.telephone}`
+
+            //Display website
+            if (user.website) {
+                website.innerText = `${user.website}`;
+                website.parentElement.href = `https://www.${user.website}`;
+            } else {
+                website.innerText = `No website available`
+            }
+
+            //Display Description
+            const description = document.querySelector('#description');
+            if (user.description) {
+                description.innerText = `${user.description}`
+            } else {
+                description.innerText = `No description available`
+            }
+
+            //Display Specialization and Experience (specialization is an array)
+            const specialization = document.querySelector('#specialization');
+            if (user.specialization.length !== 0) {
+                user.specialization.forEach(value => {
+                    const specElem = document.createElement('div');
+                    specElem.className = 'specElem'
+                    specElem.innerText = `${value}`
+                    specialization.appendChild(specElem);
+                })
+            } else {
+                specialization.innerText = `No specialization available`
+            }
+
+            //Display reviews (reviews is an array)
+            const reviews = document.querySelector('#reviews');
+            if (user.reviews.length !== 0) {
+                reviews.innerText = `${user.reviews}`
+            } else {
+                reviews.innerText = `No reviews available`
+            }
+
+            //Display CV (cv is an array)
+            const cv = document.querySelector('#cv');
+            if (user.cv.length !== 0) {
+                const ul = document.createElement('ul');
+                ul.style.padding = '1rem 2rem'
+                cv.appendChild(ul)
+                user.cv.forEach(triplet => {
+                    const li = document.createElement('li');
+                    li.className = 'bullet'
+                    li.innerText = `${triplet.year_from} - ${triplet.year_to}, ${triplet.job}`
+
+                    ul.appendChild(li)
+                });
+                // cv.innerText = `${user.cv}`
+            } else {
+                cv.innerText = `No cv available`
+            }
+
+            //Display languages (specialization is an array)
+            const languages = document.querySelector('#language');
+            if (user.languages.length !== 0) {
+                const ul = document.createElement('ul');
+                ul.style.padding = '1rem 2rem'
+                languages.appendChild(ul)
+                user.languages.forEach(language => {
+                    const li = document.createElement('li');
+                    li.className = 'bullet'
+                    li.innerText = `${language}`
+
+                    ul.appendChild(li)
+                })
+            } else {
+                languages.innerText = `No languages available`
+            }
+
+            locationArea.innerText = `${user.str_num}, ${user.location}`
+
+            //Get the collection of check boxes and turn it to array
+            const allCheckboxes = Array.from(document.querySelectorAll('input[type=checkbox]'))
+
+            //iterate the object keys and their values
+            for (const [day, arr] of Object.entries(user.schedule)) {
+                //Foreach array inside the object we have to check if the values of day and time are equal to any of the checkboxes innerText and className
+                //So we have to iterate all checkboxes and check if one of them matches with the values inside each array
+                //If we have a match, then check-true the respective checkbox and change the bg color of its label
+                arr.forEach(time => {
+                    allCheckboxes.forEach(checkbox => {
+                        if(checkbox.className === day && checkbox.value === time){
+                            // Check the checkbox
+                            checkbox.checked = true
+                            // Change color to the label
+                            checkbox.parentElement.style.backgroundColor = '#b9ffae'
+                        }
+                    })
+                    // console.log(time, day)
+                })
+            }
+        });
+
+    // If user wants to change his phone number or website info
+
+    // Telephone
+    telephoneEdit.addEventListener('click', () => {
+        const telephoneInput = document.createElement('input');
+        telephoneInput.type = 'tel';
+        telephoneInput.name = 'telephone';
+        document.querySelector('#telephoneLink').after(telephoneInput);
+        telephone.style.display = 'none';
+        document.querySelector('#telephone-check').style.display = 'block';
+        document.querySelector('#telephone-x').style.display = 'block';
+        telephoneEdit.style.display = 'none';
+
+        //Telephone x-button functionality
+        document.querySelector('#telephone-x').addEventListener('click', () => {
+            telephoneInput.remove()
+            telephone.style.display = 'block';
+            document.querySelector('#telephone-check').style.display = 'none';
+            document.querySelector('#telephone-x').style.display = 'none';
+            telephoneEdit.style.display = 'block';
+        })
+
+        //Submit new telephone number
+        document.querySelector('#telephone-check').addEventListener('click', () => {
+            fetch("/dashboard/personal-details/info/d", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    telephone: telephoneInput.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    window.location = body.url;
+                });
+        })
+    })
+
+
+    // Website
+    websiteEdit.addEventListener('click', () => {
+        const websiteInput = document.createElement('input');
+        websiteInput.type = 'web';
+        websiteInput.name = 'website';
+        document.querySelector('#websiteLink').after(websiteInput);
+        website.style.display = 'none';
+        document.querySelector('#website-check').style.display = 'block';
+        document.querySelector('#website-x').style.display = 'block';
+        websiteEdit.style.display = 'none';
+
+        //Website x-button functionality
+        document.querySelector('#website-x').addEventListener('click', () => {
+            websiteInput.remove()
+            website.style.display = 'block';
+            document.querySelector('#website-check').style.display = 'none';
+            document.querySelector('#website-x').style.display = 'none';
+            websiteEdit.style.display = 'block';
+        })
+
+        //Submit new website info
+        document.querySelector('#website-check').addEventListener('click', () => {
+            fetch("/dashboard/personal-details/info/d", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    website: websiteInput.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    window.location = body.url;
+                });
+        })
+    })
+
+    //If user wants to edit his description, specialization, cv, languages
+    const parentInfoArea = document.querySelector('#user-info-container')
+    parentInfoArea.addEventListener('click', (e) => {
+        if (e.target.id === 'description-edit') {
+            setDescription('description', e);
+        }
+        else if (e.target.id === 'specialization-edit') {
+            setSpecialization('specialization', e);
+        }
+        else if (e.target.id === 'cv-edit') {
+            setCV('cv', e)
+        }
+        else if (e.target.id === 'language-edit') {
+            setLanguages('languages', e)
+        }
+
+        // console.log(e.target.id)
+    })
+
+    //Function for languages change (input fields used)
+    function setLanguages(information, event) {
+        //Hide the displayed info
+        document.querySelector('#language').style.display = 'none';
+        //Hide the edit button
+        event.target.style.display = 'none';
+
+        //Create input field container
+        const container = inputFieldContainer();
+
+        //Create button container
+        const btnContainer = buttonsContainer();
+
+        if (user.languages.length > 0) {
+            user.languages.forEach(languages => {
+                createInputandAppend(information, container, languages)
+            })
+        }
+        else {
+            createInputandAppend(information, container, '')
+        }
+
+        //Create the submit button
+        const submitButton = createSubmitButton(information);
+
+        //Create the cancel button
+        const cancelButton = createCancelButton(information)
+
+        //Create the add language button
+        const addButton = createAddButton(information);
+
+        //Create the remove language button
+        const removeButton = createRemoveButton(information);
+
+        //Append input field container to description section
+        event.target.parentElement.parentElement.appendChild(container)
+
+        //Append button container to description section
+        event.target.parentElement.parentElement.appendChild(btnContainer)
+
+        //Append submit button to button container
+        btnContainer.appendChild(submitButton)
+
+        //Append cancel button to button container
+        btnContainer.appendChild(cancelButton)
+
+        //Append add button to button container
+        btnContainer.appendChild(addButton)
+
+        //Append remove button to button container
+        btnContainer.appendChild(removeButton)
+
+        //Event listener for add button
+        addButton.addEventListener('click', () => {
+
+            createInputandAppend(information, container, '')
+
+        })
+
+        //Event listener for remove button
+        removeButton.addEventListener('click', () => {
+            // Convert elements collection to array in order to iterate
+            const languagesInputFields = Array.from(document.querySelectorAll('.languages-input-field'));
+
+            if (languagesInputFields.length > 0) {
+                languagesInputFields[languagesInputFields.length - 1].remove()
+            }
+        })
+
+        //Event listener for cancel button
+        cancelButton.addEventListener('click', () => {
+            cancel(document.querySelector('#language'), container, event, btnContainer)
+        })
+
+        //Event Listener for submit button
+        submitButton.addEventListener('click', (e) => {
+            //Create a collection of all input fields
+            let inputFields = document.querySelectorAll('.languages-input-field');
+
+            //Convert the collection to an array in order to iterate
+            inputFields = Array.from(inputFields);
+            let languagesValues = []
+
+            //Check if all elements' value are emtpy
+            let allEmpty = true;
+            inputFields.forEach(element => {
+                if (element.value !== '') {
+                    allEmpty = false;
+                    languagesValues.push(element.value)
+                }
+            })
+
+            //If we have an input with a non blank value, post it to the server and update the value (at the server side) and then redirect
+            if (allEmpty === false) {
+                fetch("/dashboard/personal-details/info/d", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id,
+                        languages: languagesValues
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        window.location = body.url;
+                    });
+            } else {
+                true
+            }
+        })
+    }
+
+    //----Function for setting cv and editing (input fields used)
+    function setCV(information, event) {
+        //Hide the displayed info
+        cv.style.display = 'none';
+        //Hide the edit button
+        event.target.style.display = 'none';
+
+        //Create container that contains the tοtal of all containers who wrap each triplet of input fields
+        const container = inputFieldContainer();
+
+        //Create button container
+        const btnContainer = buttonsContainer();
+
+        //Create the submit button
+        const submitButton = createSubmitButton(information);
+
+        //Create the cancel button
+        const cancelButton = createCancelButton(information)
+
+        //Create the add employment button
+        const addButton = createAddButton(information);
+
+        //Create the remove employment button
+        const removeButton = createRemoveButton(information);
+
+        //Append parent container to description section
+        event.target.parentElement.parentElement.appendChild(container)
+
+        //Append button container to description section
+        event.target.parentElement.parentElement.appendChild(btnContainer)
+
+        //Append submit button to button container
+        btnContainer.appendChild(submitButton)
+
+        //Append cancel button to button container
+        btnContainer.appendChild(cancelButton)
+
+        //Append add button to button container
+        btnContainer.appendChild(addButton)
+
+        //Append remove button to button container
+        btnContainer.appendChild(removeButton)
+
+        if (user.cv.length > 0) {
+            user.cv.forEach(triplet => {
+                createTripletOfCvFields(triplet.year_from, triplet.year_to, triplet.job)
+            })
+        }
+        else {
+            createTripletOfCvFields()
+        }
+
+        //Event listener for submit button
+        submitButton.addEventListener('click', () => {
+            //All the elements of doctor's cv will be stored here
+            cvElements = []
+
+            //Create a collection of all input field triplets
+            let inputFieldsTriplets = document.getElementsByClassName('cvTriplet');
+
+            //Convert the collection to an array in order to iterate
+            inputFieldsTriplets = Array.from(inputFieldsTriplets);
+
+            //Iterate all the array containing the triplets
+            let allEmpty = true;
+            inputFieldsTriplets.forEach(triplet => {
+                // console.log(triplet.children)
+                triplet = Array.from(triplet.children)
+
+                //Check each triplet if all values are non empty
+                //If they are, then we know that we have at least one triplet to be submitted
+                if (triplet[0].value !== '' && triplet[1].value !== '' && triplet[2].value !== '') {
+                    allEmpty = false
+                }
+
+                const cvElement = {
+                    year_from: triplet[0].value,
+                    year_to: triplet[1].value,
+                    job: triplet[2].value,
+                }
+                cvElements.push(cvElement);
+            })
+
+            //If we have a triplet with non blank value, post it to the server and update the value (at the server side) and then redirect
+            if (allEmpty === false) {
+                fetch("/dashboard/personal-details/info/d", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id,
+                        cv: cvElements
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        window.location = body.url;
+                    });
+            } else {
+                true
+            }
+        })
+
+        //Event listener for cancel button
+        cancelButton.addEventListener('click', () => {
+            cancel(cv, container, event, btnContainer)
+        })
+
+        //Event listener for add button
+        addButton.addEventListener('click', () => {
+            createTripletOfCvFields()
+        })
+
+        //Event listener for remove button
+        removeButton.addEventListener('click', () => {
+            if (document.querySelector('.cvTriplet')) {
+                let cvTriplets = document.querySelectorAll('.cvTriplet')
+                cvTriplets = Array.from(cvTriplets);
+                cvTriplets[cvTriplets.length - 1].remove();
+            }
+        })
+
+        //Fucntion for creating the triplet of input fields
+        function createTripletOfCvFields(yearFrom, yearTo, job) {
+            //Create container that wraps a triplet of input fields
+            // Must have a flex-dir-row
+            const containerRow = inputFieldContainer();
+            containerRow.classList.add('flex-dir-row');
+            containerRow.classList.add('cvTriplet');
+
+            //Double click to delete
+            containerRow.title = 'Double click to delete';
+
+            containerRow.addEventListener('dblclick', () => {
+                containerRow.remove()
+            })
+
+            //Append the container of triplets to container
+            container.appendChild(containerRow);
+
+            //Create Input fields
+
+            //Year from
+            const input_year_from = createInputField('year_input', 'Year from', 'number', `${yearFrom}`);
+            containerRow.appendChild(input_year_from);
+
+            //Year to
+            const input_year_to = createInputField('year_input', 'Year to', 'number', `${yearTo}`);
+            containerRow.appendChild(input_year_to);
+
+            //Job
+            const input_job = createInputField('job_input', 'Add job or education', 'text', `${job}`);
+            containerRow.appendChild(input_job)
+        }
+
+        function createInputField(classname, placeholder, type, value) {
+            const input = document.createElement('input');
+            input.type = `${type}`
+            input.className = classname;
+            input.placeholder = `${placeholder}`
+            input.style.margin = `0 2px`
+            if (value) {
+                if (value === 'undefined')
+                    input.value = '';
+                else
+                    input.value = `${value}`;
+            } else {
+                input.value = '';
+            }
+
+            return input
+        }
+    }
+
+    //Function for specialization change (input fields used)
+    function setSpecialization(information, event) {
+        //Hide the displayed info
+        specialization.style.display = 'none';
+        //Hide the edit button
+        event.target.style.display = 'none';
+
+        //Create input field container
+        const container = inputFieldContainer();
+
+        //Create button container
+        const btnContainer = buttonsContainer();
+
+        if (user.specialization.length > 0) {
+            user.specialization.forEach(specialization => {
+                createInputandAppend(information, container, specialization)
+            })
+        }
+        else {
+            createInputandAppend(information, container, '')
+        }
+
+        //Create the submit button
+        const submitButton = createSubmitButton(information);
+
+        //Create the cancel button
+        const cancelButton = createCancelButton(information)
+
+        //Create the add specialization button
+        const addButton = createAddButton(information);
+
+        //Create the remove specialization button
+        const removeButton = createRemoveButton(information);
+
+        //Append input field container to description section
+        event.target.parentElement.parentElement.appendChild(container)
+
+        //Append button container to description section
+        event.target.parentElement.parentElement.appendChild(btnContainer)
+
+        //Append submit button to button container
+        btnContainer.appendChild(submitButton)
+
+        //Append cancel button to button container
+        btnContainer.appendChild(cancelButton)
+
+        //Append add button to button container
+        btnContainer.appendChild(addButton)
+
+        //Append remove button to button container
+        btnContainer.appendChild(removeButton)
+
+        //Event listener for add button
+        addButton.addEventListener('click', () => {
+
+            createInputandAppend(information, container, '')
+
+        })
+
+        //Event listener for remove button
+        removeButton.addEventListener('click', () => {
+            // Convert elements collection to array in order to iterate
+            const specializationInputFields = Array.from(document.querySelectorAll('.specialization-input-field'));
+
+            if (specializationInputFields.length > 0) {
+                specializationInputFields[specializationInputFields.length - 1].remove()
+            }
+        })
+
+        //Event listener for cancel button
+        cancelButton.addEventListener('click', () => {
+            cancel(specialization, container, event, btnContainer)
+        })
+
+        //Event Listener for submit button
+        submitButton.addEventListener('click', (e) => {
+            //Create a collection of all input fields
+            let inputFields = document.querySelectorAll('.specialization-input-field');
+
+            //Convert the collection to an array in order to iterate
+            inputFields = Array.from(inputFields);
+            let specializationValues = []
+
+            //Check if all elements' value are emtpy
+            let allEmpty = true;
+            inputFields.forEach(element => {
+                if (element.value !== '') {
+                    allEmpty = false;
+                    specializationValues.push(element.value)
+                }
+            })
+
+            //If we have an input with a non blank value, post it to the server and update the value (at the server side) and then redirect
+            if (allEmpty === false) {
+                fetch("/dashboard/personal-details/info/d", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id,
+                        specialization: specializationValues
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        window.location = body.url;
+                    });
+            } else {
+                true
+            }
+        })
+    }
+
+    //Create an input field and append it (for add button)
+    function createInputandAppend(information, container, value) {
+        //Create input field
+        const inputField = document.createElement('input');
+        inputField.className = `width-100 margin-top-1rem ${information}` + `-input-field`
+        inputField.name = information;
+        inputField.placeholder = `Enter ${information}`
+        inputField.value = `${value}`;
+        inputField.title = 'Double click to delete'
+
+        //Double click on input field and the input is removed
+        inputField.addEventListener('dblclick', () => inputField.remove())
+
+
+        //Append input field to textarea container
+        container.appendChild(inputField)
+    }
+
+    //----Function for description change (textarea used)
+    function setDescription(information, event) {
+        //Hide the displayed info
+        description.style.display = 'none';
+        //Hide the edit button
+        event.target.style.display = 'none';
+
+        //Create textarea container
+        const container = inputFieldContainer();
+
+        //Create button container
+        const btnContainer = buttonsContainer();
+
+        //Create textarea
+        const textArea = document.createElement('textarea');
+        textArea.id = `${information}` + `-input-field`;
+        textArea.className = 'width-100'
+        textArea.name = information;
+        if (user.description) {
+            textArea.value = user.description;
+        } else {
+            textArea.value = '';
+        }
+
+        //Create the submit button
+        const submitButton = createSubmitButton(information);
+
+        //Create the cancel button
+        const cancelButton = createCancelButton(information);
+
+        //Append textarea container to description section
+        event.target.parentElement.parentElement.appendChild(container)
+
+        //Append textarea to textarea container
+        container.appendChild(textArea)
+
+        //Append button container to description section
+        event.target.parentElement.parentElement.appendChild(btnContainer)
+
+        //Append submit button to button container
+        btnContainer.appendChild(submitButton)
+
+        //Append cancel button to button container
+        btnContainer.appendChild(cancelButton)
+
+        //Event Listener for cancel button
+        cancelButton.addEventListener('click', () => {
+            cancel(description, container, event, btnContainer)
+        })
+
+        //Event Listener for submit button
+        submitButton.addEventListener('click', (e) => {
+            fetch("/dashboard/personal-details/info/d", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    description: textArea.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    window.location = body.url;
+                });
+        })
+    }
+
+    changePwBtn.addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal container';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content container';
+        modalContent.innerHTML = `
+            <span class="close container"><i class="fas fa-times" id='display'></i></span>
+            <form id='change_pw_form'>
+                <div class="container">
+                    <h1 class='padding-1rem'>Type in your new password and confirm</h1>
+                    <div id="msg-modal"></div>
+                        <input type='password' class='input-field' name='password' id='password' placeholder='password'>
+                        <input type='password' class='input-field'  name='c_password' id='c_password' placeholder='confirm password'>
+                        <input type='submit' class='button' id='submit_pw' value='Save'>
+                </div>
+            </form>
+            `
+
+        modal.appendChild(modalContent);
+        document.querySelector('body').appendChild(modal)
+
+        document.querySelector('body').addEventListener('click', (e) => {
+            if (e.target.classList.contains('fas') || e.target.classList.contains('modal'))
+                modal.remove()
+        })
+
+        document.querySelector('#submit_pw').addEventListener('click', (e) => {
+
+            let password = document.querySelector('#password').value;
+            let c_password = document.querySelector('#c_password').value;
+            let msg = document.querySelector('#msg-modal');
+
+            if (password !== c_password || c_password === '' || password === '') {
+                if (password !== c_password) {
+                    msg.innerText = 'Password and password confirmation do not match';
+                    msg.style.color = 'red';
+                }
+                else if (password === '' || c_password === '')
+                    msg.innerText = 'Please fill all fields';
+                msg.style.color = 'red';
+                e.preventDefault()
+            } else {
+                e.preventDefault()
+                fetch("/dashboard/personal-details/password/d", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id,
+                        password: password,
+                        c_password: c_password
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        if (document.querySelector('.message-log')) {
+                            document.querySelector('.message-log').remove()
+                        } else if (document.querySelector('.message-log2')) {
+                            document.querySelector('.message-log2').remove()
+                        }
+                        const msg = document.createElement('div')
+                        document.querySelector('#msg-modal').innerText = body.msg
+                    });
+            }
+
+        })
+    })
+
+    //Function for creating input field container
+    function inputFieldContainer() {
+        const container = document.createElement('div');
+        container.className = 'container padding-1rem width-100';
+
+        return container
+    }
+
+    //Function for creating buttons' container
+    function buttonsContainer() {
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'container flex-dir-row padding-1rem';
+
+        return btnContainer
+    }
+
+    //Function for creating submit button
+    function createSubmitButton(information) {
+        const submitButton = document.createElement('div');
+        submitButton.id = `${information}` + `-submit`;
+        submitButton.className = 'display-block';
+        submitButton.innerHTML = '<i class="fas fa-check" id="information-check"></i>';
+        submitButton.title = 'Submit'
+
+        return submitButton
+    }
+
+    //Function for creating cancel button
+    function createCancelButton(information) {
+        const cancelButton = document.createElement('div');
+        cancelButton.id = `${information}` + `-cancel`;
+        cancelButton.className = 'display-block';
+        cancelButton.innerHTML = "<i class='fas fa-times' id='information-x'></i>";
+        cancelButton.title = 'Cancel'
+
+        return cancelButton;
+    }
+
+    //Function for creating add button
+    function createAddButton(information) {
+        const addButton = document.createElement('div');
+        addButton.id = `${information}` + `-minus`;
+        addButton.className = 'display-block';
+        addButton.innerHTML = "<i class='fas fa-plus' id='information-add'></i>";
+        addButton.title = 'Add'
+
+        return addButton;
+    }
+
+    //Function for creating remove button
+    function createRemoveButton(information) {
+        const removeButton = document.createElement('div');
+        removeButton.id = `${information}` + `-add`;
+        removeButton.className = 'display-block';
+        removeButton.innerHTML = "<i class='fas fa-minus' id='information-remove'></i>";
+        removeButton.title = 'Remove'
+
+        return removeButton;
+    }
+
+    //Function for cancel button functionality
+    function cancel(information, container, event, btnContainer) {
+        //Show the displayed info
+        information.style.display = 'block';
+        //Hide the edit button
+        event.target.style.display = 'block';
+
+        //Remove textarea container (its children will also be removed)
+        container.remove();
+
+        //Remove buttons' container (its children will also be removed)
+        btnContainer.remove();
+    }
+
+    //Schedule
+    const checkboxContainers = Array.from(document.getElementsByClassName('checkbox-cont'))
+
+    checkboxContainers.forEach(container_checkbox => {
+
+        let j = 0
+        for (let i = 0; i < 48; i++) {
+            if (i % 2 === 0 && i != 0) {
+                j++
+            }
+            // Create label of checkbox
+            const label = document.createElement('label');
+            label.id = i
+            label.className = `container flex-dir-row checkbox_label ${container_checkbox.id}`;
+
+            // Create checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = `${container_checkbox.id}`;
+            label.addEventListener('mouseup', () => {
+                if (checkbox.checked === false) {
+                    label.style.backgroundColor = '#b9ffae';
+                } else if (checkbox.checked === true) {
+                    label.style.backgroundColor = '#e0f1ff';
+                }
+            })
+
+            // Append values to checkboxes and labels
+            if (i % 2 === 0) {
+                if (j < 10) {
+                    label.innerText = `0${j}:00`
+                    checkbox.value = `0${j}:00`
+                } else {
+                    label.innerText = `${j}:00`
+                    checkbox.value = `${j}:00`
+                }
+            } else {
+                if (j < 10) {
+                    label.innerText = `0${j}:30`
+                    checkbox.value = `0${j}:30`
+                } else {
+                    label.innerText = `${j}:30`
+                    checkbox.value = `${j}:30`
+                }
+            }
+
+            label.appendChild(checkbox)
+            container_checkbox.appendChild(label)
+        }
+    })
+
+
+    const schedulesubmit = document.querySelector('#schedulesubmit');
+    schedulesubmit.addEventListener('click', () => {
+
+        let schedule = {
+            Monday: [],
+            Tuesday: [],
+            Wednesday: [],
+            Thursday: [],
+            Friday: [],
+            Saturday: [],
+            Sunday: []
+        }
+
+        const allCheckboxes = Array.from(document.querySelectorAll('input[type=checkbox]'))
+
+        // theory here:
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+        allCheckboxes.forEach(checkbox => {
+            if (checkbox.checked === true) {
+                for (const [day, arr] of Object.entries(schedule)) {
+                    if (checkbox.className === day) {
+                        arr.push(checkbox.value)
+                    }
+                }
+            }
+        })
+
+        fetch("/dashboard/personal-details/info/d", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id,
+                schedule: schedule
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                window.location.href = `${body.url}`
+            });
+    })
+
+    const show_less_btn = document.querySelector('#show_less');
+    const show_all_btn = document.querySelector('#show_all');
+
+    show_less_btn.addEventListener('click', () => {
+        const allLabels = Array.from(document.querySelectorAll('.checkbox_label'))
+
+        allLabels.forEach(label => {
+            if (label.id < 16 || label.id > 40) {
+                label.style.display = 'none';
+            }
+        })
+
+    })
+
+    show_all_btn.addEventListener('click', () => {
+        const allLabels = Array.from(document.querySelectorAll('.checkbox_label'))
+
+        allLabels.forEach(label => {
+            label.style.display = 'block';
+        })
+
+    })
+
+    document.querySelector('.fa-chevron-down').addEventListener('click', () => {
+        document.querySelector('#schedule').style.display = 'block'
+        document.querySelector('.fa-chevron-up').style.display = 'block'
+        document.querySelector('.fa-chevron-down').style.display = 'none'
+        document.querySelector('#schedule-desc').style.display = 'none'
+    })
+
+    document.querySelector('.fa-chevron-up').addEventListener('click', () => {
+        document.querySelector('#schedule').style.display = 'none'
+        document.querySelector('.fa-chevron-up').style.display = 'none'
+        document.querySelector('.fa-chevron-down').style.display = 'block'
+        document.querySelector('#schedule-desc').style.display = 'block'
+    })
+</script>

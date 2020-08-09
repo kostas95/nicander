@@ -1,0 +1,420 @@
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    .mandatory::after {
+        content: '*';
+        color: red;
+        margin-left: 2px;
+    }
+
+    .button {
+        margin-top: 5rem;
+    }
+
+    .items-left {
+        justify-content: left;
+        align-items: flex-start;
+    }
+
+    .padding-top-5rem {
+        padding-top: 5rem;
+    }
+
+    .input-field,
+    select {
+        background-color: #eeeeee;
+    }
+
+    #border-style {
+        width: 50vw;
+        margin-top: 5rem;
+        border-top: 1px solid #eeeeee;
+    }
+
+    #change_password {
+        cursor: pointer;
+    }
+
+    #msg-modal {
+        color: rgb(0, 209, 0);
+    }
+
+    #main-cont {
+        min-height: 93.5vh;
+    }
+
+    a{
+        color: #000
+    }
+</style>
+<div class="container width-100 padding-top-5rem" id='main-cont'>
+    <form id="main_form" class="container padding-2rem" autocomplete="off">
+        <!-- first name & last name -->
+        <div class="container flex-dir-row">
+            <div class="container margin-bottom-1rem">
+                <label class="mandatory">First Name</label>
+                <input type="text" id="name" class="input-field" name="name">
+            </div>
+            <div class="container margin-bottom-1rem">
+                <label class="mandatory">Last Name</label>
+                <input type="text" id="surname" class="input-field" name="surname">
+            </div>
+        </div>
+        <!-- phone number and gender -->
+        <div class="container flex-dir-row">
+            <div class="container margin-bottom-1rem">
+                <label>Phone number</label>
+                <input id="telephone" type="tel" class="input-field" name="telephone">
+            </div>
+            <div class="container margin-bottom-1rem">
+                <label class="mandatory">Gender</label>
+                <select id="gender" name="gender">
+                    <option id="male" value="male">Male</option>
+                    <option id="female" value="female">Female</option>
+                </select>
+            </div>
+        </div>
+        <!-- date of birth and postal code -->
+        <div class="container flex-dir-row width-100">
+            <div class="container margin-bottom-1rem width-50">
+                <label class="mandatory">Date of birth</label>
+                <div class="container flex-dir-row width-100">
+                    <select name="dd" id="dd" class="width-30"></select>
+                    <select name="mm" id="mm" class="width-30"></select>
+                    <select name="yy" id="yy" class="width-30"></select>
+                </div>
+            </div>
+            <div class="container width-50 margin-bottom-1rem">
+                <label class="mandatory">Postal code</label>
+                <input id="post_code" type="text" class="input-field" name="surname">
+            </div>
+        </div>
+
+        <div class="container margin-bottom-1rem flex-dir-row">
+            <input type="submit" class="button" value="Save">
+        </div>
+    </form>
+    <div class="container flex-dir-row margin-top-1rem" id="border-style">
+        <a id='change_password' class="padding-1rem"> Change password</a>
+        <a href="/p/delete" class="padding-1rem"> Delete account</a>
+    </div>
+</div>
+<script>
+    let genderValue, ddValue, mmValue, yyValue
+    const id = `<%= id %>`
+        , month = document.getElementById('mm')
+        , day = document.getElementById('dd')
+        , year = document.getElementById('yy')
+        , form = document.querySelector('#main_form')
+        , name = document.querySelector('#name')
+        , surname = document.querySelector('#surname')
+        , telephone = document.querySelector('#telephone')
+        , gender = document.querySelector('#gender')
+        , mm = document.querySelector('#mm')
+        , dd = document.querySelector('#dd')
+        , yy = document.querySelector('#yy')
+        , post_code = document.querySelector('#post_code')
+        , submit = document.querySelector('#submit')
+        , deleteBtn = document.querySelector('#deleteBtn')
+        , changePwBtn = document.querySelector('#change_password')
+
+    fetch("/getUsers/patient", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            usertype: 'patient',
+            id: id
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            genderValue = body.gender,
+                ddValue = body.dd,
+                mmValue = body.mm,
+                yyValue = body.yy
+
+            name.value = body.name
+            surname.value = body.surname
+            if (body.telephone === '' || typeof body.telephone === "undefined") {
+                telephone.value = ''
+            } else {
+                telephone.value = body.telephone
+            }
+            post_code.value = body.post_code
+
+            selectOption(ddoptions, ddValue)
+            selectOption(mmoptions, mmValue)
+            selectOption(yyoptions, yyValue)
+            if (genderValue == 'male') {
+                document.querySelector('#male').selected = 'selected'
+            } else {
+                document.querySelector('#female').selected = 'selected'
+            }
+
+
+        });
+
+    // SELECT: 31 days month options
+    for (let i = 0; i <= 31; i++) {
+        const option = document.createElement('option');
+        option.className = 'dd'
+        if (i > 0) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'dd';
+            option.value = ''
+        }
+        day.appendChild(option);
+    }
+
+    // SELECT: 12 months options
+    for (let i = 0; i <= 12; i++) {
+        const option = document.createElement('option');
+        option.className = 'mm'
+        if (i > 0) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'mm';
+            option.value = ''
+        }
+        month.appendChild(option);
+    }
+
+    var dt = new Date();
+    let currentYear = dt.getFullYear();
+
+    // SELECT: Years from this year minus 100 years, until 18 years before this year options
+    for (let i = currentYear - 100; i <= currentYear; i++) {
+        const option = document.createElement('option');
+        option.className = 'yy'
+        if (i > currentYear - 100) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'yy';
+            option.value = ''
+        }
+        year.appendChild(option);
+    }
+
+    const ddoptions = Array.from(document.querySelectorAll('.dd'))
+        , mmoptions = Array.from(document.querySelectorAll('.mm'))
+        , yyoptions = Array.from(document.querySelectorAll('.yy'))
+
+
+    function selectOption(arr, val) {
+        arr.forEach(option => {
+            if (option.innerText === val) {
+                option.selected = 'selected'
+            }
+        })
+    }
+
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        if (name.value === '' || surname.value === '' || gender.value === '' || post_code.value === '' || year.value === '' || day.value === '' || month.value === '') {
+            if (name.value === '') {
+                styleBorder(name, 'red')
+            }
+            else {
+                styleBorder(name, 'rgb(226, 226, 226)')
+            }
+            if (surname.value === '') {
+                styleBorder(surname, 'red')
+            }
+            else {
+                styleBorder(surname, 'rgb(226, 226, 226)')
+            }
+            if (gender.value === '') {
+                styleBorder(gender, 'red')
+            }
+            else {
+                styleBorder(gender, 'rgb(226, 226, 226)')
+            }
+            if (month.value === '') {
+                styleBorder(month, 'red')
+            }
+            else {
+                styleBorder(month, 'rgb(226, 226, 226)')
+            }
+            if (day.value === '') {
+                styleBorder(day, 'red')
+            }
+            else {
+                styleBorder(day, 'rgb(226, 226, 226)')
+            }
+            if (year.value === '') {
+                styleBorder(year, 'red')
+            }
+            else {
+                styleBorder(year, 'rgb(226, 226, 226)')
+            }
+            if (post_code.value === '') {
+                styleBorder(post_code, 'red')
+            }
+            else {
+                styleBorder(post_code, 'rgb(226, 226, 226)')
+            }
+
+            //Display err message
+            const msg = document.createElement('div')
+            msg.innerText = 'Please fill all fields correctly!'
+            msg.className = 'message-log'
+            form.appendChild(msg)
+
+            e.preventDefault()
+        } else {
+            e.preventDefault()
+
+            name.value = capitalizeFirstLetter(name.value);
+            surname.value = capitalizeFirstLetter(surname.value);
+
+            fetch("/dashboard/personal-details/info/p", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    name: name.value,
+                    surname: surname.value,
+                    telephone: telephone.value,
+                    gender: gender.value,
+                    dd: dd.value,
+                    mm: mm.value,
+                    yy: yy.value,
+                    post_code: post_code.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    if (document.querySelector('.message-log')) {
+                        document.querySelector('.message-log').remove()
+                    } else if (document.querySelector('.message-log2')) {
+                        document.querySelector('.message-log2').remove()
+                    }
+                    const msg = document.createElement('div')
+                    if (body.type === 'success') {
+                        msg.className = 'message-log2'
+                        msg.innerText = `${body.msg}`
+
+                        name.value = body.name
+                        surname.value = body.surname
+                        if (telephone != 'undefined') {
+                            telephone.value = body.telephone
+                        }
+                        gender.value = body.gender
+                        dd.value = body.dd
+                        mm.value = body.mm
+                        yy.value = body.yy
+                        post_code.value = body.post_code
+
+                        form.appendChild(msg)
+                        // window.location.href = '/dashboard/personal-details'
+                    } else {
+                        msg.className = 'message-log'
+                        msg.innerText = `${body.msg}`
+                        form.appendChild(msg)
+                    }
+                });
+        }
+    })
+
+    changePwBtn.addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal container';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content container';
+        modalContent.innerHTML = `
+            <span class="close container"><i class="fas fa-times"></i></span>
+            <form id='change_pw_form'>
+                <div class="container">
+                    <h1 class='padding-1rem'>Type in your new password and confirm</h1>
+                    <div id="msg-modal"></div>
+                        <input type='password' class='input-field' name='password' id='password' placeholder='password'>
+                        <input type='password' class='input-field'  name='c_password' id='c_password' placeholder='confirm password'>
+                        <input type='submit' class='button' id='submit_pw' value='Save'>
+                </div>
+            </form>
+            `
+
+        modal.appendChild(modalContent);
+        document.querySelector('body').appendChild(modal)
+
+        document.querySelector('body').addEventListener('click', (e) => {
+            if (e.target.classList.contains('fas') || e.target.classList.contains('modal'))
+                modal.remove()
+        })
+
+        document.querySelector('#submit_pw').addEventListener('click', (e) => {
+
+            let password = document.querySelector('#password').value;
+            let c_password = document.querySelector('#c_password').value;
+            let msg = document.querySelector('#msg-modal');
+
+            if (password !== c_password || c_password === '' || password === '') {
+                if (password !== c_password) {
+                    msg.innerText = 'Password and password confirmation do not match';
+                    msg.style.color = 'red';
+                }
+                else if (password === '' || c_password === '')
+                    msg.innerText = 'Please fill all fields';
+                msg.style.color = 'red';
+                e.preventDefault()
+            } else {
+                e.preventDefault()
+                fetch("/dashboard/personal-details/password/p", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id,
+                        password: password,
+                        c_password: c_password
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        if (document.querySelector('.message-log')) {
+                            document.querySelector('.message-log').remove()
+                        } else if (document.querySelector('.message-log2')) {
+                            document.querySelector('.message-log2').remove()
+                        }
+                        const msg = document.createElement('div')
+                        document.querySelector('#msg-modal').innerText = body.msg
+                    });
+            }
+
+        })
+    })
+
+    function styleBorder(field, color) {
+        field.style.border = `1px solid ${color}`
+    }
+
+    function capitalizeFirstLetter(string) {
+        string = string.toLowerCase();
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>

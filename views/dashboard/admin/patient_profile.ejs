@@ -1,0 +1,212 @@
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    .button {
+        margin-top: 5rem;
+    }
+
+    .items-left {
+        justify-content: left;
+        align-items: flex-start;
+    }
+
+    .padding-top-5rem {
+        padding-top: 5rem;
+    }
+
+    .input-field,
+    select {
+        background-color: #eeeeee;
+    }
+
+    #border-style {
+        width: 50vw;
+        margin-top: 5rem;
+        border-top: 1px solid #eeeeee;
+    }
+
+    #change_password {
+        cursor: pointer;
+    }
+
+    #msg-modal {
+        color: rgb(0, 209, 0);
+    }
+
+    #main-cont {
+        min-height: 93.5vh;
+        position: relative;
+    }
+
+    .fa-check,
+    .fa-check::before {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+    }
+
+    #pos-abs {
+        position: absolute;
+        top: 10vw;
+    }
+</style>
+<div class="container width-100 padding-top-5rem" id='main-cont'>
+    <div class="container" id="pos-abs">
+        <div class="container flex-dir-row margin-bottom-1rem">
+            <a href="/dashboard/users-management/patients" style="color:white"><button class="button" id="back_btn">Back
+                    to
+                    users management</button></a>
+            <button class="button" id="deleteBtn">Delete user</button>
+        </div>
+        <div class="container padding-2rem">
+            <!-- first name & last name -->
+            <div class="container flex-dir-row">
+                <div class="container margin-bottom-1rem">
+                    <label>First Name</label>
+                    <div id="name" class="input-field"></div>
+                </div>
+                <div class="container margin-bottom-1rem">
+                    <label>Last Name</label>
+                    <div id="surname" class="input-field"></div>
+                </div>
+            </div>
+            <!-- email & member_since -->
+            <div class="container flex-dir-row">
+                <div class="container margin-bottom-1rem">
+                    <label>Email</label>
+                    <div id="email" class="input-field"></div>
+                </div>
+                <div class="container margin-bottom-1rem">
+                    <label>Member since</label>
+                    <div id="member_since" class="input-field"></div>
+                </div>
+            </div>
+            <!-- phone number and gender -->
+            <div class="container flex-dir-row">
+                <div class="container margin-bottom-1rem">
+                    <label>Phone number</label>
+                    <div id="telephone" class="input-field"></div>
+                </div>
+                <div class="container margin-bottom-1rem">
+                    <label>Gender</label>
+                    <div id="gender" class="input-field"></div>
+                </div>
+            </div>
+            <!-- date of birth and postal code -->
+            <div class="container flex-dir-row width-100">
+                <div class="container margin-bottom-1rem width-50">
+                    <label>Date of birth</label>
+                    <div id="dob" class="input-field"></div>
+                </div>
+                <div class="container width-50 margin-bottom-1rem">
+                    <label>Postal code</label>
+                    <div id="post_code" class="input-field"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    const id = `<%= prof_id %>`
+        , dateOfBirth = document.getElementById('dob')
+        , name = document.querySelector('#name')
+        , surname = document.querySelector('#surname')
+        , email = document.querySelector('#email')
+        , member_since = document.querySelector('#member_since')
+        , telephone = document.querySelector('#telephone')
+        , gender = document.querySelector('#gender')
+        , post_code = document.querySelector('#post_code')
+        , deleteBtn = document.querySelector('#deleteBtn')
+
+    fetch("/getUsers/patient/a", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            usertype: 'patient',
+            id: id
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            console.log(body)
+
+            //Date of Birth
+            dateOfBirth.innerText = `${body.dd}/${body.mm}/${body.yy}`,
+
+                //Name
+                name.innerText = body.name
+            //Surname
+            surname.innerText = body.surname
+
+            //Email
+            email.innerText = body.email
+
+            //Member since
+            member_since.innerText = `${body.date.substring(8, 10)}/${body.date.substring(5, 7)}/${body.date.substring(0, 4)}`
+
+            //Telephone
+            console.log(body.telephone)
+            if (body.telephone === '') {
+                telephone.innerText = 'No telephone found';
+            }
+            else if (typeof body.telephone === "undefined"){
+                telephone.innerText = 'No telephone found';
+            }
+            else {
+                telephone.innerText = body.telephone;
+            }
+
+            //Post code
+            post_code.innerText = body.post_code
+
+            // Gender
+            gender.innerText = `${body.gender}`;
+        });
+
+    deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this user?')) {
+            fetch("/delUser", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    const parent = document.getElementsByClassName('container padding-2rem')[0];
+                    const back_btn = document.querySelector('#back_btn');
+
+                    back_btn.style.margin = '0'
+                    parent.innerText = 'Patient removed from system';
+                    parent.style.fontSize = '1.5rem'
+                    parent.classList.add("flex-dir-row");
+
+                    const check = document.createElement('div');
+                    check.id = 'check'
+                    check.className = 'container'
+                    check.innerHTML = `<i class="fas fa-check"></i>`
+
+                    parent.appendChild(check)
+                    deleteBtn.remove()
+                });
+        } else {
+            // Do nothing!
+            console.log('Thing was not saved to the database.');
+        }
+    })
+</script>

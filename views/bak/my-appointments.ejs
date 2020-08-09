@@ -1,0 +1,452 @@
+<style>
+    .head-btn {
+        color: rgb(109, 50, 109);
+        font-size: 1.5rem;
+    }
+
+    .head-btn:hover {
+        opacity: 0.7;
+    }
+
+    .font-bigger-lighter {
+        font-size: 1.5rem;
+        font-weight: normal;
+    }
+
+    #appointments,
+    #history,
+    #requests,
+    #cancelled {
+        border-right: 5px solid #f8f9fa;
+        justify-content: left !important;
+        align-items: flex-start !important;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        max-width: 75vw;
+    }
+
+    .appointment-content,
+    .history-content,
+    .requests-content,
+    .cancelled-content {
+        background: #f2f1f1;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        width: 40vw;
+    }
+
+    .min-height {
+        min-height: 93px;
+    }
+
+    .border:nth-child(2) {
+        border-right: 1px solid #cecdcd;
+        border-left: 1px solid #cecdcd;
+    }
+
+    .border:nth-child(1) {
+        align-items: flex-start;
+    }
+
+    .border {
+        flex: 1;
+    }
+
+    #appointments-head,
+    #history-head,
+    #requests-head,
+    #cancelled-head {
+        margin-bottom: 20px;
+    }
+
+    .button {
+        margin-bottom: 5px;
+        font-size: 12px;
+        width: 150px;
+    }
+
+    #name {
+        color: #3498db;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    #specialty {
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+</style>
+
+<div class="container padding-1rem width-100">
+    <div class="container flex-dir-row padding-1rem width-100">
+        <h1 class="padding-1rem pointer head-btn">Appointments</h1>
+        <h1 class="padding-1rem pointer head-btn">Requests</h1>
+        <h1 class="padding-1rem pointer head-btn">History</h1>
+        <h1 class="padding-1rem pointer head-btn">Cancelled</h1>
+    </div>
+    <div class="container padding-2rem" id="appointments">
+        <h1 class="font-bigger-lighter text-left width-100" id="appointments-head">Here you can see your future
+            appointments</h1>
+        <div class="container padding-1rem" id="appointments-content-wrap"></div>
+    </div>
+    <div class="container padding-2rem" id="requests">
+        <h1 class="font-bigger-lighter text-left width-100" id="requests-head">Here you can see all the requests from
+            your patients</h1>
+        <div class="container padding-1rem" id="requests-content-wrap"></div>
+    </div>
+    <div class="container padding-2rem width-100 text-left" id="history">
+        <h1 class="font-bigger-lighter text-left" id="history-head">My History</h1>
+        <div class="container padding-1rem" id="history-content-wrap"></div>
+    </div>
+    <div class="container padding-2rem width-100 text-left" id="cancelled">
+        <h1 class="font-bigger-lighter text-left" id="cancelled-head">Rejected Appointments</h1>
+        <div class="container padding-1rem" id="cancelled-content-wrap"></div>
+    </div>
+</div>
+<script>
+
+    const id = `<%= id %>`;
+    const appointments = document.querySelector('#appointments-content-wrap');
+    const history = document.querySelector('#history-content-wrap');
+    const requests = document.querySelector('#requests-content-wrap');
+    const cancelled = document.querySelector('#cancelled-content-wrap');
+
+    const appointmentsBtn = document.getElementsByClassName('head-btn')[0];
+    const requestsBtn = document.getElementsByClassName('head-btn')[1];
+    const historyBtn = document.getElementsByClassName('head-btn')[2];
+    const cancelledBtn = document.getElementsByClassName('head-btn')[3];
+
+    document.querySelector('#requests').style.display = document.querySelector('#history').style.display = document.querySelector('#cancelled').style.display = 'none'
+
+    appointmentsBtn.addEventListener('click', () => {
+        document.querySelector('#appointments').style.display = 'flex'
+        document.querySelector('#requests').style.display = document.querySelector('#history').style.display = document.querySelector('#cancelled').style.display = 'none'
+    })
+
+    requestsBtn.addEventListener('click', () => {
+        document.querySelector('#requests').style.display = 'flex'
+        document.querySelector('#appointments').style.display = document.querySelector('#history').style.display = document.querySelector('#cancelled').style.display = 'none'
+    })
+
+    historyBtn.addEventListener('click', () => {
+        document.querySelector('#history').style.display = 'flex'
+        document.querySelector('#requests').style.display = document.querySelector('#appointments').style.display = document.querySelector('#cancelled').style.display = 'none'
+    })
+
+    cancelledBtn.addEventListener('click', () => {
+        document.querySelector('#cancelled').style.display = 'flex'
+        document.querySelector('#requests').style.display = document.querySelector('#history').style.display = document.querySelector('#appointments').style.display = 'none'
+    })
+
+
+    fetch("/getAppointments/d", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            doctor_id: id,
+            type: "rejected"
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            console.log(body)
+            if (body.result === 'success') {
+                body.appointments.forEach(appointment => {
+
+                    //Create container that contains the appointment info (doc info, date etc)
+                    const appointmentElement = document.createElement('div');
+                    appointmentElement.className = 'container flex-dir-row appointment-content';
+                    appointmentElement.id = `${appointment._id}`
+
+                    //Create left section of container
+                    let appointmentSection = document.createElement('div');
+                    appointmentSection.className = `container padding-left-right-12px min-height border`
+                    appointmentSection.innerHTML = `
+                    <div id='name'>${appointment.patient.name} ${appointment.patient.surname}</div>
+                    `
+                    //Append left section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+                    //Create middle section of container
+                    appointmentSection = document.createElement('div');
+                    appointmentSection.className = `container padding-left-right-12px min-height border flex-dir-row strong`
+                    appointmentSection.innerHTML = `
+                    <div><i class="fas fa-calendar-alt"></i></div>
+                    <div class='font-12px'>${appointment.timestamp}</div>
+                    `
+                    //Append middle section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+
+                    //Create right section of container
+                    //Check if appointment type is request then create the appropriate buttons
+                    if (appointment.type === 'request') {
+                        appointmentSection = document.createElement('div');
+                        appointmentSection.className = `container padding-left-right-12px min-height border`
+
+                        const cont = createContainer();
+
+                        const btn = createButton('rejectReq', 'Reject request')
+
+                        //Event listener for reject request button
+                        btn.addEventListener('click', () => {
+
+                            fetch("/appointment/action/d", {
+                                method: "post",
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+
+                                //make sure to serialize your JSON body
+                                body: JSON.stringify({
+                                    appointment_id: appointment._id,
+                                    action: 'reject',
+                                    patient: appointment.patient,
+                                    timestamp: appointment.timestamp,
+                                    doctor: appointment.doctor
+                                })
+                            })
+                                .then(response => response.json())
+                                .then((body) => {
+                                    appointmentElement.innerHTML = `
+                                    <div class='container flex-dir-row'>
+                                        <div>${body.msg}</div>
+                                        <div class='container' id='check'>
+                                            <i class="fas fa-check" style='color:white'></i>
+                                        </div>
+                                    </div>
+                                    `
+                                    setTimeout(() => {
+                                        location.reload()
+                                    }, 1000);
+                                });
+                        })
+                        const btn2 = createButton('acceptReq', 'Accept request')
+
+                        //Event listener for accept request
+                        btn2.addEventListener('click', () => {
+                            fetch("/appointment/action/d", {
+                                method: "post",
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+
+                                //make sure to serialize your JSON body
+                                body: JSON.stringify({
+                                    appointment_id: appointment._id,
+                                    action: 'accept',
+                                    patient: appointment.patient,
+                                    timestamp: appointment.timestamp,
+                                    doctor: appointment.doctor
+                                })
+                            })
+                                .then(response => response.json())
+                                .then((body) => {
+                                    appointmentElement.innerHTML = `
+                                    <div class='container flex-dir-row'>
+                                        <div>${body.msg}</div>
+                                        <div class='container' id='check'>
+                                            <i class="fas fa-check" style='color:white'></i>
+                                        </div>
+                                    </div>
+                                    `
+                                    setTimeout(() => {
+                                        location.reload()
+                                    }, 1000);
+                                });
+                        })
+
+                        cont.appendChild(btn2)
+                        cont.appendChild(btn)
+                        appointmentSection.appendChild(cont)
+
+                        requests.appendChild(appointmentElement)
+                    }
+                    //Check if appointment type is appointment then create the appropriate buttons 
+                    else if (appointment.type === 'appointment') {
+                        appointmentSection = document.createElement('div');
+                        appointmentSection.className = `container padding-left-right-12px min-height border`
+
+                        const cont = createContainer();
+
+                        const btn = createButton('join', 'Join room')
+
+                        const btn2 = createButton('cancel', 'Cancel appointment')
+
+                        const cont2 = createContainer();
+
+                        cont2.classList.add("flex-dir-row");
+
+                        cont2.style.display = 'none'
+
+                        //Create textarea
+                        const textarea = createTextArea();
+                        textarea.style.display = 'none'
+
+                        //Check button
+                        const buttonCheck = document.createElement('div');
+                        buttonCheck.innerHTML = `<i class="fas fa-check"></i>`;
+
+                        buttonCheck.addEventListener('click', () => {
+                            if (textarea.value !== '') {
+                                fetch("/appointment/action/d", {
+                                    method: "post",
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+
+                                    //make sure to serialize your JSON body
+                                    body: JSON.stringify({
+                                        appointment_id: appointment._id,
+                                        action: 'cancel',
+                                        patient: appointment.patient,
+                                        timestamp: appointment.timestamp,
+                                        doctor: appointment.doctor,
+                                        reason: textarea.value
+                                    })
+                                })
+                                    .then(response => response.json())
+                                    .then((body) => {
+                                        appointmentElement.innerHTML = `
+                                    <div class='container flex-dir-row'>
+                                        <div>${body.msg}</div>
+                                        <div class='container' id='check'>
+                                            <i class="fas fa-check" style='color:white'></i>
+                                        </div>
+                                    </div>
+                                    `
+                                        setTimeout(() => {
+                                            location.reload()
+                                        }, 1000);
+                                    });
+                            } else {
+                                textarea.style.border = '1px solid red'
+                            }
+                        })
+
+                        //Cancel button
+                        const buttonTimes = document.createElement('div');
+                        buttonCheck.innerHTML = `<i class="fas fa-check pointer"></i>`
+                        buttonTimes.innerHTML = `<i class="fas fa-times pointer"></i>
+                        `
+
+                        buttonTimes.addEventListener('click', () => {
+                            cont.style.display = 'block'
+                            btn.style.display = 'block'
+                            btn2.style.display = 'block'
+                            cont2.style.display = 'none'
+                            textarea.style.display = 'none'
+                        })
+
+                        //Append textarea and button check and button times to container flex-dir-row
+                        cont.appendChild(textarea)
+                        cont2.appendChild(buttonCheck)
+                        cont2.appendChild(buttonTimes)
+
+
+                        //Event listener for joining appointment
+                        btn.addEventListener('click', () => {
+                            window.location.href = `/appointment/${appointment._id}`
+                        })
+
+                        //Event listener for cancelling appointment
+                        btn2.addEventListener('click', () => {
+                            btn.style.display = 'none'
+                            btn2.style.display = 'none'
+                            cont2.style.display = 'flex'
+                            textarea.style.display = 'block'
+                        })
+
+                        //Append join and cancel button to container
+                        cont.appendChild(btn)
+                        cont.appendChild(btn2)
+
+                        //Append containers to right side of element
+                        appointmentSection.appendChild(cont)
+                        appointmentSection.appendChild(cont2)
+
+                        //Append element to appointments page area
+                        appointments.appendChild(appointmentElement)
+                    } else if (appointment.type === 'completed') {
+                        appointmentSection = document.createElement('div');
+                        appointmentSection.className = `container padding-left-right-12px min-height border`
+
+                        const cont = createContainer();
+
+                        //Here we must have the rating of the user
+
+                        // cont.appendChild(btn)
+                        appointmentSection.appendChild(cont)
+
+                        history.appendChild(appointmentElement)
+                    } else if (appointment.type === 'rejected') {
+                        appointmentSection = document.createElement('div');
+                        appointmentSection.className = `container padding-left-right-12px min-height border`
+
+                        const cont = createContainer();
+                        if (appointment.type === 'cancelled') {
+                            cont.innerText = 'Cancelled by user'
+                        } else {
+                            cont.innerText = 'Rejected by doctor'
+                        }
+
+                        appointmentSection.appendChild(cont)
+
+                        cancelled.appendChild(appointmentElement)
+                    }
+
+                    //Append right section to appointment container
+                    appointmentElement.appendChild(appointmentSection)
+
+                    function createContainer() {
+                        const cont = document.createElement('div');
+                        cont.className = 'container';
+
+                        return cont;
+                    }
+
+                    function createButton(id, innerText) {
+                        const btn = document.createElement('button')
+                        btn.className = 'button small'
+                        btn.id = `${id}`
+                        btn.innerText = `${innerText}`
+
+                        return btn;
+                    }
+
+                    function createTextArea() {
+                        const textarea = document.createElement('textarea');
+                        textarea.style.height = '50px';
+                        textarea.style.width = '150px';
+                        textarea.style.resize = 'none';
+                        textarea.placeholder = 'Add a cancellation reason';
+                        return textarea;
+                    }
+                });
+            }
+            if (appointments.innerText === '') {
+                appointments.innerText = `There are no appointments at this moment`
+            }
+            if (requests.innerText === '') {
+                requests.innerText = `There are no requests at this moment`
+            }
+            if (history.innerText === '') {
+                history.innerText = `There are no previous appointments at this moment`
+            }
+            if (cancelled.innerText === '') {
+                cancelled.innerText = `There are no cancelled appointments at this moment`
+            }
+        });
+</script>

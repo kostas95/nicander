@@ -1,0 +1,74 @@
+<style>
+    #type {
+        display: none;
+    }
+
+    body {
+        overflow: hidden;
+    }
+
+    #form-container {
+        padding-right: 0;
+        border: none
+    }
+</style>
+<div class="container">
+    <div id='login-header' class="container flex-dir-row">
+        <div class="container" id='log-container'>
+            <i class="fas fa-sign-in-alt fa-2x"></i>
+            <h3>Administrator Login</h3>
+        </div>
+    </div>
+    <div id="login-container" class="container flex-dir-row">
+        <div id="form-container" class="container">
+            <h2>Welcome!</h2>
+            <form action="/admin/login" method="post" class="form container" autocomplete="off">
+                <label>Email</label>
+                <input type="email" id="email" name='email' class='input-field'>
+                <label>Password</label>
+                <input type="password" id="password" name='password' class='input-field'>
+                <input type="text" id="type" name='type' class='input-field' value="admin">
+                <input type="submit" value="Login" class="button">
+                <div class="message-log">
+                    <%= error %>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<script>
+    document.title = 'Admin Login'
+
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const message = document.querySelector('.message-log');
+
+    document.querySelector('form').addEventListener('submit', (e) => {
+
+        if (email.value === '' || password.value === '') {
+            if (email.value === '') {
+                styleBorder(email, 'red')
+            }
+            else {
+                styleBorder(email, 'rgb(226, 226, 226)')
+            }
+            if (password.value === '') {
+                styleBorder(password, 'red')
+            }
+            else {
+                styleBorder(password, 'rgb(226, 226, 226)')
+            }
+            e.preventDefault();
+            message.style.display = 'block';
+            message.innerText = 'Please fill all fields correctly!'
+        }
+        else {
+            true
+        }
+    })
+
+    function styleBorder(field, color) {
+        field.style.border = `1px solid ${color}`
+    }
+</script>

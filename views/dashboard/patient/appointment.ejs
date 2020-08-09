@@ -1,0 +1,707 @@
+<style>
+    #chat-area,
+    #video-area {
+        height: 90vh;
+        background-color: #ebebeb;
+        border-radius: 5px;
+        box-shadow: 0 0 29px 0 rgba(66, 66, 66, .13);
+    }
+
+    #chat-area {
+        flex: 2;
+    }
+
+    #display-messages {
+        flex: 15;
+    }
+
+    #text-area {
+        flex: 1;
+        justify-content: flex-start;
+    }
+
+    #wrap-textarea-cont {
+        border: 1px solid black;
+        border-radius: 25px;
+        justify-content: flex-start;
+    }
+
+    #textArea {
+        resize: none;
+        outline: none;
+        line-height: 1.28;
+        height: 3rem;
+        border: none;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-left: 25px;
+        width: 80%;
+        font-size: 14px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    #video-area {
+        flex: 4;
+    }
+
+    .far:hover {
+        opacity: 0.7;
+    }
+
+    .url {
+        color: black;
+        text-decoration: underline;
+    }
+
+    #file {
+        display: none;
+    }
+
+    label {
+        width: auto;
+        margin: 0;
+    }
+
+    #peerDiv,
+    #myVideo {
+        display: none;
+    }
+
+    .fa-video:hover,
+    .fa-2x:hover {
+        opacity: 0.7;
+    }
+
+    .padding-1rem {
+        padding: 1rem !important;
+    }
+
+    /* 
+    #peerDiv {
+        z-index: -1;
+    } */
+</style>
+
+<div class="container width-100 padding-1rem flex-dir-row">
+    <!-- Chat Area -->
+    <div class="container width-100 padding-1rem" id="chat-area">
+
+        <!-- Area where messages are displayed -->
+        <div class="container padding-1rem width-100" id="display-messages">
+
+        </div>
+        <div id="typing"></div>
+
+        <!-- Area where we type stuff -->
+        <div class="container width-100 flex-dir-row" id="text-area">
+            <!-- Textarea wrapper -->
+            <form class="container width-100 flex-dir-row" id="wrap-textarea-cont">
+                <!-- Textarea -->
+                <textarea name="" id="textArea" class="" placeholder="Type your message here..."></textarea>
+                <!-- Buttons -->
+                <label for="file">
+                    <i class="far fa-folder-open pointer" title="Choose file"></i>
+                </label>
+                <input type="file" name="file" id="file">
+                <i class="far fa-paper-plane pointer" title="Send message"></i>
+            </form>
+        </div>
+    </div>
+
+    <!-- Video Area -->
+    <div class="container width-100" id="video-area">
+        <div class="container" id="videos-container">
+            <h1 class="h1" id="make-call-header"></h1>
+            <i class="fas fa-video fa-3x pointer"></i>
+            <div id="peerDiv" class="embed-responsive embed-responsive-16by9">
+            </div>
+            <video id="myVideo" muted></video>
+        </div>
+    </div>
+</div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.2/simplepeer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+<script>
+
+    let socket = io();
+    const appointment_id = '<%= appointment_id %>'
+    let patient, doctor
+    //Alert if user is willing to exit this page
+    // window.onbeforeunload = function () {
+    //     return 'Are you sure you want to leave?';
+    //     console.log('asdf')
+    // };
+
+    const videoArea = document.querySelector('#video-area'), chatArea = document.querySelector('#chat-area');
+
+    const textArea = document.querySelector('#textArea');
+    const msgForm = document.querySelector('#wrap-textarea-cont');
+    const displayMessages = document.querySelector('#display-messages');
+
+    const video = document.querySelector('video')
+    const filter = document.querySelector('#filter')
+    let client = {}
+
+
+    setTimeout(() => {
+        fetch("/getAppointments/1", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                appointment_id: appointment_id
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                console.log(body)
+                patient = body.patient
+                doctor = body.doctor
+                document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`
+
+                body.chat.forEach(data => {
+                    createMessageBubble(data, data.from);
+                });
+
+                if (body.doctor.status !== 'online' || body.patient.status !== 'online') {
+                    //Create Modal
+                    const modal = document.createElement('div');
+                    modal.className = 'modal container';
+
+                    const modalContent = document.createElement('div');
+                    modalContent.className = 'modal-content container';
+                    modalContent.innerHTML = `
+                    <div class="container width-100 padding-1rem">
+                        <h1 class='big-h1'>Doctor hasn't connected yet. Please wait a little, or exit...</h1>
+                        <a href='/dashboard/my-appointments' title='Go back'>
+                            <i class="fas fa-door-closed fa-5x padding-1rem"></i>
+                        </a>
+                    </div>
+                    `
+                    //Append modal
+                    modal.appendChild(modalContent);
+                    document.querySelector('body').appendChild(modal)
+
+                    //Get event "accessChat"
+                    //This event triggers the removal of the modal
+                    socket.on('accessChat', (data) => {
+                        console.log(data)
+                        modalContent.innerHTML = `
+                        <div class="container width-100 padding-1rem">
+                            <h1 class='big-h1'>The doctor has joined... You're entering the appointment</h1>
+                            <i class="fa fa-spinner fa-spin fa-5x fa-fw"></i>
+                        </div>
+                        `
+                        setTimeout(() => {
+                            modal.remove()
+                        }, 1500);
+                    })
+
+                    addEventListenerIcon()
+
+                }
+
+
+            });
+    }, 500);
+
+    //Get event if patient disconnects
+    socket.on('peerDisconnected', (data) => {
+        console.log('DOCTOR LEFT')
+        //Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal container';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content container';
+        modalContent.innerHTML = `
+        <div class="container width-100 padding-1rem">
+            <h1 class='big-h1'>${data}</h1>
+            <a href='/dashboard/my-appointments' title='Go back'>
+            <i class="fas fa-door-closed fa-5x padding-1rem"></i>
+            </a>
+        </div>
+        `
+
+        //Append modal
+        modal.appendChild(modalContent);
+        document.querySelector('body').appendChild(modal)
+
+        addEventListenerIcon()
+    })
+
+    //Event listener when typing inside textarea
+    //Socket send event of typing or not typing
+    textArea.addEventListener('keyup', () => {
+        if (textArea.value.length > 0) {
+            socket.emit('typing', {
+                typing: true,
+                type: 'patient'
+            })
+        } else {
+            socket.emit('typing', {
+                typing: false,
+                type: 'patient'
+            })
+        }
+    })
+
+    //Event handler to typing event
+    //Gets the info that the other peer is typing
+    socket.on('typing', (data) => {
+        document.querySelector('#typing').innerText = `${data}`;
+    })
+
+    //Hit enter event listener and send message data to server
+    document.querySelector('body').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            sendMessageData(e);
+        }
+    });
+
+    //Hit the send button and send message data to server 
+    document.querySelector('.fa-paper-plane').addEventListener('click', (e) => {
+        sendMessageData(e);
+
+    })
+
+    //Receive and display the patient's message
+    socket.on('receiveMessage', (data) => {
+        createMessageBubble(data, data.from)
+    })
+
+    function getDate() {
+        var today = new Date();
+        let yy = today.getFullYear(),
+            mm = today.getMonth() + 1,
+            dd = today.getDate()
+
+        if (mm < 10) {
+            mm = `0${mm}`
+        }
+        if (dd < 10) {
+            dd = `0${dd}`
+        }
+
+        return `${dd}-${mm}-${yy}`;
+    }
+
+    function createMessageBubble(data, from) {
+        //Create a div container for the message data
+        const cont = document.createElement('div');
+        cont.className = `container padding-5px message-bubble ${from}`;
+
+        const contName = document.createElement('div');
+        if (from === 'patient') {
+            contName.innerText = `You`
+        } else if (from === 'doctor') {
+            contName.innerText = `Dr. ${data.doctor.name} ${data.doctor.surname}`
+        }
+        contName.className = 'container width-100'
+        contName.id = 'chat-name'
+        cont.appendChild(contName)
+
+        const cont2 = document.createElement('div');
+        cont2.className = `container flex-dir-row padding-5px width-100`;
+        cont.appendChild(cont2);
+
+        const contMsg = document.createElement('div');
+
+        //Decrypt message and turn it to readable string
+        data.message = CryptoJS.AES.decrypt(data.message.toString(), "Secret Passphrase").toString(CryptoJS.enc.Utf8)
+
+        //Check if message is link
+        data.message = linkify(data.message)
+        contMsg.innerHTML = `${data.message}`;
+        contMsg.id = 'message-content'
+        cont2.appendChild(contMsg);
+
+        const contDateTime = document.createElement('div');
+        contDateTime.id = 'datetime-content'
+        contDateTime.innerText = `${data.date} ${data.time}
+        `;
+        cont2.appendChild(contDateTime);
+
+        displayMessages.appendChild(cont)
+
+        scrollBarBottom()
+    }
+
+    //URLify
+    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    function linkify(text) {
+        return text.replace(urlRegex, function (url) {
+            return '<a href="' + url + '" target="_blank" class="url">' + url + '</a>';
+        });
+    }
+
+    function scrollBarBottom() {
+        // Scrollbar of display messages section always to bottom
+        displayMessages.scrollTop = displayMessages.scrollHeight - displayMessages.clientHeight;
+    }
+
+    const callButton = document.querySelector('.fa-video');
+    callButton.addEventListener('click', (e) => {
+
+        //Hide the title and the button
+        callButton.style.display = 'none';
+        document.querySelector('#make-call-header').style.display = 'none';
+
+        //Create a calling spinner and the label calling
+        const cont = document.createElement('div');
+        cont.id = 'calling'
+        cont.className = 'container'
+        cont.innerHTML = '<div class="container"><i class="fas fa-spinner fa-pulse fa-3x"></i><div class="h1">Calling</div></div>';
+
+        document.querySelector('#videos-container').appendChild(cont)
+
+        const cancelBtn = cancelCallBtn();
+
+        cont.appendChild(cancelBtn);
+
+        socket.emit('callEvent', {
+            calling: true,
+            caller: 'patient'
+        })
+
+    })
+
+    socket.on('callEvent', (data) => {
+        //Hide the title and the button
+        callButton.style.display = 'none';
+        document.querySelector('#make-call-header').style.display = 'none';
+
+        //Create a calling spinner and the label calling
+        const cont = document.createElement('div');
+        cont.id = 'calling'
+        cont.className = 'container'
+        cont.innerHTML = `<div class="container"><i class="fas fa-phone-volume fa-pulse fa-3x"></i></i ><div class="h1">Dr. ${data.caller} is calling you</div></div>`;
+
+        document.querySelector('#videos-container').appendChild(cont)
+
+        const cont2 = document.createElement('div');
+        cont2.className = 'container flex-dir-row'
+
+        const cancelBtn = cancelCallBtn();
+        const acceptBtn = acceptCallBtn();
+
+        cont2.appendChild(acceptBtn);
+        cont2.appendChild(cancelBtn);
+        cont.appendChild(cont2)
+    })
+
+    function cancelCallBtn() {
+        const btn = document.createElement('i');
+        btn.className = 'fas fa-times fa-3x pointer padding-left-right-12px';
+        btn.title = 'Cancel call'
+        btn.addEventListener('click', () => {
+
+            //Emit the cancellation of the call
+            socket.emit('cancelCall', {
+                from: 'patient',
+                cancel: true
+            })
+            restoreToInitial('cancelself')
+        })
+
+        return btn;
+    }
+
+    function acceptCallBtn() {
+        const btn = document.createElement('i');
+        btn.className = 'fas fa-check fa-3x pointer padding-left-right-12px';
+        btn.title = 'Accept call'
+        btn.addEventListener('click', () => {
+
+            //Emit the cancellation of the call
+            socket.emit('acceptCall', {
+                from: 'patient',
+                accept: true
+            })
+            initCall()
+        })
+
+        return btn;
+    }
+
+
+    //Cancel call event listener
+    socket.on('cancelCall', (data) => {
+        restoreToInitial('cancel')
+    })
+
+    //Accept call event listener
+    socket.on('acceptCall', (data) => {
+        initCall()
+
+    })
+
+    function restoreToInitial(type) {
+
+        //Display a message that informs the call was not answered
+        callButton.style.display = 'block';
+        document.querySelector('#make-call-header').style.display = 'block';
+        document.querySelector('#peerDiv').style.display = 'none';
+        //Remove tha calling icon
+        if (document.querySelector('#calling'))
+            document.querySelector('#calling').remove()
+        if (type === 'calling') {
+            //Inform that call was not answered
+            document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} did not answer your call. You can try again.`;
+
+            //Return to inital message
+            // setTimeout(() => {
+            //     document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`;
+            // }, 10000);
+        } else if (type === 'called') {
+            document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} just called you. Call him back.`;
+        } else if (type === 'cancel') {
+            document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} aborted the call. You can call later.`;
+        } else if (type === 'cancelself') {
+            document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`;
+        }
+    }
+
+    function sendMessageData(e) {
+
+        if (textArea.value !== '') {
+            let message = textArea.value
+            textArea.value = '';
+
+            let date = getDate();
+            let time = getTime();
+            let data = {
+                //Encrypt message
+                message: CryptoJS.AES.encrypt(`${message}`, "Secret Passphrase").toString(),
+                patient: {
+                    id: patient.id,
+                    name: patient.name,
+                    surname: patient.surname
+                },
+                doctor: {
+                    id: doctor.id,
+                    name: doctor.name,
+                    surname: doctor.surname
+                },
+                from: 'patient',
+                to: 'doctor',
+                date: date,
+                time: time
+            }
+
+            socket.emit('sendMessage', data)
+            socket.emit('typing', {
+                typing: false,
+                type: 'patient'
+            })
+
+            createMessageBubble(data, data.from)
+        }
+        e.preventDefault()
+    }
+
+    function getTime() {
+        var today = new Date();
+        let hh = today.getHours(),
+            min = today.getMinutes(),
+            sec;
+
+        if (min < 10) {
+            min = `0${min}`
+        }
+        if (hh < 10) {
+            console.log('asdf')
+            hh = `0` + hh
+        }
+        if (today.getSeconds() < 10) {
+            sec = '0' + today.getSeconds()
+        } else {
+            sec = today.getSeconds()
+        }
+
+        return `${hh}:${min}:${sec}`;
+    }
+
+    function addEventListenerIcon() {
+        //Open close door hover graphic 
+        document.querySelector('.fa-door-closed').addEventListener('mouseover', (e) => {
+            document.querySelector('.fa-door-closed').className = 'fas fa-door-open fa-5x padding-1rem'
+        })
+        document.querySelector('.fa-door-closed').addEventListener('mouseout', (e) => {
+            document.querySelector('.fa-door-open').className = 'fas fa-door-closed fa-5x padding-1rem'
+        })
+    }
+
+
+    ///////////////////////////////////////////////////
+    //////////////////////VIDEOCALL////////////////////
+    ///////////////////////////////////////////////////
+    function initCall() {
+
+        document.querySelector('#make-call-header').style.display = 'none';
+        document.querySelector('.fa-video').style.display = 'none';
+        document.querySelector('#calling').style.display = 'none';
+        document.querySelector('#peerDiv').style.display = 'block';
+        document.querySelector('#myVideo').style.display = 'block';
+
+        const contain = document.createElement('div');
+        contain.className = 'container flex-dir-row pointer padding-1rem';
+        contain.id = 'buttons-container';
+
+
+        //get stream
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+            video: { width: 320, height: 240 }
+        })
+            .then(stream => {
+                socket.emit('NewClient')
+                video.srcObject = stream
+                var p = video.play();
+                if (p !== undefined) p.catch(function () { });
+
+                //End Call button
+                const endBtn = document.createElement('i');
+                endBtn.className = 'fas fa-phone-slash fa-2x padding-left-right-12px pointer';
+                endBtn.addEventListener('click', () => {
+                    stopBothVideoAndAudio(stream)
+                    document.querySelector('#myVideo').style.display = 'none'
+                    if (document.querySelector('#peerVideo'))
+                        document.querySelector('#peerVideo').remove()
+                    document.querySelector('#buttons-container').remove()
+                    restoreToInitial('cancelself')
+                    socket.emit('endCall', {
+                        end: true,
+                        from: 'patient'
+                    })
+                })
+                //Mute button
+                let muted = false;
+                const mute = document.createElement('i');
+                mute.className = 'fas fa-pause fa-2x padding-left-right-12px';
+                mute.addEventListener('click', () => {
+                    muteStream(stream)
+                    if (muted === false) {
+                        muted = true;
+                        mute.className = 'fas fa-play fa-2x'
+                    } else if (muted === true) {
+                        muted = false;
+                        mute.className = 'fas fa-pause fa-2x'
+                    }
+                })
+
+                contain.appendChild(endBtn)
+                contain.appendChild(mute)
+                document.querySelector('#video-area').appendChild(contain)
+
+                //End call
+                socket.on('endCall', (data) => {
+                    document.querySelector('#peerVideo').remove()
+                    document.querySelector('#myVideo').style.display = 'none'
+                    document.querySelector('#buttons-container').remove()
+                    restoreToInitial('cancelself')
+                    stopBothVideoAndAudio(stream)
+                })
+                //used to initialize a peer
+                function InitPeer(type) {
+                    let peer = new SimplePeer({
+                        initiator: (type == 'init') ? true : false,
+                        stream: stream,
+                        trickle: false
+                    })
+                    peer.on('stream', function (stream) {
+
+                        let video = document.createElement('video')
+                        video.id = 'peerVideo'
+                        video.srcObject = stream
+                        document.querySelector('#peerDiv').appendChild(video)
+                        var p = video.play();
+                        if (p !== undefined) p.catch(function () { });
+
+                    })
+                    peer.on('data', function (data) {
+                        let decodedData = new TextDecoder('utf-8').decode(data)
+                        let peervideo = document.querySelector('#peerVideo')
+                        peervideo.style.filter = decodedData
+                    })
+                    return peer
+                }
+                socket.on('CreatePeer', function () {
+                    client.gotAnswer = false
+                    let peer = InitPeer('init')
+                    peer.on('signal', function (data) {
+                        if (!client.gotAnswer) {
+                            socket.emit('Offer', data)
+                        }
+                    })
+                    client.peer = peer
+                })
+                socket.on('BackOffer', function (offer) {
+                    let peer = InitPeer('notInit')
+                    peer.on('signal', (data) => {
+                        socket.emit('Answer', data)
+                    })
+                    peer.signal(offer)
+                    client.peer = peer
+                })
+                socket.on('BackAnswer', function (answer) {
+                    client.gotAnswer = true
+                    let peer = client.peer
+                    peer.signal(answer)
+                })
+                socket.on('SessionActive', function () {
+                    console.log('Session Active.')
+                    let video = document.createElement('video')
+                    video.id = 'peerVideo'
+                    video.srcObject = stream
+                    document.querySelector('#peerDiv').appendChild(video)
+                    var p = video.play();
+                    if (p !== undefined) p.catch(function () { });
+
+                    let videos = Array.from(document.querySelectorAll('#peerVideo'))
+                    for(i = 0; i < videos.length-1; i++){
+                        let video = videos[i]
+                        console.log(video)
+                        video.remove()
+                    }
+                })
+                socket.on('Disconnect', function () {
+                    console.log('disconnect')
+                    if (document.getElementById("peerVideo"))
+                        document.getElementById("peerVideo").remove();
+                    if (client.peer) {
+                        client.peer.destroy()
+                    }
+                })
+            })
+            .catch(err => document.write(err))
+    }
+
+    function stopBothVideoAndAudio(stream) {
+        if (document.getElementById("peerVideo"))
+            document.getElementById("peerVideo").remove();
+
+        if (client.peer) {
+            client.peer.destroy()
+        }
+        stream.getTracks().forEach(function (track) {
+            if (track.readyState == 'live') {
+                track.stop();
+            }
+        });
+    }
+
+    // mute (black screen)
+    function muteStream(stream) {
+        stream.getTracks().forEach(track => track.enabled = !track.enabled);
+        console.log(stream.getTracks())
+    }
+</script>

@@ -1,0 +1,331 @@
+<div class="dashboard-container">
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/posts/new-post"><div class="dashboard-headers"><i class="fas fa-plus"></i>New Post</div></a>
+        <a href="/dashboard/posts/edit-post"><div class="dashboard-headers" id="underline"><i class="far fa-edit"></i>Edit Post</div></a>
+        <a href="/dashboard/posts/see-posts"><div class="dashboard-headers"><i class="far fa-eye"></i>See Posts</div></a>
+    </div>
+    <h2 class="h2-bg"><i class="far fa-edit"></i>Edit post</h2>
+    <div class="container flex-dir-row" id='edit-main-cont'>
+
+        <div class="container" id="display-all-posts">
+
+        </div>
+
+        <form action="/dashboard/posts/edit-post" method="post" class="form" autocomplete="off">
+            <div id="form-container" class="container">
+                <div class="message"><%= message%></div>
+                <label>Title</label>
+                <input type="text" id="postTitle" class='input-field' name="postTitle">
+                <label>Content</label>
+                <div class="container flex-dir-row" id='writing-palette'>
+                    <i class="fas fa-bold" title="Bold"></i>
+                    <i class="fas fa-italic" title="Italic"></i>
+                    <i class="fas fa-link" title="Add URL"></i>
+                    <i class="fas fa-arrow-down" title="Line Break"></i>
+                </div>
+                <textarea id="postContent" class='input-field' name='postContent'></textarea>
+                <label>Author</label>
+                <input type="text" id="postAuthor" name='postAuthor' class='input-field'>
+                <input type="text" id="postId" name='id' class='input-field' style="display:none">
+                <!-- <label>Select image:</label> -->
+                <!-- <input type="file" id="postImg" name="postImg" accept="image/*"> -->
+                <input type="button" value="Preview" class="button-2" id="button-2">
+                <input type="submit" value="Edit" class="button" id="submitBtn">
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    h2 {
+        justify-content: center;
+    }
+
+    #preview {
+        position: relative;
+    }
+
+    #edit-main-cont {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    #edit-main-cont>* {
+        width: 50%;
+        max-height: 90vh;
+        margin: 10px 10px !important;
+    }
+
+    #display-all-posts {
+        justify-content: flex-start;
+        align-self: start;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+
+    .post-edit {
+        align-items: flex-start !important;
+        justify-content: flex-start;
+        align-items: center;
+        border: 1px solid rgb(226, 226, 226);
+        border-radius: 5px;
+        padding: 1rem;
+        width: 100%;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+
+    .post-author {
+        position: initial;
+    }
+
+    .post-title {
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+    .small {
+        z-index: 10;
+        padding: 5px;
+        width: 50px;
+        font-size: 10px;
+        text-align: center;
+    }
+</style>
+<script>
+
+    //Disable all input fields and buttons
+    document.querySelector('#postTitle').disabled = true;
+    document.querySelector('#postContent').disabled = true;
+    document.querySelector('#postAuthor').disabled = true;
+    document.querySelector('#button-2').disabled = true;
+    document.querySelector('#submitBtn').disabled = true;
+
+    //Prevent form from resubmitting when page refreshes
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    //Hide message before submission and display it after submission, and hide it again after 5sec
+    if (document.querySelector('.message').innerText != '') {
+        // console.log('asdf')
+        document.querySelector('.message').style.display = 'block';
+
+        setTimeout(function () {
+            document.querySelector('.message').innerText = ''
+            document.querySelector('.message').style.display = 'none';
+        }, 5000);
+    }
+
+    let postsArr = [];
+    //Fetch all posts
+    fetch("/getposts", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({ 'post_num': 'all' })
+    })
+        .then(response => response.json())
+        .then((posts) => {
+            if (posts.length !== 0) {
+                posts.forEach(post => {
+                    // console.log(post)
+                    postsArr.push(post)
+                    createPostSection(post.title, post.content, post.author, post.timestamp, post._id)
+                });
+            }
+            else {
+                document.querySelector('#display-all-posts').innerText = 'No available posts yet'
+            }
+        });
+
+    //Show content of each post if clicked
+
+    //New Post, Edit Post, See Posts buttons redirect functionality
+    // const dashboardHeaders = Array.from(document.getElementsByClassName('dashboard-headers'));
+
+    // for (let i = 0; i < dashboardHeaders.length; i++) {
+    //     dashboardHeaders[i].style.cursor = 'pointer';
+    //     if (dashboardHeaders[i].innerText === 'New Post') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/new-post";
+    //         })
+    //     }
+    //     if (dashboardHeaders[i].innerText === 'Edit Post') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/edit-post";
+    //         })
+    //     }
+    //     if (dashboardHeaders[i].innerText === 'See Posts') {
+    //         dashboardHeaders[i].addEventListener('click', () => {
+    //             window.location.href = "/dashboard/posts/see-posts";
+    //         })
+    //     }
+    // }
+
+    // Functionality for bold, italic, line break, url
+    const txtarea = document.querySelector('#postContent');
+    const body = document.querySelector('body');
+    body.addEventListener('mousedown', (e) => {
+        // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+        body.addEventListener('mouseup', (e) => {
+            // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+
+
+            // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+            const beforeChange = txtarea.value.substring(0, txtarea.selectionStart);
+            const afterChange = txtarea.value.substring(txtarea.selectionEnd, txtarea.length);
+            const toBeChanged = txtarea.value.substring(txtarea.selectionStart, txtarea.selectionEnd);
+
+            document.getElementById('writing-palette').addEventListener('click', (e) => {
+                // const selectionEnd = txtarea.selectionEnd;
+                const postContent = document.getElementById('postContent');
+                if (e.target.className === 'fas fa-bold') {
+                    // console.log(selectionEnd)
+                    // postContent.value += `<b></b>`
+                    txtarea.value = `${beforeChange}<b>${toBeChanged}</b>${afterChange}`;
+                    // txtarea.focus()
+                    // txtarea.selectionEnd= selectionEnd;
+                }
+                if (e.target.className === 'fas fa-italic') {
+                    // postContent.value += `<i></i>`
+                    txtarea.value = `${beforeChange}<em>${toBeChanged}</em>${afterChange}`
+                }
+                if (e.target.className === 'fas fa-link') {
+                    // postContent.value += `<a href='https://WWW.EXAMPLE.COM'></a>`
+                    txtarea.value = `${beforeChange}${toBeChanged}<a href='https://EXAMPLE.COM'></a>${afterChange}`
+                }
+                if (e.target.className === 'fas fa-arrow-down') {
+                    // postContent.value += `<br>`
+                    txtarea.value = `${beforeChange}${toBeChanged}<br>${afterChange}`
+                }
+            })
+        })
+    })
+
+    // Preview a post functionality
+    const previewBtn = document.querySelector('.button-2')
+    previewBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (document.getElementById('post')) {
+            document.getElementById('post').remove()
+        }
+
+        const previewSection = document.createElement('div');
+        previewSection.className = 'container';
+        previewSection.id = 'post';
+        previewSection.style.margin = '2rem';
+        previewSection.style.padding = '1rem';
+        previewSection.style.minWidth = '50vw';
+
+        const title = document.querySelector('#postTitle').value;
+        const content = document.querySelector('#postContent').value;
+        const author = document.querySelector('#postAuthor').value;
+
+        previewSection.innerHTML = `
+            <div class='post-date'>${getCurrentDate()}</div></br>
+            <div class='post-title'>${title}</div><br>
+            <div class='post-content'>${content}</div></br>
+            <div class='post-author'>Post written by: ${author}</div>
+        `
+        document.querySelector('.dashboard-container').appendChild(previewSection)
+
+        window.location = '#post';
+    })
+
+    //Functions
+    function getCurrentDate() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = mm + '/' + dd + '/' + yyyy;
+        return today;
+    }
+
+    function createPostSection(title, content, author, timestamp, id) {
+        const postSection = document.createElement('div');
+        postSection.className = 'container post-edit';
+        postSection.id = id;
+        postSection.innerHTML = `
+        <div class='post-date'>${reformDate(timestamp)} ${reformTime(timestamp)}</div>
+        <div class='post-title'>Title:${title}</div>
+        <div class='post-content' style="display:none;">${content}</div>
+        <div class='post-author'>Author:${author}</div>
+        <i class="fas fa-edit button-2 small" style="display: none;" title="Edit"></i>
+        `
+        document.querySelector('#display-all-posts').appendChild(postSection)
+
+        //Add event listener
+        //When clicking the post info, the content appears or disappears
+        let open = false;
+        postSection.addEventListener('click', (e) => {
+            if (e.target.className !== 'fas fa-edit button-2 small') {
+                // console.log(e.target.className)
+                if (open === false) {
+                    for (let i = 0; i < postSection.childNodes.length; i++) {
+                        if (postSection.childNodes[i].className === 'post-content' || postSection.childNodes[i].className === 'fas fa-edit button-2 small') {
+
+                            postSection.childNodes[i].style.display = 'block';
+                        }
+                    }
+                    // console.log('open')
+                    open = true;
+                }
+                else if (open === true) {
+                    for (let i = 0; i < postSection.childNodes.length; i++) {
+                        if (postSection.childNodes[i].className === 'post-content' || postSection.childNodes[i].className === 'fas fa-edit button-2 small') {
+
+                            postSection.childNodes[i].style.display = 'none';
+
+                        }
+                    }
+                    // console.log('close')
+                    open = false;
+                }
+            }
+            else if (e.target.className === 'fas fa-edit button-2 small') {
+                undisable();
+                setTimeout(function () {
+                    document.querySelector('#postTitle').value = title;
+                    document.querySelector('#postContent').value = content;
+                    document.querySelector('#postAuthor').value = author;
+                    document.querySelector('#postId').value = id;
+
+                }, 50);
+
+            }
+
+        })
+
+    }
+
+    function reformDate(timestamp) {
+        const date = `${timestamp.substring(8, 10)}/${timestamp.substring(5, 7)}/${timestamp.substring(0, 4)}`
+
+        return date
+    }
+
+    function reformTime(timestamp) {
+        const time = `${timestamp.substring(11, 16)}`
+
+        return time
+    }
+
+    //Undisable the input fields and buttons
+    function undisable() {
+        document.querySelector('#postTitle').disabled = false;
+        document.querySelector('#postContent').disabled = false;
+        document.querySelector('#postAuthor').disabled = false;
+        document.querySelector('#button-2').disabled = false;
+        document.querySelector('#submitBtn').disabled = false;
+    }
+</script>

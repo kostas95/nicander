@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Patient</title>
+    <link rel="stylesheet" href="/stylesheets/main.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
+</head>
+<style>
+    #navbar>ul {
+        width: 90%;
+    }
+
+    .navbar-decoration {
+        width: 5%;
+    }
+
+    .fa-sign-out-alt {
+        color: black;
+    }
+
+    #dropdown {
+        top: 3rem;
+    }
+
+    i {
+        font-family: roboto;
+    }
+</style>
+
+<body>
+    <div id="navbar" class="navbar2">
+        <div class="navbar-decoration"></div>
+        <img src="/img/logo.png" id="logo">
+        <ul>
+            <a href="/dashboard">
+                <li class="navbar-item"><i class="fas fa-home"></i></li>
+            </a>
+            <a href="/dashboard/personal-details">
+                <li class="navbar-item">My personal details</li>
+            </a>
+            <a href="/dashboard/my-appointments">
+                <li class="navbar-item">My appointments</li>
+            </a>
+            <a href="/dashboard/reviews">
+                <li class="navbar-item">Reviews</li>
+            </a>
+            <a href="/dashboard/notifications">
+                <li class="navbar-item">Notifications</li>
+            </a>
+            <li class="navbar-item email"><%= email %>
+                <div class="container" id='dropdown'>
+                    <a href="/logout" class="navbar-item">
+                        Logout <i class="fas fa-sign-out-alt"> </i>
+                    </a>
+                    <!-- <a href="/doctor/login" class="navbar-item">Doctors</a> -->
+                </div>
+            </li>
+        </ul>
+        <div class="navbar-decoration"></div>
+    </div>
+
+    <%- body %>
+
+</body>
+<!-- <footer>
+    <div class="container">
+
+    </div>
+</footer> -->
+
+</html>
+
+<script>
+
+    const uId = '<%= id %>'
+    //Prevent form from resubmitting when page refreshes
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    // Footer Copyright Year Dynamic Change
+    // var dt = new Date();
+    // document.querySelector('#year').innerHTML = dt.getFullYear();
+
+    const buttonsCollection = document.getElementsByClassName('navbar-item');
+    const buttonsArray = Array.from(buttonsCollection);
+
+    for (let i = 0; i < buttonsArray.length; i++) {
+        const element = buttonsArray[i];
+        element.style.cursor = 'pointer';
+        element.addEventListener('click', (e) => {
+            if (e.target.className === 'navbar-item email') {
+                document.getElementById('dropdown').style.display = 'block'
+            }
+        })
+
+    }
+
+    document.querySelector('.fa-sign-out-alt').style.cursor = 'pointer'
+    document.querySelector('.fa-sign-out-alt').addEventListener('click', () => {
+        window.location.href = "/logout";
+    })
+
+    document.querySelector('body').addEventListener('click', (e) => {
+        if (e.target.className !== 'navbar-item email') {
+            open = false
+            document.querySelector('#dropdown').style.display = 'none';
+        }
+    })
+
+    fetch("/getNotifications/unseen/number", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            id: uId
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if(body.notifications.req != 0){
+                const notificationHeader = document.getElementsByClassName('navbar-item')[4]
+
+                if (body.notifications.length != 0) {
+                    notificationHeader.innerHTML = `Notifications <div class='container' id='notifNum'>${body.notifications.length}</div>
+                    `
+                }
+            }
+        });
+</script>

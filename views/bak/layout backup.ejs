@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicander</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500&family=Roboto&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <div class='container'>
+        <h1 id='main-page-header'>
+            <div>Nicander Pharmacovigilance</div>
+        </h1>
+
+        <div class="container" id="navbar">
+            <div class="navbar-decoration"></div>
+            <ul>
+                <li class="navbar-item">Home</li>
+                <li class="navbar-item">About</li>
+                <li class="navbar-item">Get Started</li>
+                <li class="navbar-item">Community</li>
+                <li class="navbar-item">Contact us</li>
+            </ul>
+            <div class="navbar-decoration"></div>
+        </div>
+        <div id="main-container">
+            <%- body %>
+        </div>
+        <footer>
+            <div class="container flex-dir-row">
+                <div class="container" id='footer-container'>
+                    <div><span class="strong">Designed and developed by Mandális Konstantinos</span></div>
+                    <div><span class="strong">Bachelor Thesis Project: Nicander &copy; <span id="year"></span></span></div>
+                    <div><span class="strong">Project Supervisor: Dept. of Digital Systems University of Piraeus Professor Dr.
+                            Ilias Maglogiannis</span>
+                    </div>
+                </div>
+                <div class="container">
+                    <img src="/img/unipi.png" alt="unipi-logo">
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Flash messaging -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+
+<script>
+    // Footer Copyright Year Dynamic Change
+    var dt = new Date();
+    document.querySelector('#year').innerHTML = dt.getFullYear();
+
+    //Main header link to indexpage
+    const header = document.querySelector('#main-page-header').firstElementChild;
+    header.style.cursor = 'pointer';
+
+    //Add event listener to header
+    header.addEventListener('click', function () {
+        window.location.href = "/";
+    })
+
+    const navItemsCollection = document.getElementsByClassName('navbar-item');
+    const navItems = Array.from(navItemsCollection)
+    for (let i = 0; i < navItems.length; i++) {
+        navItems[i].style.cursor = 'pointer';
+        navItems[i].addEventListener('click', (e) => {
+            let navItem = e.target.innerText.replace(/\s/g, '').toLowerCase();
+            if (navItem === 'home') {
+                window.location.href = "/";
+            }
+            if (navItem === 'about') {
+                window.location.href = "/about";
+            }
+            if (navItem === 'getstarted') {
+                window.location.href = "/started";
+            }
+            if (navItem === 'community') {
+                window.location.href = "/community";
+            }
+            if (navItem === 'contact') {
+                window.location.href = "/contact";
+            }
+        });
+
+    }
+
+</script>
+
+</html>

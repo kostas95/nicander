@@ -1,0 +1,387 @@
+<style>
+    #id {
+        display: none;
+    }
+
+    #image {
+        display: none;
+        position: absolute;
+        z-index: -1;
+    }
+
+    #imgSection {
+        background-color: rgb(255, 255, 255);
+        position: relative;
+        width: 270px;
+        height: 270px;
+        border-radius: 5px;
+    }
+
+    .profile-info>.container>div,
+    .profile-info>.container>a {
+        margin-left: 10px
+    }
+
+    .profile-info>* {
+        justify-content: left !important;
+        align-items: flex-start;
+    }
+
+    h3 {
+        color: rgb(139, 139, 139);
+        font-weight: lighter;
+    }
+
+    #full-name {
+        font-size: 2rem;
+    }
+
+    .display-block>* {
+        display: block !important;
+        font-size: 2rem;
+        padding: 1rem;
+    }
+
+    #telephone,
+    #website,
+    #location {
+        padding: 5px;
+    }
+
+    #wrap-bgcolor,
+    #telephone {
+        background-color: #d0eaff;
+        color: rgb(54, 54, 54);
+    }
+
+    .info-wrap {
+        width: 80%;
+        border-radius: 4px;
+        box-shadow: 0 0 20.37px 0.63px rgba(0, 0, 0, .07);
+    }
+
+    h1>i {
+        color: rgb(255, 65, 65);
+    }
+
+    .big-headers,
+    .big-headers>* {
+        padding: 1rem 2px;
+        font-size: 1.5rem;
+    }
+
+    .big-headers {
+        padding: 1rem 1rem 0 1rem;
+        justify-content: left !important;
+    }
+
+    .info-content {
+        display: block;
+        text-align: left;
+    }
+
+    .specElem {
+        border-radius: 2rem;
+        background: rgb(241, 241, 241);
+        padding: 1rem;
+        color: #000;
+        display: inline;
+        margin: 10px;
+    }
+
+    #specialization {
+        line-height: 5rem;
+        flex-wrap: wrap;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    .bullet {
+        position: relative;
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.3rem;
+        margin-top: 10px;
+    }
+
+    ul .bullet::before {
+        content: "";
+        background-color: rgb(175, 175, 175);
+        font-weight: bold;
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-right: 1rem;
+        border-radius: 100%;
+    }
+</style>
+<div class="container">
+    <!-- Display profile info section -->
+    <div class="container flex-dir-row width-100 padding-2rem" id='wrap-bgcolor'>
+        <!-- Image section -->
+        <div class="container" id="profile-image">
+            <div id="imgSectionWrap" class="hover">
+            </div>
+        </div>
+        <div class="container padding-2rem profile-info width-30">
+            <div class="container width-100">
+                <h1 id="full-name"></h1>
+                <h3 id="specialty"></h3>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-star"></i></h1>
+                <div id="rating"></div>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-phone-alt"></i></h1>
+                <a href="" id='telephoneLink'>
+                    <div id="telephone"></div>
+                </a>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-link"></i></h1>
+                <a href="" id='websiteLink'>
+                    <div id="website"></div>
+                </a>
+            </div>
+            <div class="container flex-dir-row width-100">
+                <h1><i class="fas fa-map-marker-alt"></i></h1>
+                <div id="location"></div>
+            </div>
+        </div>
+        <button id='delBtn' class="button">
+            Delete user
+        </button>
+
+    </div>
+    <div class="container width-100" id="user-info-container">
+        <div class="container padding-2rem width-100">
+            <!-- user description -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-user-md"></i>
+                    <h1>Description</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id="description">
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Specialization and Experience -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-book-medical"></i>
+                    <h1>Specialization and Experience</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='specialization'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Patient reviews -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-award" id='reviews-edit'></i>
+                    <h1>Patient reviews</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='reviews'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Curriculum Vitae and Career -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="far fa-clipboard"></i>
+                    <h1>Curriculum Vitae and Career</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='cv'>
+
+                </div>
+            </div>
+        </div>
+        <div class="container padding-2rem width-100">
+            <!-- Languages -->
+            <div class="container info-wrap">
+                <div class="container flex-dir-row big-headers width-100">
+                    <i class="fas fa-globe"></i>
+                    <h1>Languages</h1>
+                </div>
+                <div class="container padding-1rem width-100 info-content" id='language'>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const items = document.createElement('div');
+        items.innerText = `<%= items %>`
+
+        const imgContent = document.createElement('div');
+        const imgSectionWrap = document.querySelector('#imgSectionWrap');
+        imgContent.id = 'imgSection'
+        imgContent.className = 'container hover'
+
+        //Get user id
+        const div = document.createElement('div');
+        const id = div.innerText = `<%= prof_id %>`
+        let user = [];
+        const fullName = document.querySelector('#full-name'), specialty = document.querySelector('#specialty'), rating = document.querySelector('#rating'), telephone = document.querySelector('#telephone'), website = document.querySelector('#website'), locationArea = document.querySelector('#location');
+
+        const telephoneEdit = document.querySelector('#telephone-edit');
+        const websiteEdit = document.querySelector('#website-edit');
+
+
+        //Check if items is blank inside
+        //If it is not then display the user image from the database
+        if (items.innerText !== '') {
+            imgContent.innerHTML = `
+            <% items.forEach(function(image) { %>
+                <img class='hover' id='profile-photo' src="data:image/<%=image.img.contentType%>;base64, 
+                <%=image.img.data.toString('base64')%>">
+            <% }) %>
+        `
+            imgSectionWrap.appendChild(imgContent)
+        }
+        //If not then display default blank user image from folder
+        else {
+            imgContent.innerHTML = `
+            <img id='profile-photo' class='hover' src="/img/profile.png">
+        `
+            imgSectionWrap.appendChild(imgContent)
+        }
+
+        //Get current doctor's info and display them
+        fetch("/getUsers/Doctors/1/p", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id,
+                type: 'profile'
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                user = JSON.parse(body);
+
+                //Display full name
+                fullName.innerText = `${user.name} ${user.surname}`
+
+                //Display specialty 
+                specialty.innerText = `${user.specialty}`
+
+                //Display telephone number
+                telephone.innerText = `${user.telephone}`
+                telephone.parentElement.href = `tel:+30${user.telephone}`
+
+                //Display website
+                if (user.website) {
+                    website.innerText = `${user.website}`
+                } else {
+                    website.innerText = `No website available`
+                }
+
+                //Display Description
+                const description = document.querySelector('#description');
+                if (user.description) {
+                    description.innerText = `${user.description}`
+                } else {
+                    description.innerText = `No description available`
+                }
+
+                //Display Specialization and Experience (specialization is an array)
+                const specialization = document.querySelector('#specialization');
+                if (user.specialization.length !== 0) {
+                    user.specialization.forEach(value => {
+                        const specElem = document.createElement('div');
+                        specElem.className = 'specElem'
+                        specElem.innerText = `${value}`
+                        specialization.appendChild(specElem);
+                    })
+                } else {
+                    specialization.innerText = `No specialization available`
+                }
+
+                //Display reviews (reviews is an array)
+                const reviews = document.querySelector('#reviews');
+                if (user.reviews.length !== 0) {
+                    reviews.innerText = `${user.reviews}`
+                } else {
+                    reviews.innerText = `No reviews available`
+                }
+
+                //Display CV (cv is an array)
+                const cv = document.querySelector('#cv');
+                if (user.cv.length !== 0) {
+                    const ul = document.createElement('ul');
+                    ul.style.padding = '1rem 2rem'
+                    cv.appendChild(ul)
+                    user.cv.forEach(triplet => {
+                        const li = document.createElement('li');
+                        li.className = 'bullet'
+                        li.innerText = `${triplet.year_from} - ${triplet.year_to}, ${triplet.job}`
+
+                        ul.appendChild(li)
+                    });
+                    // cv.innerText = `${user.cv}`
+                } else {
+                    cv.innerText = `No cv available`
+                }
+
+                //Display languages (specialization is an array)
+                const languages = document.querySelector('#language');
+                if (user.languages.length !== 0) {
+                    const ul = document.createElement('ul');
+                    ul.style.padding = '1rem 2rem'
+                    languages.appendChild(ul)
+                    user.languages.forEach(language => {
+                        const li = document.createElement('li');
+                        li.className = 'bullet'
+                        li.innerText = `${language}`
+
+                        ul.appendChild(li)
+                    })
+                } else {
+                    languages.innerText = `No languages available`
+                }
+
+                locationArea.innerText = `${user.str_num}, ${user.location}`
+
+                console.log(user)
+            });
+
+        document.querySelector('#delBtn').addEventListener('click', () => {
+
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch("/delUser", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        id: id
+                    })
+                })
+                    .then(response => response.json())
+                    .then((data) => {
+                        window.location.href = data.url
+                    });
+            }
+        })
+
+    </script>

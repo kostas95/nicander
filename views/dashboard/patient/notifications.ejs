@@ -1,0 +1,189 @@
+<style>
+    .wrap {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        max-width: 76.5rem;
+    }
+
+    .notifications-wrap {
+        width: 79%;
+        padding-right: 25px;
+    }
+
+    .notification {
+        width: 100;
+        align-items: flex-start;
+    }
+
+    #notifications-content {
+        border-right: 5px solid #f8f9fa;
+    }
+
+    #notifications-head {
+        font-weight: normal;
+        font-size: 1.5rem;
+    }
+
+    .small-date {
+        color: #919191;
+        margin-left: 10px;
+        font-size: 12px;
+    }
+
+    body {
+        min-height: 100vh;
+    }
+
+    .container>.strong,
+    .container>.not-strong {
+        flex: 5;
+    }
+
+    .container>.date-time {
+        flex: 1;
+    }
+
+    a{
+        color: #000;
+    }
+</style>
+<div class="container padding-2rem wrap">
+    <div class="container padding-1rem notifications-wrap">
+        <h1 id="notifications-head" class="padding-1rem width-100 text-center">Notifications</h1>
+        <div class="container padding-top-bottom-2rem width-100" id="notifications-content">
+
+        </div>
+    </div>
+</div>
+<script>
+
+    const id = '<%= id %>',
+        notificationsContent = document.querySelector('#notifications-content');
+    let index = 0;
+    fetch("/getNotifications", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            id: id
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            let dates = []
+            // console.log(body.sort(function (a, b) {
+            //     var c = new Date(a.date);
+            //     var d = new Date(b.date);
+            //     return c - d;
+            // }))
+
+            //Get all notification dates in an array
+            body.forEach(notification => {
+                date = `${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)}`
+
+                if (!dates.includes(date)) {
+                    dates.push(date)
+                }
+            });
+
+            //Create a container for each date
+            //Inside there, we will append the respective notifications
+            dates.reverse().forEach(date => {
+                const arrReversed = body.sort(function (a, b) {
+                    var c = new Date(a.timestamp);
+                    var d = new Date(b.timestamp);
+                    return d - c;
+                });
+                const cont = createGroup(date, arrReversed);
+                notificationsContent.appendChild(cont)
+
+
+            })
+            //Get all the child nodes of container named notification
+            const childrenNodes = Array.from(document.querySelectorAll('.display-child'));
+            
+            //Iterate: The first 20 are displayed, the others are not
+            for (let i = 0; i < childrenNodes.length; i++) {
+                if (childrenNodes.length > 20) {
+                    let element = childrenNodes[i];
+                    if (i >= 20) {
+                        element.style.display = 'none';
+                    } else if (i <= 20) {
+                        element.style.display = 'flex';
+                    }
+                }
+            }
+
+            //Init an i value (shows how many items are displayd)
+            let i = 20
+            //Create show more button
+            const showMore = document.createElement('div');
+            showMore.className = 'padding-1rem pointer';
+            showMore.id = 'showMore'
+            showMore.innerText = 'Show more'
+
+            //Show more button event listener
+            showMore.addEventListener('click', () => {
+                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 20)
+                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                const j = i
+                for (i; i < j + 20; i++) {
+                    if (i < childrenNodes.length > 0) {
+                        const element = childrenNodes[i];
+                        element.style.display = 'flex';
+                    } else {
+                        showMore.remove()
+                        break
+                    }
+                }
+            })
+            notificationsContent.appendChild(showMore)
+
+            if (body.length === 0) {
+                notificationsContent.innerText = 'There are no notifications at this moment'
+            }
+        });
+
+    function createGroup(date, arr) {
+        const container = document.createElement('div');
+        container.className = 'notification container padding-1rem width-100';
+
+        // Heading for the day group of notifications
+        const header = document.createElement('h1');
+        header.className = 'display-child padding-1rem'
+        header.innerText = `${date}`;
+        container.appendChild(header)
+
+        // Append all days
+        arr.forEach(notification => {
+            notification.newTimestamp = `${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)}`
+            
+            if (notification.newTimestamp === date) {
+                const notificationElement = document.createElement('div')
+                notificationElement.className = 'display-child container flex-dir-row padding-1rem width-100 notification-element';
+                notificationElement.style.justifyContent = 'flex-start'
+                notificationElement.style.position = 'relative'
+                if (notification.status === 'unseen') {
+                    notificationElement.innerHTML = `<div class='strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)},</div><div class='small-date'>${notification.timestamp.substring(11, 16)}</div></div>`
+                    notificationElement.style.borderBottom = '1px solid #3333'
+                } else {
+                    notificationElement.innerHTML = `<div class='not-strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)},</div><div class='small-date'>${notification.timestamp.substring(11, 16)}</div></div>`
+                    notificationElement.style.borderBottom = '1px solid #3333'
+                }
+
+
+                container.appendChild(notificationElement)
+            }
+        })
+
+        return container;
+    }
+
+</script>

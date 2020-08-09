@@ -1,0 +1,127 @@
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    #main-container {
+        height: 94vh;
+        position: relative;
+    }
+
+    #main-container>.container {
+        position: absolute;
+        top: 25vh;
+    }
+
+    #main-container>.container>h1,
+    #main-container>.container>div {
+        max-width: 60%;
+        margin-bottom: 2rem;
+    }
+
+    h1 {
+        font-size: 3rem;
+        color: #6D326D;
+    }
+
+    a {
+        color: #6D326D !important;
+    }
+
+    #message,
+    u {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    label {
+        width: auto;
+        margin: 0;
+    }
+
+    input {
+        outline: none;
+        margin-top: 10px;
+        line-height: 1.5rem !important;
+        font-size: 1.5rem !important;
+    }
+
+    #msg, #msg-modal{
+        color: red;
+    }
+</style>
+<div class="container" id="main-container">
+    <div class="container">
+        <div id="msg"><%= msg %></div>
+        <h1>Are you sure?</h1>
+
+        <div id="message">
+            We would hate to see you go, but if you are completely sure, enter your password and we will close your
+            account and delete all your data. <u> Remember: there is no going back</u>
+        </div>
+
+        <div class="container flex-dir-row">
+            <button class="button">Delete my account</button>
+            <button class="button-2">Cancel</button>
+        </div>
+    </div>
+
+</div>
+<script>
+    const delete_btn = document.querySelector('.button');
+    const cancel_btn = document.querySelector('.button-2');
+
+    cancel_btn.addEventListener('click', () => {
+        window.location.href = '/dashboard/personal-details';
+    })
+
+    delete_btn.addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal container';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content container';
+        modalContent.innerHTML = `
+            <span class="close container"><i class="fas fa-times"></i></span>
+            <form action='/d/delete' method='POST'>
+                <div class="container">
+                    <h2>Type in your password and confirm</h2>
+                    <div id="msg-modal"></div>
+                        <input type='password' class='input-field' name='password' id='password' placeholder='password'>
+                        <input type='password' class='input-field'  name='c_password' id='c_password' placeholder='confirm password'>
+                        <input type='submit' class='button' id='submit' value='Delete'>
+                </div>
+            </form>
+            `
+
+        modal.appendChild(modalContent);
+        document.querySelector('body').appendChild(modal)
+
+        document.querySelector('body').addEventListener('click', (e) => {
+            if (e.target.classList.contains('fas') || e.target.classList.contains('modal'))
+                modal.remove()
+        })
+
+        document.querySelector('#submit').addEventListener('click', (e) => {
+
+            let password = document.querySelector('#password').value;
+            let c_password = document.querySelector('#c_password').value;
+            let msg = document.querySelector('#msg-modal');
+
+            if(password !== c_password || c_password === '' || password === ''){
+                if(password !== c_password)
+                msg.innerText = 'Password and password confirmation do not match';
+                else if(password === '' || c_password === '')
+                msg.innerText = 'Please fill all fields';
+                e.preventDefault()
+            }
+            
+        })
+    })
+
+</script>
