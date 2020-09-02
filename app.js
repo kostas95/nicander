@@ -14,6 +14,7 @@ let error = { error: null };
 var bcrypt = require('bcrypt');
 var multer = require('multer');
 var CryptoJS = require("crypto-js");
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const GridFsStorage = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
