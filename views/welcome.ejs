@@ -76,12 +76,19 @@
         font-size: 12px;
     }
 
-    h3{
+    h3 {
         text-align: center;
     }
 
-    #specialties-content>div, #doctors-content>div{
+    #specialties-content>div,
+    #doctors-content>div {
         padding: 10px;
+    }
+
+    .bounceIn,
+    .fadeIn,
+    .backinleft {
+        visibility: hidden;
     }
 </style>
 <div class='container width-100'>
@@ -89,8 +96,9 @@
         <div class="container width-100 main-page-section" id='section-1'>
             <img src="/img/bg1.png" id='background-image'>
             <div class="container width-100 height-90">
-                <h1>Contact the experts easily and quickly!</h1>
-                <div class="container flex-dir-row width-90" id="searchbar-cont">
+                <h1 class="animate__animated animate__bounce">Contact the experts easily and quickly!</h1>
+                <div class="delay-1 animate__animated animate__backInLeft container flex-dir-row width-90"
+                    id="searchbar-cont">
                     <input type="text" class='searchbar  width-100' placeholder="Doctor's name or specialty">
                     <div class="arrow"><i class="fas fa-chevron-down"></i></div>
                     <div class="container flex-dir-row width-100 flex-left" id="search-results">
@@ -109,7 +117,7 @@
         </div>
         <div class="container width-100 main-page-section" id='section-2'>
             <div id='main-welcome'>
-                <div>
+                <div class="backinleft">
                     <h2 class='strong'>Welcome to Nicander Pharmacovigilance.</h2><br> <strong>Nicander
                         Pharmacovigilance</strong> is
                     an
@@ -123,9 +131,9 @@
             </div>
         </div>
         <div class="container width-100 main-page-section" id='section-3'>
-            <h2>Follow these 3 simple steps</h2>
+            <h2 class="fadeIn">Follow these 3 simple steps</h2>
             <div class="container flex-dir-row ">
-                <div class="container">
+                <div class="container fadeIn">
                     <i class="fas fa-search 9x"></i>
                     <h3 class="h3-main">Search for the doctor you need</h3>
                     <div class="paragraph">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet dicta
@@ -134,7 +142,7 @@
                         Libero suscipit, sint cumque aspernatur ratione facere ex aperiam dicta excepturi illum corporis
                         quo in autem dignissimos odit iste! Dolor, saepe.</div>
                 </div>
-                <div class="container">
+                <div class="container fadeIn">
                     <i class="fas fa-user-md 9x"></i>
                     <h3 class="h3-main">View the doctor's profile</h3>
                     <div class="paragraph">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet dicta
@@ -143,7 +151,7 @@
                         Libero suscipit, sint cumque aspernatur ratione facere ex aperiam dicta excepturi illum corporis
                         quo in autem dignissimos odit iste! Dolor, saepe.</div>
                 </div>
-                <div class="container">
+                <div class="container fadeIn">
                     <i class="fas fa-check 9x"></i>
                     <h3 class="h3-main">Contact the experts for FREE</h3>
                     <div class="paragraph">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet dicta
@@ -155,7 +163,7 @@
             </div>
         </div>
         <div class="container width-100 main-page-section" id='section-4'>
-            <h2>Latest News</h2>
+            <h2 class="bounceIn">Latest News</h2>
             <div class="container" id="latest-news-section">
 
             </div>
@@ -208,7 +216,7 @@
 
     function createPostSection(title, content, author, timestamp) {
         const postSection = document.createElement('div');
-        postSection.className = 'container';
+        postSection.className = 'container bounceIn';
         postSection.id = 'post';
         postSection.style.padding = '1rem';
         postSection.style.width = '300px';
@@ -431,5 +439,75 @@
             })
             parent.appendChild(result);
         }
+    }
+
+    //Animation while scrolling
+
+    const backInLeft = document.querySelector('.backinleft');
+    const fadeIn = Array.from(document.querySelectorAll('.fadeIn'));
+    let bounce;
+    setTimeout(() => {
+        bounce = Array.from(document.querySelectorAll('.bounceIn'));
+    }, 150);
+
+    let last_known_scroll_position = 0;
+    let ticking = false;
+    Array.from(document.querySelectorAll('.img')).forEach(el => {
+        isScrolledIntoView(el)
+    })
+
+    Array.from(document.querySelectorAll('.text')).forEach(el => {
+        isScrolledIntoView(el)
+    })
+
+    function doSomething(scroll_pos) {
+
+        isScrolledIntoView(backInLeft)
+
+        fadeIn.forEach(el => {
+            isScrolledIntoView(el)
+        })
+
+        bounce.forEach(el => {
+            isScrolledIntoView(el)
+        })
+    }
+
+    window.addEventListener('scroll', function (e) {
+        last_known_scroll_position = window.scrollY;
+
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                doSomething(last_known_scroll_position);
+                ticking = false;
+            });
+
+            ticking = true;
+        }
+    });
+
+    function isScrolledIntoView(el) {
+        var rect = el.getBoundingClientRect();
+        var elemTop = rect.top;
+        var elemBottom = rect.bottom;
+
+        // Only completely visible elements return true:
+        var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+        // Partially visible elements return true:
+        //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
+        if (isVisible === true) {
+            el.style.visibility = 'visible'
+
+            if (el.classList.contains('fadeIn')) {
+                el.classList.add('animate__animated', 'animate__fadeIn')
+            } else if (el.classList.contains('backinleft')) {
+                el.classList.add('animate__animated', 'animate__backInLeft')
+            } else if (el.classList.contains('bounceIn')) {
+                console.log('ok')
+                el.style.visibility = 'visible'
+                el.classList.add('animate__animated', 'animate__bounceIn')
+            }
+        }
+        return isVisible;
     }
 </script>

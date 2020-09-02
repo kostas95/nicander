@@ -1,0 +1,272 @@
+<style>
+    .flex-left {
+        align-items: flex-start;
+    }
+
+    button {
+        width: 250px !important;
+    }
+
+    #container_wrap {
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        margin-top: 5px;
+    }
+
+    #reports_content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    .flex>.container>strong {
+        flex: 2;
+        color: #6d6d6d;
+    }
+
+    .flex>.container>div {
+        flex: 5;
+        font-size: 1.2rem;
+        margin-left: 5px;
+    }
+
+    .small-date {
+        font-size: 1.2rem;
+    }
+
+    .small-date:nth-child(2) {
+        margin-left: 5px;
+    }
+
+    .justify-left{
+        justify-content: flex-start !important;
+    }
+
+    #users {
+        padding: 5rem 1rem 1rem 1rem;
+    }
+</style>
+
+<div class="container" id="reports_content">
+    <div class="container width-100">
+        <h1 class="big-h1 width-100"><i class="fas fa-flag"></i> Reported users</h1>
+    </div>
+    <div class="container width-100 padding-1rem" id="users">
+
+    </div>
+</div>
+<script>
+    fetch("/getReports", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            console.log(body)
+            if (body.reports.length === 0) {
+                document.querySelector('#users').innerText = 'There are no reported users at this moment'
+            }
+            body.reports.forEach(report => {
+
+                let reporting_user_name, reported_user_name
+
+                // fetch reported user info
+                fetch("/getReportedUser", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        user_id: report.user_id
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        reported_user_name = `${body.user.name} ${body.user.surname}`
+                    });
+                // fetch reporting user info
+                fetch("/getReportingUser", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        user_id: report.reporting_user
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        reporting_user_name = `${body.user.name} ${body.user.surname}`
+                    });
+
+                setTimeout(() => {
+                    const users_container = document.querySelector('#users');
+
+                    const container_wrap = document.createElement('div');
+                    container_wrap.className = 'container padding-1rem width-50 flex-dir-row report';
+                    container_wrap.id = 'container_wrap'
+
+                    const container = document.createElement('div');
+                    container.className = 'container padding-1rem width-80 flex-left flex';
+
+                    const report_by_div = document.createElement('div');
+                    report_by_div.addEventListener('click', () => {
+                        window.location.href = `/profiles/${report.reporting_user}`
+                    })
+                    const reported_user_div = document.createElement('div');
+                    reported_user_div.addEventListener('click', () => {
+                        window.location.href = `/profiles/${report.user_id}`
+                    })
+                    report_by_div.title = reported_user_div.title = 'Visit profile'
+                    report_by_div.style.cursor = reported_user_div.style.cursor = 'pointer'
+                    const reason_div = document.createElement('div');
+                    const date_div = document.createElement('div');
+
+                    const buttons_wrap = document.createElement('div');
+                    buttons_wrap.className = 'container padding-1rem width-50'
+                    const ban_btn = document.createElement('button');
+                    const ignore_btn = document.createElement('button');
+                    ban_btn.className = 'button'
+                    ban_btn.innerText = `Ban ${reported_user_name}`
+                    ignore_btn.className = 'button-2'
+                    ignore_btn.innerText = `Ignore report`
+
+                    ban_btn.addEventListener('click', (e) => {
+                        fetch("/reportBtnAction", {
+                            method: "post",
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+
+                            //make sure to serialize your JSON body
+                            body: JSON.stringify({
+                                action: 'ban',
+                                id: report.user_id,
+                                report_id: report._id
+                            })
+                        })
+                            .then(response => response.json())
+                            .then((body) => {
+                                e.target.parentElement.parentElement.innerHTML = `
+                                    <div id='check' class='container'>
+                                        <i class="fas fa-check" style='color:white'></i>
+                                    </div>${body.msg}`
+                            });
+                    })
+
+                    ignore_btn.addEventListener('click', (e) => {
+                        fetch("/reportBtnAction", {
+                            method: "post",
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+
+                            //make sure to serialize your JSON body
+                            body: JSON.stringify({
+                                action: 'ignore',
+                                report_id: report._id
+                            })
+                        })
+                            .then(response => response.json())
+                            .then((body) => {
+                                e.target.parentElement.parentElement.innerHTML =
+                                    e.target.parentElement.parentElement.innerHTML = `
+                                    <div id='check' class='container'>
+                                        <i class="fas fa-check" style='color:white'></i>
+                                    </div>${body.msg}`
+                            });
+                    })
+
+
+                    report_by_div.className = reported_user_div.className = reason_div.className = date_div.className = 'container flex-dir-row padding-5px width-100'
+
+                    report_by_div.innerHTML = `<strong class='padding-5px'>Report by:</strong><div> ${reporting_user_name}</div>`;
+                    reported_user_div.innerHTML = `<strong class='padding-5px'>Reported user:</strong><div> ${reported_user_name}</div>`;
+                    reason_div.innerHTML = `<strong class='padding-5px'>Reason:</strong><div> ${report.reason}</div>`;
+                    date_div.innerHTML = `<strong class='padding-5px'>Date:</strong> 
+                    <div class='container flex-dir-row justify-left'>
+                    <div class='small-date'>${report.date.substring(8, 10)}-${report.date.substring(5, 7)}-${report.date.substring(0, 4)},</div><div class='small-date'>${report.date.substring(11, 16)}</div>
+                    </div>
+                    `;
+
+
+
+
+                    container.appendChild(report_by_div)
+                    container.appendChild(reported_user_div)
+                    container.appendChild(reason_div)
+                    container.appendChild(date_div)
+                    buttons_wrap.appendChild(ban_btn)
+                    buttons_wrap.appendChild(ignore_btn)
+                    container_wrap.appendChild(container)
+                    container_wrap.appendChild(buttons_wrap)
+                    users_container.appendChild(container_wrap)
+
+
+                }, 500);
+            });
+
+            setTimeout(() => {
+
+                //Get all the child nodes of container named report
+                const childrenNodes = Array.from(document.querySelectorAll('.report'));
+
+                //Iterate: The first 5 are displayed, the others are not
+                for (let i = 0; i < childrenNodes.length; i++) {
+                    if (childrenNodes[i]) {
+                        let element = childrenNodes[i];
+                        if (i > 5) {
+                            element.style.display = 'none';
+                        } else if (i <= 5) {
+                            element.style.display = 'flex';
+                        }
+                    }
+                }
+
+                //Init an i value (shows how many items are displayd)
+                let i = 5
+                //Create show more button
+                const showMore = document.createElement('div');
+                showMore.className = 'padding-1rem pointer';
+                showMore.id = 'showMore'
+                showMore.innerText = 'Show more'
+
+                //Show more button event listener
+                showMore.addEventListener('click', () => {
+                    //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 5)
+                    //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                    const j = i
+                    for (i; i < j + 5; i++) {
+                        if (i < childrenNodes.length > 0) {
+                            const element = childrenNodes[i];
+                            element.style.display = 'flex';
+                        } else {
+                            showMore.remove()
+                            break
+                        }
+                    }
+                })
+
+                if (body.reports.length !== 0) {
+                    document.querySelector('#reports_content').appendChild(showMore)
+                }
+            }, 500);
+        });
+</script>

@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    emailPassword: {
+        type: String,
+        required: false
+    },
     specialty: {
         type: String,
         required: false
@@ -33,6 +37,12 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    //emailAuthorized: authorization via email
+    emailAuthorized: {
+        type: Boolean,
+        required: false
+    },
+    //authorized: authorization via admin (doctors only)
     authorized: {
         type: Boolean,
         required: false
@@ -100,16 +110,6 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    reviews: [{
-        comment: {
-            type: String,
-            required: false
-        },
-        rating: {
-            type: Number,
-            required: false
-        }
-    }],
     banned: {
         type: Boolean,
         default: false,

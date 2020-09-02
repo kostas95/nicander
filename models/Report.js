@@ -12,6 +12,10 @@ const ReportSchema = new mongoose.Schema({
     reporting_user: {
         type: String,
         required: false
+    },
+    date: {
+        type: Date,
+        default: Date.now
     }
 });
 

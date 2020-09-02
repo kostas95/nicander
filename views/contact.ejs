@@ -1,0 +1,120 @@
+<!-- <script src='https://www.google.com/recaptcha/api.js'></script> -->
+<style>
+    #main-container {
+        min-height: 76.85vh;
+    }
+
+    .justify-top {
+        justify-content: flex-start;
+    }
+
+    .align-left {
+        align-items: flex-start;
+        border-right: 5px solid #f8f9fa;
+    }
+
+    textarea,
+    input {
+        outline: none;
+        font-family: 'Roboto', sans-serif;
+        padding: 5px;
+        border: 1px solid #b9b9b9;
+        border-radius: 5px;
+        width: 100%;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="container padding-1rem width-100 justify-top" id="main-container">
+    <div class="container padding-1rem width-100">
+        <div class="container padding-5px width-50 align-left">
+            <h1 class="animate__animated animate__bounce big-h1 padding-5px">Contact us now!</h1>
+            <div class="container flex-dir-row padding-5px">Send us your message and we will reply as soon as possible!
+            </div>
+            <div class="container padding-1rem form">
+                <textarea name="message" id="textarea" placeholder="Type your message here..."></textarea>
+                <input type="text" name="name" placeholder="Name" id="name">
+                <input type="text" name="surname" placeholder="Surname" id="surname">
+                <input type="email" name="email" placeholder="Email" id="email">
+                <!-- <div class="g-recaptcha" data-sitekey="6LeNScQZAAAAAA-yi0gbUn9HVGdeADlU9qRrHWOz"></div> -->
+                <button class="button">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js" integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+
+<script>
+
+    const submit = document.querySelector('.button');
+    const message = document.querySelector('textarea'),
+        name = document.querySelector('#name'), surname = document.querySelector('#surname'), email = document.querySelector('#email')
+    
+    submit.addEventListener('click', () => {
+
+        if (message.value === '' || name.value === '' || surname.value === '' || email.value === '') {
+            if (!document.querySelector('#error')) {
+                const error = document.createElement('div');
+                error.style.color = 'red';
+                error.style.margin = '5px';
+                error.innerText = 'Please fill in all fields';
+                error.id = 'error'
+
+                document.querySelector('.form').appendChild(error)
+                setTimeout(() => {
+                    error.remove()
+                }, 7000);
+            }
+        } else if (message.value.split(' ').length < 20) {
+            if (document.querySelector('#error')) {
+                document.querySelector('#error').remove()
+            }
+
+            const error = document.createElement('div');
+            error.style.color = 'red';
+            error.style.margin = '5px';
+            error.innerText = 'Your message must contain at least 20 words';
+            error.id = 'error'
+
+            document.querySelector('.form').appendChild(error)
+            setTimeout(() => {
+                error.remove()
+            }, 7000);
+        } else {
+            fetch("/message", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    message: CryptoJS.AES.encrypt(message.value, "Secret Passphrase").toString(),
+                    name: name.value,
+                    surname: surname.value,
+                    email: email.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    if (!document.querySelector('#success')) {
+                        const success = document.createElement('div');
+                        success.style.color = '#19e31c';
+                        success.style.margin = '5px';
+                        success.innerText = `${body.msg}`;
+                        success.id = 'success'
+                        submit.disabled = true;
+                        message.value = name.value = surname.value = email.value = '';
+
+                        document.querySelector('.form').appendChild(success)
+                        setTimeout(() => {
+                            success.remove()
+                            submit.disabled = false;
+                        }, 7000);
+                    }
+                });
+        }
+    })
+
+</script>

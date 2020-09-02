@@ -1,0 +1,133 @@
+<style>
+    #main-container {
+        min-height: 76.85vh;
+    }
+
+    .justify-top {
+        justify-content: flex-start;
+    }
+
+    .align-left {
+        align-items: flex-start;
+        border-right: 5px solid #f8f9fa;
+    }
+
+    .img {
+        display: inline-block;
+        margin: 0 auto;
+        width: 20rem;
+        border-radius: 4px;
+        visibility: hidden;
+    }
+
+    .text {
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+        visibility: hidden;
+    }
+</style>
+
+<div class="container padding-1rem width-100 justify-top" id="main-container">
+    <div class="container padding-1rem width-100">
+        <div class="container padding-5px width-50 align-left">
+            <h1 class="animate__animated animate__bounce big-h1 padding-5px">About Nicander</h1>
+            <div class="text container flex-dir-row padding-5px">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet corrupti ullam necessitatibus eligendi
+                commodi minus itaque vitae laboriosam maiores ad! Beatae exercitationem laudantium tenetur cum alias
+                nobis hic vel ipsam inventore veniam mollitia officiis similique quaerat voluptas cupiditate architecto
+                eius temporibus error aliquid amet sunt, delectus omnis molestiae! Harum voluptatibus hic explicabo ad
+                cum quisquam, incidunt magnam commodi temporibus deleniti error placeat, animi reprehenderit accusantium
+                inventore nihil facere? Omnis reiciendis officiis doloribus ipsa eaque, distinctio ipsum deserunt aut
+                officia, voluptate laboriosam dolor, soluta consequuntur unde architecto nisi. Quidem fuga sint
+                voluptas, labore sit animi veniam impedit aut! Similique tempore libero facere vitae molestiae? Vel
+                consequatur tenetur quasi aliquam, molestias, eaque esse, quam animi ipsa explicabo ut. Vero amet
+                possimus vel consectetur rem saepe distinctio ipsum laudantium doloribus aliquam accusamus obcaecati hic
+                optio quo eum quidem, expedita sit deleniti eos officiis ipsam vitae tempore explicabo nemo. Ut
+                laboriosam distinctio nemo excepturi!
+            </div>
+            <img src="/img/about1.jpg" class="img">
+            <div class="text container flex-dir-row padding-5px">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Cumque dolor incidunt dolorum enim consequatur
+                vero, a voluptas ab sequi fugiat tenetur optio commodi aspernatur id nesciunt. Blanditiis perspiciatis
+                rerum quia, recusandae, mollitia itaque possimus fugit cupiditate neque voluptates qui corrupti
+                distinctio cumque laborum magnam exercitationem nemo iste eos accusantium, repellat optio! Aperiam quos
+                dolore ullam ipsam ipsum quia culpa quis vitae, nam est cupiditate ipsa. Vero magni nostrum voluptates
+                repellendus. Accusantium dignissimos architecto beatae ut in adipisci debitis tempore, quia tenetur quae
+                quam reiciendis itaque eveniet impedit inventore exercitationem maiores fugiat. Quod in adipisci
+                similique, voluptates vel fuga nulla accusantium.
+            </div>
+            <div class="text container flex-dir-row padding-5px">
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Reiciendis quaerat expedita dolores quas.
+                Quisquam rem repudiandae explicabo adipisci, facere nihil molestias! Quisquam ea voluptas ullam sint
+                modi suscipit quae neque. Adipisci saepe dolorum quo accusamus consequuntur commodi esse, suscipit
+                maiores in sit nulla, dolores, laboriosam laborum neque quia molestiae quasi magni natus similique nisi?
+                Dignissimos corporis assumenda possimus nostrum doloremque?
+            </div>
+            <img src="/img/about2.jpg" class="img">
+            <div class="text container flex-dir-row padding-5px">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quod necessitatibus culpa consectetur
+                distinctio accusamus, officiis rerum, tempora similique facilis possimus perferendis dignissimos
+                laudantium quo? Quo facilis error veniam voluptatibus eum accusantium natus, quasi similique doloremque,
+                sapiente tempora eveniet laboriosam? Debitis quis magni ex ullam perferendis reprehenderit, pariatur
+                omnis, tempora culpa aliquam expedita odit veritatis. Iure vitae cupiditate delectus. Molestias
+                aspernatur id tempore, consectetur unde, adipisci voluptas repellat recusandae vero vitae incidunt! Nam,
+                excepturi fugiat nesciunt deserunt pariatur quidem ea dolores natus consequatur. Quibusdam nostrum
+                nobis, exercitationem accusamus fugit qui cupiditate tenetur nesciunt architecto iure dolorem molestias
+                saepe, omnis tempore deserunt repudiandae voluptates nulla hic sed aperiam? Ducimus placeat
+                necessitatibus, voluptate excepturi at consectetur. Quos voluptatum mollitia explicabo quas ut aliquam
+                sapiente optio harum reprehenderit velit et neque corrupti culpa officiis minus dolore, provident
+                exercitationem. Quis nobis eum similique ut magni ex accusantium est dolores dolorum ea tempora,
+                laudantium dolorem excepturi?
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let last_known_scroll_position = 0;
+    let ticking = false;
+    Array.from(document.querySelectorAll('.img')).forEach(el => {
+        isScrolledIntoView(el)
+    })
+
+    Array.from(document.querySelectorAll('.text')).forEach(el => {
+        isScrolledIntoView(el)
+    })
+
+    function doSomething(scroll_pos) {
+        Array.from(document.querySelectorAll('.img')).forEach(el => {
+            isScrolledIntoView(el)
+        })
+        Array.from(document.querySelectorAll('.text')).forEach(el => {
+            isScrolledIntoView(el)
+        })
+    }
+
+    window.addEventListener('scroll', function (e) {
+        last_known_scroll_position = window.scrollY;
+
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                doSomething(last_known_scroll_position);
+                ticking = false;
+            });
+
+            ticking = true;
+        }
+    });
+
+    function isScrolledIntoView(el) {
+        var rect = el.getBoundingClientRect();
+        var elemTop = rect.top;
+        var elemBottom = rect.bottom;
+
+        // Only completely visible elements return true:
+        var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+        // Partially visible elements return true:
+        //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
+        if (isVisible === true) {
+            el.classList.add('animate__animated', 'animate__fadeIn')
+            el.style.visibility = 'visible'
+        }
+        return isVisible;
+    }
+</script>

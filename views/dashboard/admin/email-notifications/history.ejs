@@ -1,0 +1,246 @@
+<style>
+    .justify-left {
+        justify-content: flex-start;
+    }
+
+    .align-top {
+        justify-content: flex-start;
+    }
+
+    .align-top2 {
+        align-items: flex-start;
+    }
+
+    .modal-content {
+        padding: 1rem;
+        height: 100vh;
+    }
+
+    input,
+    select,
+    label {
+        width: 75% !important;
+        margin: 0;
+    }
+
+    .button {
+        margin: 3rem 0 0 0;
+    }
+
+    label {
+        margin: 10px;
+    }
+
+    .font {
+        font-size: 1.5rem;
+    }
+
+    .email-cont {
+        border-radius: 5px;
+        margin-top: 5px;
+        background-color: #f8f8f8;
+    }
+
+    .color {
+        color: #868686;
+        font-size: 12px;
+        font-weight: bolder;
+    }
+
+    .content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    .content {
+        padding: 1rem 0 10rem 0;
+    }
+
+    .flex>strong {
+        flex: 1;
+        color: #6d6d6d;
+    }
+
+    .flex>div {
+        flex: 5;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="container padding-1rem width-100 content">
+    <div class="container width-100">
+        <h1 class="container padding-5px width-100 big-h1 flex-dir-row"><i class="fas fa-history"></i>Email
+            notifications history</h1>
+    </div>
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/email-notifications/">
+            <div class="dashboard-headers width-100"><i class="fas fa-paper-plane"></i>Send email notification</div>
+        </a>
+    </div>
+    <div class="container padding-1rem width-100" id="notifications-container">
+
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+
+<script>
+
+    const mainContainer = document.querySelector('#notifications-container')
+
+    fetch("/getEmails", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((emails) => {
+            emails.sort(function (a, b) {
+                    var c = new Date(a.date);
+                    var d = new Date(b.date);
+                    return d - c;
+                }).forEach(email => {
+
+                let preview = ''
+
+                let i = 0;
+                CryptoJS.AES.decrypt(email.body, "Secret Passphrase").toString(CryptoJS.enc.Utf8).split(' ').forEach(char => {
+                    i++;
+                    if (i <= 20)
+                        preview += `${char} `
+                })
+
+                const container = document.createElement('div');
+                container.className = 'container padding-1rem width-50 email-cont pointer noselect'
+                container.innerHTML = `
+                <div class='container flex-dir-row padding-1rem width-100'>
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                    </div>
+                </div>
+                <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                    <strong>Subject:</strong> 
+                    <div>${CryptoJS.AES.decrypt(email.subject, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
+                </div>
+                <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                    <strong>Body preview:</strong> 
+                    <div>${preview}</div>
+                </div>
+                <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                    <strong>Sent by:</strong>
+                    <div> ${email.sender} </div>
+                </div>
+                <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                    <strong>Received by:</strong>
+                    <div> ${email.receivers} </div>
+                </div>
+                `
+                let open = false
+                container.addEventListener('click', () => {
+                    if (open === false) {
+                        open = true;
+                        container.innerHTML = `
+                        <div class='container flex-dir-row padding-1rem width-100'>
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                            </div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Subject:</strong> 
+                            <div>${CryptoJS.AES.decrypt(email.subject, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Body:</strong> 
+                            <div>${CryptoJS.AES.decrypt(email.body, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Sent by:</strong>
+                            <div> ${email.sender} </div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Received by:</strong>
+                            <div> ${email.receivers} </div>
+                        </div>
+                        `
+                    } else if (open === true) {
+                        open = false;
+                        container.innerHTML = `
+                        <div class='container flex-dir-row padding-1rem width-100'>
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                            </div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Subject:</strong> 
+                            <div>${CryptoJS.AES.decrypt(email.subject, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Body preview:</strong> 
+                            <div>${preview}</div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Sent by:</strong>
+                            <div> ${email.sender} </div>
+                        </div>
+                        <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
+                            <strong>Received by:</strong>
+                            <div> ${email.receivers} </div>
+                        </div>
+                        `
+                    }
+                })
+
+                mainContainer.appendChild(container)
+            });
+            //Get all the child nodes of container named notification
+            const childrenNodes = Array.from(document.querySelectorAll('.email-cont'));
+
+            //Iterate: The first 5 are displayed, the others are not
+            for (let i = 0; i < childrenNodes.length; i++) {
+                if (childrenNodes.length > 3) {
+                    let element = childrenNodes[i];
+                    if (i >= 5) {
+                        element.style.display = 'none';
+                    } else if (i <= 5) {
+                        element.style.display = 'flex';
+                    }
+                }
+            }
+
+            //Init an i value (shows how many items are displayd)
+            let i = 5
+            //Create show more button
+            const showMore = document.createElement('div');
+            showMore.className = 'padding-1rem pointer';
+            showMore.id = 'showMore'
+            showMore.innerText = 'Show more'
+
+            //Show more button event listener
+            showMore.addEventListener('click', () => {
+                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 5)
+                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                const j = i
+                for (i; i < j + 5; i++) {
+                    if (i < childrenNodes.length > 0) {
+                        const element = childrenNodes[i];
+                        element.style.display = 'flex';
+                    } else {
+                        showMore.remove()
+                        break
+                    }
+                }
+            })
+            if (emails.length > 0) {
+                document.querySelector('#notifications-container').appendChild(showMore)
+            }
+        });
+</script>

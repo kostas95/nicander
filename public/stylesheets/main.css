@@ -67,6 +67,14 @@ span {
     width: 90% !important;
 }
 
+.width-80 {
+    width: 80% !important;
+}
+
+.width-70 {
+    width: 70% !important;
+}
+
 .width-50 {
     width: 50% !important;
 }
@@ -119,12 +127,24 @@ span {
     margin: 1rem 0;
 }
 
+.margin-top-2rem {
+    margin: 2rem 0;
+}
+
 .margin-left-right-5rem {
     margin: 0 5rem;
 }
 
+.margin-left-right-10px {
+    margin: 0 10px;
+}
+
 .margin-left-2rem {
     margin-left: 1rem;
+}
+
+.margin-right-2rem {
+    margin-right: 2rem;
 }
 
 .margin-left-10rem {
@@ -162,6 +182,18 @@ span {
 
 .font-12px {
     font-size: 12px;
+}
+
+.delay-1 {
+    animation-delay: .1s;
+}
+
+.delay-2 {
+    animation-delay: .2s;
+}
+    
+.delay-3 {
+    animation-delay: 2s;
 }
 
 .container {
@@ -695,7 +727,7 @@ footer img {
 #login-container {
     width: 100%;
     padding: 7rem;
-    margin-bottom: 9rem;
+    margin-bottom: 5.05rem;
 }
 
 #register-container {
@@ -1060,6 +1092,56 @@ video {
     position: absolute;
     bottom: 0;
     right: 0;
+}
+
+#files-area {
+    align-items: flex-start;
+    justify-content: flex-start;
+    max-height: 50vh;
+    overflow: auto;
+    padding: 0;
+}
+
+
+
+#dot{
+    margin-left: 8px;
+    border-radius: 100%;
+    height: 8px;
+    width: 8px;
+    animation: fileNotify infinite forwards 1s ease-in-out;
+    transition: all 2s ease-in-out;
+}
+
+@keyframes fileNotify {
+    0% {
+        background-color: auto
+    }
+    50% {
+        background-color: rgb(255, 130, 130);
+    }
+    100% {
+        background-color: auto;
+    }
+}
+
+/* completed appointment */
+
+.user_info {
+    font-size: 0.9rem;
+    font-family: 'Roboto', sans-serif;
+}
+
+.user_info>div {
+    margin: 5px 0;
+}
+
+.user_info>div:first-child, .diag_head {
+    font-size: 1.5rem;
+}
+
+#info_wrapper, #date_info{
+    border-bottom: 1px solid rgb(224, 224, 224);
 }
 
 /* --- */

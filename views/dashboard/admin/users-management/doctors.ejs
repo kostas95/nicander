@@ -473,6 +473,20 @@
     function doctorElement(id, date, email, name, surname, specialty, str_num, telephone, authorized) {
         const parent = document.createElement('div');
         parent.className = 'container data-cont';
+        
+        if(email.length > 15) {
+            let oldEmail = email
+            email = ''
+            i = 0
+            oldEmail.split('@').forEach(element => {
+                if (i === 0 ){
+                    email += `${element}@ `
+                } else {
+                    email += `${element} `
+                }
+                i++
+            })
+        }
 
         const element = document.createElement('div');
         element.className = 'container flex-dir-row';

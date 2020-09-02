@@ -1,6 +1,7 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const e = require('express');
 
 // I have 3 types of users (admin, doctor, patient)
 // In each login form i have a non-displayed preset field that sends the user's type alongside with username and password
@@ -26,7 +27,13 @@ module.exports = function (passport) {
                 bcrypt.compare(password, user.password, (err, isMatch) => {
                     if (err) throw err;
                     if (isMatch) {
-                        return done(null, user);
+                        if (user.banned === true) {
+                            return done(null, false, { message: 'User is banned!' });
+                        } if (user.authorized === false) {
+                            return done(null, false, { message: "User is not authorized yet! Try again when you receive an email about the account's authorization." });
+                        } else {
+                            return done(null, user);
+                        }
                     } else {
                         return done(null, false, { message: 'Password incorrect' });
                     }

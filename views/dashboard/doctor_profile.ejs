@@ -1,3 +1,5 @@
+<!-- This is for viewing a profile when someone has not authenticated -->
+
 <style>
     #id {
         display: none;
@@ -117,6 +119,70 @@
         margin-right: 1rem;
         border-radius: 100%;
     }
+
+    .modal-date {
+        transition: all 0.5s ease-in-out;
+    }
+
+    #schedule {
+        justify-content: flex-start;
+        align-items: flex-start;
+        max-height: 50vh;
+        overflow-x: auto;
+    }
+
+    #date-header {
+        font-size: 14px;
+        padding-left: 20px;
+        padding-right: 20px;
+        font-weight: bold;
+    }
+
+    #date-hours {
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .hour-element {
+        padding: 2px;
+        color: #3497db;
+        cursor: pointer;
+        width: 100%;
+        font-size: 12px;
+    }
+
+    .hour-element:hover {
+        background-color: #a7dcff;
+    }
+
+    .modal-content,
+    .modal {
+        padding: 1rem;
+    }
+
+    #schedule>div {
+        flex: 1;
+    }
+
+    .name-header {
+        border-bottom: 1px solid #ccc;
+    }
+
+    .review-element {
+        width: 60%;
+        border-radius: 5px;
+        background-color: #f7f7f7;
+        margin: 2px auto;
+    }
+
+    #reviews {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #showMore{
+        text-align: center;
+    }
 </style>
 <div class="container">
     <!-- Display profile info section -->
@@ -132,7 +198,7 @@
                 <h3 id="specialty"></h3>
             </div>
             <div class="container flex-dir-row width-100">
-                <h1><i class="fas fa-star"></i></h1>
+                <h1 id="star-rating"></h1>
                 <div id="rating"></div>
             </div>
             <div class="container flex-dir-row width-100">
@@ -143,7 +209,7 @@
             </div>
             <div class="container flex-dir-row width-100">
                 <h1><i class="fas fa-link"></i></h1>
-                <a href="" id='websiteLink'>
+                <a href="" id='websiteLink' target="_blank">
                     <div id="website"></div>
                 </a>
             </div>
@@ -152,9 +218,11 @@
                 <div id="location"></div>
             </div>
         </div>
-        <button id='bookBtn' class="button">
-            Book appointment
-        </button>
+        <div class="container">
+            <button id='bookBtn' class="button">
+                Book appointment
+            </button>
+        </div>
     </div>
     <div class="container width-100" id="user-info-container">
         <div class="container padding-2rem width-100">
@@ -217,151 +285,280 @@
                 </div>
             </div>
         </div>
-        
-</div>
-<script>
-    const items = document.createElement('div');
-    items.innerText = `<%= items %>`
 
-    const imgContent = document.createElement('div');
-    const imgSectionWrap = document.querySelector('#imgSectionWrap');
-    imgContent.id = 'imgSection'
-    imgContent.className = 'container hover'
+    </div>
+    <script>
+        const items = document.createElement('div');
+        items.innerText = `<%= items %>`
 
-    //Get user id
-    const div = document.createElement('div');
-    const id = div.innerText = `<%= prof_id %>`
-    let user = [];
-    const fullName = document.querySelector('#full-name'), specialty = document.querySelector('#specialty'), rating = document.querySelector('#rating'), telephone = document.querySelector('#telephone'), website = document.querySelector('#website'), locationArea = document.querySelector('#location');
+        const imgContent = document.createElement('div');
+        const imgSectionWrap = document.querySelector('#imgSectionWrap');
+        imgContent.id = 'imgSection'
+        imgContent.className = 'container hover'
+        id = '<%= prof_id %>'
+        //Get user id
+        const div = document.createElement('div');
+        let user = [];
+        const fullName = document.querySelector('#full-name'), specialty = document.querySelector('#specialty'), rating = document.querySelector('#rating'), telephone = document.querySelector('#telephone'), website = document.querySelector('#website'), locationArea = document.querySelector('#location');
 
-    const telephoneEdit = document.querySelector('#telephone-edit');
-    const websiteEdit = document.querySelector('#website-edit');
+        let selectedHour, selected = false;
 
-
-    //Check if items is blank inside
-    //If it is not then display the user image from the database
-    if (items.innerText !== '') {
-        imgContent.innerHTML = `
+        //Check if items is blank inside
+        //If it is not then display the user image from the database
+        if (items.innerText !== '') {
+            imgContent.innerHTML = `
             <% items.forEach(function(image) { %>
                 <img class='hover' id='profile-photo' src="data:image/<%=image.img.contentType%>;base64, 
                 <%=image.img.data.toString('base64')%>">
             <% }) %>
         `
-        imgSectionWrap.appendChild(imgContent)
-    }
-    //If not then display default blank user image from folder
-    else {
-        imgContent.innerHTML = `
+            imgSectionWrap.appendChild(imgContent)
+        }
+        //If not then display default blank user image from folder
+        else {
+            imgContent.innerHTML = `
             <img id='profile-photo' class='hover' src="/img/profile.png">
         `
-        imgSectionWrap.appendChild(imgContent)
-    }
+            imgSectionWrap.appendChild(imgContent)
+        }
 
-    //Get current doctor's info and display them
-    fetch("/getUsers/Doctors/1/p", {
-        method: "post",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
+        //Get current doctor's info and display them
+        fetch("/getUsers/Doctors/1/p", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
 
-        //make sure to serialize your JSON body
-        body: JSON.stringify({
-            id: id,
-            type: 'profile'
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id,
+                type: 'profile'
+            })
         })
-    })
-        .then(response => response.json())
-        .then((body) => {
-            user = JSON.parse(body);
+            .then(response => response.json())
+            .then((body) => {
+                user = JSON.parse(body);
 
-            //Display full name
-            fullName.innerText = `${user.name} ${user.surname}`
+                //Display full name
+                fullName.innerText = `${user.name} ${user.surname}`
 
-            //Display specialty 
-            specialty.innerText = `${user.specialty}`
+                //Display specialty 
+                specialty.innerText = `${user.specialty}`
 
-            //Display telephone number
-            telephone.innerText = `${user.telephone}`
-            telephone.parentElement.href = `tel:+30${user.telephone}`
+                //Display telephone number
+                telephone.innerText = `${user.telephone}`
+                telephone.parentElement.href = `tel:+30${user.telephone}`
 
-            //Display website
-            if (user.website) {
-                website.innerText = `${user.website}`
-            } else {
-                website.innerText = `No website available`
-            }
+                //Display website
+                if (user.website) {
+                    website.innerText = `${user.website}`
+                    document.querySelector('#websiteLink').href = `https://${user.website}`
+                    document.querySelector('#websiteLink').style.color = `#363636`
+                } else {
+                    website.innerText = `No website available`
+                }
 
-            //Display Description
-            const description = document.querySelector('#description');
-            if (user.description) {
-                description.innerText = `${user.description}`
-            } else {
-                description.innerText = `No description available`
-            }
+                //Display Description
+                const description = document.querySelector('#description');
+                if (user.description) {
+                    description.innerText = `${user.description}`
+                } else {
+                    description.innerText = `No description available`
+                }
 
-            //Display Specialization and Experience (specialization is an array)
-            const specialization = document.querySelector('#specialization');
-            if (user.specialization.length !== 0) {
-                user.specialization.forEach(value => {
-                    const specElem = document.createElement('div');
-                    specElem.className = 'specElem'
-                    specElem.innerText = `${value}`
-                    specialization.appendChild(specElem);
+                //Display Specialization and Experience (specialization is an array)
+                const specialization = document.querySelector('#specialization');
+                if (user.specialization.length !== 0) {
+                    user.specialization.forEach(value => {
+                        const specElem = document.createElement('div');
+                        specElem.className = 'specElem'
+                        specElem.innerText = `${value}`
+                        specialization.appendChild(specElem);
+                    })
+                } else {
+                    specialization.innerText = `No specialization available`
+                }
+
+                //Display reviews (reviews is an array)
+                const reviews = document.querySelector('#reviews');
+                fetch("/getReviews", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        user_id: id
+                    })
                 })
-            } else {
-                specialization.innerText = `No specialization available`
-            }
+                    .then(response => response.json())
+                    .then((body) => {
+                        let total = 0;
+                        console.log(body)
+                        const starRating = document.querySelector('#star-rating');
+                        const reviewsSection = document.querySelector('#reviews');
 
-            //Display reviews (reviews is an array)
-            const reviews = document.querySelector('#reviews');
-            if (user.reviews.length !== 0) {
-                reviews.innerText = `${user.reviews}`
-            } else {
-                reviews.innerText = `No reviews available`
-            }
+                        if (body.reviews) {
+                            body.reviews.forEach(review => {
+                                total += review.rating;
+                            });
 
-            //Display CV (cv is an array)
-            const cv = document.querySelector('#cv');
-            if (user.cv.length !== 0) {
-                const ul = document.createElement('ul');
-                ul.style.padding = '1rem 2rem'
-                cv.appendChild(ul)
-                user.cv.forEach(triplet => {
-                    const li = document.createElement('li');
-                    li.className = 'bullet'
-                    li.innerText = `${triplet.year_from} - ${triplet.year_to}, ${triplet.job}`
+                            let avg = total / body.reviews.length
 
-                    ul.appendChild(li)
-                });
-                // cv.innerText = `${user.cv}`
-            } else {
-                cv.innerText = `No cv available`
-            }
+                            // Header of infos
+                            starRating.className = 'container flex-dir-row'
 
-            //Display languages (specialization is an array)
-            const languages = document.querySelector('#language');
-            if (user.languages.length !== 0) {
-                const ul = document.createElement('ul');
-                ul.style.padding = '1rem 2rem'
-                languages.appendChild(ul)
-                user.languages.forEach(language => {
-                    const li = document.createElement('li');
-                    li.className = 'bullet'
-                    li.innerText = `${language}`
+                            for (i = 0; i < Math.trunc(avg); i++) {
+                                const star = document.createElement('i');
+                                star.className = 'fas fa-star'
+                                starRating.appendChild(star)
+                            }
 
-                    ul.appendChild(li)
+                            const ratingInfo = document.createElement('div')
+                            ratingInfo.innerText = `Rated on ${body.reviews.length} appointments`
+
+                            starRating.appendChild(ratingInfo)
+
+                            // Patient Reviews Section
+                            const starsCont = document.createElement('div');
+                            starsCont.className = 'container flex-dir-row padding-5px '
+
+                            //Stars rating
+                            for (i = 0; i < Math.trunc(avg); i++) {
+                                const star = document.createElement('i');
+                                star.className = 'fas fa-star fa-3x'
+                                starsCont.appendChild(star)
+                            }
+
+                            //Show avg rating in parenthesis next to the stars
+                            const avgRatingHeader = document.createElement('h1');
+                            avgRatingHeader.innerText = `(${avg.toFixed(1)})`
+                            avgRatingHeader.className = 'h1 padding-1rem'
+                            starsCont.appendChild(avgRatingHeader)
+
+                            reviewsSection.appendChild(starsCont)
+
+                            //Show the reviews by detail
+                            const reviewsCont = document.createElement('div');
+                            reviewsCont.className = 'container padding-1rem'
+                            body.reviews.sort(function (a, b) {
+                                var c = new Date(a.date);
+                                var d = new Date(b.date);
+                                return d - c;
+                            }).forEach(review => {
+                                const reviewElement = document.createElement('div');
+
+                                if (review.comment === '') {
+                                    review.comment = 'The user made no comment'
+                                }
+
+                                reviewElement.className = 'container padding-5px review-element'
+
+                                reviewElement.innerHTML = `
+                                <div class='container flex-dir-row'>
+                                    <div class='padding-5px strong'>${review.patient.name} ${review.patient.surname}</div>
+                                    <div class='padding-5px strong'>${review.date.substring(8, 10)}-${review.date.substring(5, 7)}-${review.date.substring(0, 4)}</div>
+                                </div>
+                                <div class='container padding-1rem'>
+                                    <div class='padding-5px'>Rating: ${review.rating}/5</div>
+                                    <div class='padding-5px'>${review.comment}</div>
+                                </div>
+                                    `
+                                reviewsSection.appendChild(reviewElement)
+
+                            });
+
+                            //Get all the child nodes of container named notification
+                            const childrenNodes = Array.from(document.querySelectorAll('.review-element'));
+
+                            //Iterate: The first 3 are displayed, the others are not
+                            for (let ind = 0; ind < childrenNodes.length; ind++) {
+                                if (childrenNodes.length > 3) {
+                                    let element = childrenNodes[ind];
+                                    if (ind >= 3) {
+                                        element.style.display = 'none';
+                                    } else if (ind <= 3) {
+                                        element.style.display = 'flex';
+                                    }
+                                }
+                            }
+
+                            //Init an i value (shows how many items are displayd)
+                            let ind = 3
+                            //Create show more button
+                            const showMore = document.createElement('div');
+                            showMore.className = 'padding-1rem pointer';
+                            showMore.id = 'showMore'
+                            showMore.innerText = 'Show more'
+
+                            //Show more button event listener
+                            showMore.addEventListener('click', () => {
+                                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 20)
+                                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                                const j = ind
+                                for (ind; ind < j + 3; ind++) {
+                                    if (ind < childrenNodes.length > 0) {
+                                        const element = childrenNodes[ind];
+                                        element.style.display = 'flex';
+                                    } else {
+                                        showMore.remove()
+                                        break
+                                    }
+                                }
+                            })
+                            reviewsSection.appendChild(showMore)
+
+                            //Append here: reviewsSection
+                        } else {
+                            starRating.innerText = 'No ratings yet'
+                            reviewsSection.innerText = 'No ratings for this doctor yet'
+                        }
+                    });
+
+                //Display CV (cv is an array)
+                const cv = document.querySelector('#cv');
+                if (user.cv.length !== 0) {
+                    const ul = document.createElement('ul');
+                    ul.style.padding = '1rem 2rem'
+                    cv.appendChild(ul)
+                    user.cv.forEach(triplet => {
+                        const li = document.createElement('li');
+                        li.className = 'bullet'
+                        li.innerText = `${triplet.year_from} - ${triplet.year_to}, ${triplet.job}`
+
+                        ul.appendChild(li)
+                    });
+                    // cv.innerText = `${user.cv}`
+                } else {
+                    cv.innerText = `No cv available`
+                }
+
+                //Display languages (specialization is an array)
+                const languages = document.querySelector('#language');
+                if (user.languages.length !== 0) {
+                    const ul = document.createElement('ul');
+                    ul.style.padding = '1rem 2rem'
+                    languages.appendChild(ul)
+                    user.languages.forEach(language => {
+                        const li = document.createElement('li');
+                        li.className = 'bullet'
+                        li.innerText = `${language}`
+
+                        ul.appendChild(li)
+                    })
+                } else {
+                    languages.innerText = `No languages available`
+                }
+
+                locationArea.innerText = `${user.str_num}, ${user.location}`
+
+                document.querySelector('#bookBtn').addEventListener('click', () => {
+                    window.location.href = '/patient/register'
                 })
-            } else {
-                languages.innerText = `No languages available`
-            }
+            });
 
-            locationArea.innerText = `${user.str_num}, ${user.location}`
-
-            console.log(user)
-        });
-
-        document.querySelector('#bookBtn').addEventListener('click', () => {
-            window.location.href = '/patient/register'
-        })
-</script>
+        
+    </script>

@@ -131,6 +131,24 @@ const AppointmentSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    diagnosis: {
+        diagnosis: {
+            type: String,
+            required: false
+        },
+        treatment: {
+            type: String,
+            required: false
+        },
+        comments: {
+            type: String,
+            required: false
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        }
+    },
     date: {
         type: Date,
         default: Date.now

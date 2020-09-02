@@ -11,8 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500&family=Roboto&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
 </head>
+
 <body>
 
     <div class='container'>
@@ -21,7 +22,6 @@
             <ul>
                 <li class="navbar-item">Home</li>
                 <li class="navbar-item">About</li>
-                <li class="navbar-item">Get Started</li>
                 <li class="navbar-item">Community</li>
                 <li class="navbar-item container" id="dropdown-li">
                     <div>Login/Register</div>
@@ -118,9 +118,6 @@
             }
             if (navItem === 'about') {
                 window.location.href = "/about";
-            }
-            if (navItem === 'getstarted') {
-                window.location.href = "/started";
             }
             if (navItem === 'community') {
                 window.location.href = "/community";

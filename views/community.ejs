@@ -1,0 +1,211 @@
+<style>
+    #main-container {
+        min-height: 76.85vh;
+    }
+
+    .justify-top {
+        justify-content: flex-start;
+    }
+
+    .align-left {
+        align-items: flex-start;
+        border-right: 5px solid #f8f9fa;
+    }
+
+    textarea,
+    input {
+        outline: none;
+        font-family: 'Roboto', sans-serif;
+        padding: 5px;
+        border: 1px solid #b9b9b9;
+        border-radius: 5px;
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .bigger-h1 {
+        font-size: 2rem;
+        font-weight: 500;
+    }
+
+    .fa-thumbs-up {
+        padding-left: 0.6rem;
+        color: green;
+        transition: all 1s ease-in-out 0s;
+    }
+
+    .border {
+        border-radius: 4px;
+        margin-bottom: 10px;
+        transition: opacity 2s ease-in-out 0s;
+        animation: animate1 2s forwards 0s ease-in-out;
+    }
+
+    @keyframes  animate1 {
+        0% {
+            background-color: #fff;
+        }
+
+        100% {
+            background-color: #f8f8f8;
+        }
+    }
+</style>
+
+<div class="container padding-1rem width-100 justify-top" id="main-container">
+    <div class="container padding-1rem width-100">
+        <div class="container padding-5px width-70 align-left">
+            <h1 class="delay-3 animate__animated animate__bounce bigger-h1 padding-5px margin-bottom-2rem">Nicander community
+            </h1>
+
+            <!-- Users -->
+            <div class="container width-100 padding-2rem border">
+                <div class="container flex-dir-row padding-10px width-100">
+                    <h1
+                        class="animate__animated animate__backInLeft container flex-dir-row big-h1 container flex-dir-row">
+                        At this moment, Nicander serves
+                        <div id="total-users" class="padding-5px big-h1"></div> users,
+                    </h1>
+                </div>
+                <div class="container flex-dir-row padding-10px width-100">
+                    <h1 class="animate__animated animate__backInLeft container flex-dir-row big-h1 width-100">
+                        <div id="patients" class="padding-5px big-h1"></div> of them are patients and <div id="doctors"
+                            class="padding-5px big-h1"></div> are doctors
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Appointments -->
+            <div class="container width-100 padding-2rem border">
+                <div class="container padding-2rem width-100">
+                    <h1
+                        class="delay-1 animate__animated animate__backInLeft container flex-dir-row big-h1 padding-left-right-12px width-100">
+                        <div id="appointments-past" class="padding-5px big-h1"></div> appointments have taken place
+                    </h1>
+                    <h1
+                        class="delay-1 animate__animated animate__backInLeft container flex-dir-row big-h1 padding-left-right-12px width-100">
+                        and <div id="appointments-future" class="padding-5px big-h1"></div>
+                        appointments are scheduled to
+                        happen
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Ratings -->
+            <div class="container width-100 padding-2rem border">
+                <div class="container padding-2rem width-100">
+                    <h1
+                        class="delay-2 animate__animated animate__backInLeft container flex-dir-row big-h1 padding-left-right-12px width-100">
+                        <div id="voters" class="padding-5px big-h1"></div> users have voted
+                    </h1>
+                    <h1
+                        class="delay-2 animate__animated animate__backInLeft container flex-dir-row big-h1 padding-left-right-12px width-100">
+                        <div id="upvotes" class="padding-5px big-h1"></div> of them are pleased with Nicander and gave
+                        us <i class="animate__animated animate__fadeIn delay-3 fas fa-thumbs-up"></i>
+                    </h1>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const totalUsers = document.querySelector('#total-users');
+    const patients = document.querySelector('#patients');
+    const doctors = document.querySelector('#doctors');
+
+
+    fetch("/getUsers", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((users) => {
+            let usersCount = 0, doctorsCount = 0, patientsCount = 0;
+            users.forEach(user => {
+                if (user.type === 'doctor' || user.type === 'patient') {
+                    usersCount++;
+                    if (user.type === 'doctor') {
+                        doctorsCount++;
+                    } else if (user.type === 'patient') {
+                        patientsCount++;
+                    }
+                }
+            });
+
+            animateValue("total-users", 0, usersCount, 2000);
+            animateValue("doctors", 0, doctorsCount, 2000);
+            animateValue("patients", 0, patientsCount, 2000);
+        });
+
+    fetch("/getAppointments", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((appointments) => {
+            let appPastCount = 0, appFutCount = 0;
+            appointments.forEach(appointments => {
+                if (appointments.type === 'appointment' || appointments.type === 'completed') {
+                    if (appointments.type === 'appointment') {
+                        appFutCount++;
+                    } else if (appointments.type === 'completed') {
+                        appPastCount++;
+                    }
+                }
+            });
+
+            setTimeout(() => {
+                animateValue("appointments-past", 0, appPastCount, 2000);
+                animateValue("appointments-future", 0, appFutCount, 2000);
+            }, 1000);
+        });
+
+    fetch("/getSysReviews", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((reviews) => {
+            let upVotes = 0
+            reviews.forEach(review => {
+                if (review.vote === 'up') {
+                    upVotes++;
+                }
+            });
+
+
+            setTimeout(() => {
+                animateValue("voters", 0, reviews.length, 2000);
+                animateValue("upvotes", 0, upVotes, 2000);
+            }, 1000);
+        });
+
+    function animateValue(id, start, end, duration) {
+        var range = end - start;
+        var current = start;
+        var increment = end > start ? 1 : -1;
+        var stepTime = Math.abs(Math.floor(duration / range));
+        var obj = document.getElementById(id);
+        var timer = setInterval(function () {
+            current += increment;
+            obj.innerHTML = current;
+            if (current == end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+
+
+</script>

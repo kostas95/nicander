@@ -79,6 +79,14 @@
         margin-bottom: 5px;
         font-size: 15px;
     }
+
+    textarea {
+        padding: 1rem;
+        margin: 20px 0;
+        outline: none;
+        font-size: 1rem;
+        font-family: 'Roboto', sans-serif;
+    }
 </style>
 
 <div class="container padding-1rem width-100">
@@ -172,12 +180,151 @@
 
                         const btn = createButton('rateApp', 'Rate appointment')
 
-                        //Add event listener for appointment adding
+                        const btn2 = createButton('viewApp', 'View appointment')
+
+                        //Add event listener for appointment rating
                         btn.addEventListener('click', () => {
-                            console.log(appointment._id, 'rate')
+
+                            const dateDiff = getDateDiff(appointment.date)
+
+                            const modal = document.createElement('div');
+                            modal.className = 'modal container';
+
+                            const modalContent = document.createElement('div');
+                            modalContent.className = 'modal-content container';
+
+                            modal.appendChild(modalContent);
+
+                            document.querySelector('body').appendChild(modal)
+
+                            document.querySelector('body').addEventListener('click', (e) => {
+                                if (e.target.classList.contains('modal'))
+                                    modal.remove()
+                            })
+
+                            if (dateDiff > 90) {
+                                modalContent.innerHTML = `<div class='big-h1'>This appointment is too old, therefore you cannot edit it`
+                            } else {
+                                const starsCont = createContainer();
+
+                                starsCont.className = 'flex-dir-row padding-5px'
+
+                                let ratingValue;
+                                let starsArr = []
+
+                                for (i = 0; i < 5; i++) {
+                                    const star = document.createElement('div');
+                                    star.className = 'far fa-star fa-3x';
+                                    star.value = i + 1;
+                                    starsArr.push(star)
+                                    //Click event
+                                    star.addEventListener('click', () => {
+                                        ratingValue = star.value;
+                                        console.log(ratingValue)
+                                        for (i = 0; i < 5; i++) {
+                                            if (i < star.value) {
+                                                starsArr[i].className = 'fas fa-star fa-3x';
+                                            } else {
+                                                starsArr[i].className = 'far fa-star fa-3x';
+                                            }
+                                        }
+
+                                    })
+                                    //Hover event
+                                    star.addEventListener('mouseover', () => {
+                                        if (!ratingValue) {
+                                            for (i = 0; i < star.value; i++) {
+                                                starsArr[i].className = 'fas fa-star fa-3x';
+                                            }
+                                        }
+                                    })
+                                    //Hover event
+                                    star.addEventListener('mouseout', () => {
+                                        if (!ratingValue) {
+                                            for (i = 0; i < star.value; i++) {
+                                                starsArr[i].className = 'far fa-star fa-3x';
+                                            }
+                                        }
+                                    })
+                                    starsCont.appendChild(star)
+                                }
+                                const submit = document.createElement('i');
+                                submit.className = 'fas fa-check fa-3x';
+                                submit.style.margin = '0px 10px'
+                                submit.style.cursor = 'pointer'
+
+                                submit.addEventListener('click', () => {
+                                    console.log(ratingValue)
+                                    if (ratingValue) {
+                                        fetch("/review", {
+                                            method: "post",
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Accept': 'application/json'
+                                            },
+
+                                            //make sure to serialize your JSON body
+                                            body: JSON.stringify({
+                                                rating: ratingValue,
+                                                appointment_id: appointment._id,
+                                                comment: textarea.value,
+                                                doctor: appointment.doctor,
+                                                patient: appointment.patient
+                                            })
+                                        })
+                                            .then(response => response.json())
+                                            .then((body) => {
+                                                console.log(document.querySelector('#msg'))
+                                                if (document.querySelector('#msg')) {
+                                                    document.querySelector('#msg').remove()
+                                                }
+                                                const msg = document.createElement('p');
+                                                if (body.type === 'fail') {
+                                                    msg.style.color = 'red';
+
+                                                } else {
+                                                    msg.style.color = 'green';
+                                                }
+                                                msg.innerText = `${body.msg}`
+
+                                                modalContent.appendChild(msg);
+                                                setTimeout(() => {
+                                                    msg.remove()
+                                                }, 5000);
+                                            });
+                                    } else {
+                                        const errMsg = document.createElement('p');
+                                        errMsg.style.color = 'red';
+                                        errMsg.id = 'msg'
+                                        errMsg.innerText = 'Please give a star rating'
+                                        modalContent.appendChild(errMsg);
+                                        setTimeout(() => {
+                                            errMsg.remove()
+                                        }, 5000);
+                                    }
+
+                                })
+
+                                const textarea = document.createElement('textarea')
+                                textarea.id = 'rate-textarea'
+                                textarea.placeholder = 'Write your opinion'
+                                textarea.style.width = '75%';
+                                textarea.style.resize = 'none';
+
+                                modalContent.appendChild(starsCont);
+                                modalContent.appendChild(textarea);
+                                modalContent.appendChild(submit)
+
+                            }
+                        })
+
+                        //Add event listener for appointment viewing
+                        btn2.addEventListener('click', () => {
+                            window.location.href = `/appointment/${appointment._id}`
                         })
 
                         cont.appendChild(btn)
+                        cont.appendChild(btn2)
                         appointmentSection.appendChild(cont)
 
                         history.appendChild(appointmentElement)
@@ -248,4 +395,22 @@
             }
 
             document.querySelector('#total').innerText = `Total appointments: ${total.length}`
-        });</script>
+        });
+
+
+    function getDateDiff(reviewDate) {
+        const date1 = new Date(`${reviewDate.substring(5, 7)}/${reviewDate.substring(8, 10)}/${reviewDate.substring(0, 4)}`)
+
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+        const date2 = new Date(today)
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return diffDays
+    }
+
+</script>

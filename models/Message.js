@@ -3,32 +3,45 @@ const mongoose = require('mongoose');
 const MessageSchema = new mongoose.Schema({
 
 
-    // _id: 1111,
-    timestamp:{
-        type: Date//,
-        //required: true
+
+    date: {
+        type: Date,
+        default: Date.now
     },
 
-    sentByUser: {
+    message: {
         type: String
     },
 
-    sentByUser_id: {
+    name: {
         type: String
     },
 
-    sentToUser: {
+    surname: {
         type: String
     },
 
-    sentToUser_id: {
+    email: {
         type: String
     },
 
+    status: {
+        type: String,
+        default: 'unread'
+    },
 
-    body: {
-        type: String
-    }
+    replies: [{
+        body: {
+            type: String
+        },
+        sender: {
+            type: String
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 
 });
 

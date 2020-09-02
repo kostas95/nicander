@@ -222,13 +222,30 @@
         display: none
     }
 
-    .fa-chevron-up{
+    .fa-chevron-up {
         display: none;
     }
 
-    .fa-chevron-up, .fa-chevron-down{
+    .fa-chevron-up,
+    .fa-chevron-down {
         cursor: pointer;
         margin-left: 1rem;
+    }
+
+    .review-element {
+        width: 60%;
+        border-radius: 5px;
+        background-color: #f7f7f7;
+        margin: 2px auto;
+    }
+
+    #reviews {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #showMore {
+        text-align: center;
     }
 </style>
 <div class="container">
@@ -252,7 +269,7 @@
                 <h3 id="specialty"></h3>
             </div>
             <div class="container flex-dir-row width-100">
-                <h1><i class="fas fa-star"></i></h1>
+                <h1 id="star-rating"></h1>
                 <div id="rating"></div>
             </div>
             <div class="container flex-dir-row width-100">
@@ -354,7 +371,8 @@
                     <i class="fas fa-chevron-up"></i>
                 </div>
                 <div class="container padding-2rem" id="schedule-desc">
-                    Set your weekly schedule, so your patients know which days and hours they should select, for their appointments' requests
+                    Set your weekly schedule, so your patients know which days and hours they should select, for their
+                    appointments' requests
                 </div>
                 <div class="container padding-1rem width-100 info-content" id='schedule'>
                     <div class="container flex-dir-row">
@@ -529,11 +547,143 @@
 
             //Display reviews (reviews is an array)
             const reviews = document.querySelector('#reviews');
-            if (user.reviews.length !== 0) {
-                reviews.innerText = `${user.reviews}`
-            } else {
-                reviews.innerText = `No reviews available`
-            }
+            fetch("/getReviews", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    user_id: id
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    let total = 0;
+                    console.log(body)
+                    const starRating = document.querySelector('#star-rating');
+                    const reviewsSection = document.querySelector('#reviews');
+
+                    if (body.reviews) {
+                        body.reviews.forEach(review => {
+                            total += review.rating;
+                        });
+
+                        let avg = total / body.reviews.length
+
+                        // Header of infos
+                        starRating.className = 'container flex-dir-row'
+
+                        for (i = 0; i < Math.trunc(avg); i++) {
+                            const star = document.createElement('i');
+                            star.className = 'fas fa-star'
+                            starRating.appendChild(star)
+                        }
+
+                        const ratingInfo = document.createElement('div')
+                        ratingInfo.innerText = `Rated on ${body.reviews.length} appointments`
+
+                        starRating.appendChild(ratingInfo)
+
+                        // Patient Reviews Section
+                        const starsCont = document.createElement('div');
+                        starsCont.className = 'container flex-dir-row padding-5px '
+
+                        //Stars rating
+                        for (i = 0; i < Math.trunc(avg); i++) {
+                            const star = document.createElement('i');
+                            star.className = 'fas fa-star fa-3x'
+                            starsCont.appendChild(star)
+                        }
+
+                        //Show avg rating in parenthesis next to the stars
+                        const avgRatingHeader = document.createElement('h1');
+                        avgRatingHeader.innerText = `(${avg.toFixed(1)})`
+                        avgRatingHeader.className = 'h1 padding-1rem'
+                        starsCont.appendChild(avgRatingHeader)
+
+                        reviewsSection.appendChild(starsCont)
+
+                        //Show the reviews by detail
+                        const reviewsCont = document.createElement('div');
+                        reviewsCont.className = 'container padding-1rem'
+                        body.reviews.sort(function (a, b) {
+                            var c = new Date(a.date);
+                            var d = new Date(b.date);
+                            return d - c;
+                        }).forEach(review => {
+                            const reviewElement = document.createElement('div');
+
+                            if (review.comment === '') {
+                                review.comment = 'The user made no comment'
+                            }
+
+                            reviewElement.className = 'container padding-5px review-element'
+
+                            reviewElement.innerHTML = `
+                                <div class='container flex-dir-row'>
+                                    <div class='padding-5px strong'>${review.patient.name} ${review.patient.surname}</div>
+                                    <div class='padding-5px strong'>${review.date.substring(8, 10)}-${review.date.substring(5, 7)}-${review.date.substring(0, 4)}</div>
+                                </div>
+                                <div class='container padding-1rem'>
+                                    <div class='padding-5px'>Rating: ${review.rating}/5</div>
+                                    <div class='padding-5px'>${review.comment}</div>
+                                </div>
+                                    `
+                            reviewsSection.appendChild(reviewElement)
+
+                        });
+
+                        //Get all the child nodes of container named notification
+                        const childrenNodes = Array.from(document.querySelectorAll('.review-element'));
+
+                        //Iterate: The first 3 are displayed, the others are not
+                        for (let ind = 0; ind < childrenNodes.length; ind++) {
+                            if (childrenNodes.length > 3) {
+                                let element = childrenNodes[ind];
+                                if (ind >= 3) {
+                                    element.style.display = 'none';
+                                } else if (ind <= 3) {
+                                    element.style.display = 'flex';
+                                }
+                            }
+                        }
+
+                        //Init an i value (shows how many items are displayd)
+                        let ind = 3
+                        //Create show more button
+                        const showMore = document.createElement('div');
+                        showMore.className = 'padding-1rem pointer';
+                        showMore.id = 'showMore'
+                        showMore.innerText = 'Show more'
+
+                        //Show more button event listener
+                        showMore.addEventListener('click', () => {
+                            //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 20)
+                            //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                            const j = ind
+                            for (ind; ind < j + 3; ind++) {
+                                if (ind < childrenNodes.length > 0) {
+                                    const element = childrenNodes[ind];
+                                    element.style.display = 'flex';
+                                } else {
+                                    showMore.remove()
+                                    break
+                                }
+                            }
+                        })
+                        reviewsSection.appendChild(showMore)
+
+                        //Append here: reviewsSection
+                    } else {
+                        starRating.innerText = 'No ratings yet'
+                        reviewsSection.innerText = 'No ratings for this doctor yet'
+                    }
+                });
+
+
 
             //Display CV (cv is an array)
             const cv = document.querySelector('#cv');
@@ -582,7 +732,7 @@
                 //If we have a match, then check-true the respective checkbox and change the bg color of its label
                 arr.forEach(time => {
                     allCheckboxes.forEach(checkbox => {
-                        if(checkbox.className === day && checkbox.value === time){
+                        if (checkbox.className === day && checkbox.value === time) {
                             // Check the checkbox
                             checkbox.checked = true
                             // Change color to the label

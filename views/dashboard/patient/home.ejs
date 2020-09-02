@@ -57,6 +57,71 @@
         color: #9e9e9e;
         font-size: 12px;
     }
+
+    .align-left {
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+    }
+
+    .appointment-content,
+    .history-content,
+    .requests-content,
+    .cancelled-content,
+    .content {
+        background: #f2f1f1;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        width: 40vw;
+    }
+
+    .min-height {
+        min-height: 93px;
+    }
+
+    .border:nth-child(2) {
+        border-left: 1px solid #cecdcd;
+    }
+
+    .border:nth-child(1) {
+        align-items: flex-start;
+    }
+
+    .border {
+        flex: 1;
+    }
+
+    #appointments-head,
+    #history-head,
+    #requests-head,
+    #cancelled-head {
+        margin-bottom: 20px;
+    }
+
+    .button {
+        margin-bottom: 5px;
+        font-size: 12px;
+        width: 150px;
+    }
+
+    #name {
+        color: #3498db;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    #specialty {
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+
+    .fa-smile {
+        color: green;
+    }
+
+    .fa-frown {
+        color: red;
+    }
 </style>
 
 <div class="container padding-2rem">
@@ -84,14 +149,25 @@
         </div>
         <div class="container padding-2rem width-75vw">
             <h1 class="h1 margin-bottom-1rem text-left flex-left">Future appointments</h1>
-            <div class="container">
+            <div class="container width-100 align-left" id="appointments-container">
 
             </div>
         </div>
     </div>
+    <div class="container width-80 padding-2rem margin-top-2rem margin-right-20rem margin-left-10rem content"
+        id="vote-area">
+        <h1 class="big-h1 padding-1rem">Do you like Nicander?</h1>
+        <div>If so, please give us a thumbs up! </div>
+        <div class="container flex-dir-row width-100 padding-5px" id="vote">
+            <i class="fas fa-thumbs-up fa-2x padding-1rem pointer" id="up"></i>
+            <i class="fas fa-thumbs-down fa-2x padding-1rem pointer" id="down"></i>
+        </div>
+        <div id="msg" style="max-height: 10px;"></div>
+    </div>
 </div>
 <script>
     let users = [];
+    const id = '<%= id %>';
 
     //Fetch get doctors
     fetch("/getUsers/patient", {
@@ -125,6 +201,9 @@
     const doctors = document.getElementById('doctors-content');
     const doctorsCont = document.getElementById('doctors');
     const specialtiesCont = document.getElementById('specialties');
+    const appointments = document.querySelector('#appointments-container');
+    let total = []
+
 
     searchbar.addEventListener('keyup', (e) => {
 
@@ -228,6 +307,100 @@
         }
     })
 
+    fetch("/getAppointments/p", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            type: 'appointment',
+            patient_id: id
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            const appointmentsContainer = document.querySelector('#appointments-container');
+            let count = 0;
+
+            if (body.result === 'success') {
+                appointmentsContainer.innerHTML = `<div class='container padding-1rem'>You have ${body.appointments.length} upcoming appointments</div>`
+                body.appointments.sort(function (a, b) {
+                    var c = new Date(a.timestamp);
+                    var d = new Date(b.timestamp);
+                    return d - c;
+                }).forEach(appointment => {
+                    if (count < 3) {
+                        if (appointment.type === 'appointment') {
+                            //Create container that contains the appointment info (doc info, date etc)
+                            const appointmentElement = document.createElement('div');
+                            appointmentElement.className = 'container flex-dir-row appointment-content';
+                            appointmentElement.id = `${appointment._id}`
+
+                            //Create left section of container
+                            let appointmentSection = document.createElement('div');
+                            appointmentSection.className = `container padding-left-right-12px min-height border`
+                            appointmentSection.innerHTML = `
+                            <a id='name' href='/profiles/${appointment.doctor.id}'>${appointment.doctor.name} ${appointment.doctor.surname}</a>
+                            <div id='specialty' class='strong'>${appointment.doctor.specialty}</div>
+                            `
+                            //Append left section to appointment container
+                            appointmentElement.appendChild(appointmentSection)
+
+                            //Create middle section of container
+                            appointmentSection = document.createElement('div');
+                            appointmentSection.className = `container padding-left-right-12px min-height border flex-dir-row strong`
+                            appointmentSection.innerHTML = `
+                            <div><i class="fas fa-calendar-alt"></i></div>
+                            <div class='font-12px'>${appointment.timestamp}</div>
+                            `
+                            //Append middle section to appointment container
+                            appointmentElement.appendChild(appointmentSection)
+
+                            appointments.appendChild(appointmentElement)
+
+                            function createContainer() {
+                                const cont = document.createElement('div');
+                                cont.className = 'container';
+
+                                return cont;
+                            }
+
+                            function createButton(id, innerText) {
+                                const btn = document.createElement('button')
+                                btn.className = 'button small'
+                                btn.id = `${id}`
+                                btn.innerText = `${innerText}`
+
+                                return btn;
+                            }
+
+                        }
+                    }
+                    count++
+                })
+
+                const seeAppointments = document.createElement('button');
+                seeAppointments.className = 'button';
+                seeAppointments.addEventListener('click', () => {
+                    window.location.href = '/dashboard/my-appointments'
+                })
+                seeAppointments.innerText = 'Go to my appointments';
+                appointmentsContainer.appendChild(seeAppointments)
+            } else {
+                appointmentsContainer.innerHTML = `
+                <div class="container appointment-content" >
+                    <i class="fas fa-clock"></i>
+                    <div class='padding-1rem'>There are no upcoming appointments at this moment.</div>
+                </div>
+                `
+            }
+
+        });
+
+
     function createResult(parent, resultValue, resultValue2, resultValue3, id) {
         if (resultValue2 && resultValue3 && id) {
             const result = document.createElement('div');
@@ -252,5 +425,44 @@
             parent.appendChild(result);
         }
     }
+
+    document.querySelector('#vote').addEventListener('click', (e) => {
+        if (e.target.id === 'up' || e.target.id === 'down') {
+            fetch("/systemVote", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    vote: e.target.id
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+
+                    const msg = document.querySelector('#msg');
+                    msg.className = 'container padding-1rem width-100';
+
+                    if (e.target.id === 'up') {
+                        document.querySelector('#down').style.color = 'rgb(109, 50, 109, 0.9)'
+                        e.target.style.color = 'green'
+
+                        msg.innerHTML = `${body.msg}<i class="fas fa-smile"></i>`
+                        msg.style.color = 'green'
+                    } else {
+                        document.querySelector('#up').style.color = 'rgb(109, 50, 109, 0.9)'
+                        e.target.style.color = 'red'
+
+                        msg.innerHTML = `${body.msg}<i class="fas fa-frown"></i>`
+                        msg.style.color = 'red'
+                    }
+                });
+        }
+    })
+
 
 </script>

@@ -1,0 +1,444 @@
+<style>
+    .justify-left {
+        justify-content: flex-start;
+    }
+
+    .align-top {
+        justify-content: flex-start;
+    }
+
+    .align-top2 {
+        align-items: flex-start;
+    }
+
+    .message-item>div {
+        min-height: 140px;
+    }
+
+    .fa-envelope {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        background-color: #ffffff;
+    }
+
+    .strong {
+        padding: 5px;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    .message-item {
+        border-radius: 5px;
+        margin-top: 5px;
+        background-color: #f8f8f8;
+    }
+
+    .modal-content {
+        padding: 1rem;
+        height: 100vh;
+    }
+
+    textarea {
+        width: 100%;
+        height: 75vh;
+        outline: none;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px;
+        border: 1px solid #dbdbdb;
+    }
+
+    .modal-content>div:nth-child(2) {
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .font {
+        font-size: 1.5rem;
+    }
+
+    .color {
+        color: #868686;
+        font-size: 12px;
+        font-weight: bolder;
+    }
+
+    .message_content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    #messages {
+        padding: 5rem 1rem 1rem 1rem;
+    }
+</style>
+
+<div class="container padding-1rem width-100 message_content">
+    <div class="container width-100">
+        <h1 class="container padding-5px width-100 big-h1 flex-dir-row"><i class="fas fa-mail-bulk"></i>Messages</h1>
+    </div>
+    <div class="container padding-1rem width-100" id="messages">
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+<script>
+    const name = '<%= name %>', surname = '<%= surname %>';
+    const username = name + ' ' + surname;
+
+    fetch("/getMessages", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.length === 0) {
+                document.querySelector('#messages').innerText = 'There are no messages at this moment';
+            }
+            body.sort(function (a, b) {
+                var c = new Date(a.date);
+                var d = new Date(b.date);
+                return d - c;
+            }).forEach(message => {
+
+                //Create container for each message
+                const container = document.createElement('div')
+                container.className = 'container padding-1rem width-50 message-item flex-dir-row'
+                document.querySelector('#messages').appendChild(container);
+                container.style.cursor = 'pointer';
+
+                //Create the container that is the one half of the initial container, and contains the sender's info
+                const infoContainer = document.createElement('div');
+                infoContainer.className = 'container padding-1rem width-50';
+                container.appendChild(infoContainer)
+
+                //Create the other half of the container, the message container, which contains the message preview
+                const messageContainer = document.createElement('div');
+                messageContainer.className = 'container padding-1rem width-50 align-top';
+                container.appendChild(messageContainer)
+
+                //Date info
+                const date = document.createElement('div');
+                infoContainer.appendChild(date);
+                date.innerHTML = `
+                <i class="fas fa-calendar-alt"></i>
+                <div class='strong'>${message.date.substring(8, 10)}-${message.date.substring(5, 7)}-${message.date.substring(0, 4)},</div><div class='strong'>${message.date.substring(11, 16)}</div>
+                `
+                //Email info
+                const email = document.createElement('div');
+                infoContainer.appendChild(email);
+                email.innerHTML = `
+                <i class="fas fa-at"></i>
+                <div class='strong'>${message.email}</div>
+                `
+                //Full name info of sender
+                const fullName = document.createElement('div');
+                infoContainer.appendChild(fullName);
+                fullName.innerHTML = `
+                <i class="fas fa-file-signature"></i>
+                <div class='strong'>${message.name} ${message.surname}</div>
+                `
+
+                //Reply status
+                const reply = document.createElement('div');
+                infoContainer.appendChild(reply);
+                if (message.replies.length === 0) {
+                    reply.innerHTML = `
+                    <i class="fas fa-reply" style='color:red'></i>
+                    <div class='strong'>Not replied</div>
+                    `
+                } else {
+                    reply.innerHTML = `
+                    <i class="fas fa-reply" style='color:green'></i>
+                    <div class='strong'>Replied</div>
+                    `
+                }
+
+                //Message preview (the other half of the container)
+                const messageContent = document.createElement('div');
+                messageContainer.appendChild(messageContent);
+
+                let i = 0
+                let messagePreview = ''
+                CryptoJS.AES.decrypt(message.message, "Secret Passphrase").toString(CryptoJS.enc.Utf8).split(' ').forEach(word => {
+                    if (i < 20) {
+                        messagePreview += `${word} `
+                        i++
+                    }
+                })
+
+                if (message.status === 'unread') {
+                    messageContent.innerHTML = `
+                    <i class="far fa-envelope"></i>
+                    <div class='strong'>${messagePreview}...</div>
+                    `
+                } else if (message.status === 'read') {
+                    messageContent.innerHTML = `
+                    <i class="far fa-envelope-open"></i>
+                    <div class='strong'>${messagePreview}</div>
+                    `
+                }
+
+                //Add event listener when clicking the message container it pops a modal with all the needed info and tools to reply
+                container.addEventListener('click', () => {
+                    //Change status if message is unread
+                    if (message.status === 'unread' && !messageContent.innerHTML.includes("fa-envelope-open")) {
+
+                        fetch("/message/status", {
+                            method: "post",
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+
+                            //make sure to serialize your JSON body
+                            body: JSON.stringify({
+                                id: message._id,
+                                status: 'read'
+                            })
+                        })
+                            .then(response => response.json())
+                            .then((body) => {
+                                //Get init number of unread msg
+                                const notifNum = document.querySelector('#notifNum').innerText
+
+                                //Open envelope icon update
+                                messageContent.innerHTML = `
+                                <i class="far fa-envelope-open"></i>
+                                <div class='strong'>${messagePreview}</div>
+                                `
+
+                                //Update the remaining unread messages number at the navbar
+                                if (notifNum - 1 === 0) {
+                                    document.querySelectorAll('.navbar-item')[4].innerHTML = `Contact Platform`;
+                                } else {
+                                    document.querySelectorAll('.navbar-item')[4].innerHTML = `Contact Platform <div class='container' id='notifNum'>${notifNum - 1}</div>
+                                    `;
+                                }
+                                document.querySelectorAll('.navbar-item')[4].addEventListener('click', () => {
+                                    window.location.href = "/dashboard/contact-platform";
+                                })
+                            });
+                    }
+
+                    //Modal
+                    const modal = document.createElement('div');
+                    modal.className = 'modal container';
+
+                    //Content of modal
+                    const modalContent = document.createElement('div');
+                    modalContent.className = 'modal-content container flex-dir-row align-top2';
+
+                    //Section where message is displayed and replies (left half)
+                    const messageSection = document.createElement('div');
+                    messageSection.className = 'container padding-1rem width-50'
+
+                    //Name and email
+                    const info = document.createElement('div');
+                    info.className = 'container width-100'
+                    info.innerHTML = `
+                    <div class='container padding-1rem width-100 align-top'>
+                        <div class='container padding-5px width-100 flex-dir-row align-top'>
+                            <i class="fas fa-file-signature"></i>
+                            <div class='strong'>${message.name} ${message.surname}</div>
+                        </div>
+                        <div class='container padding-5px width-100 flex-dir-row align-top'>
+                            <i class="fas fa-at"></i>
+                            <div class='strong'>${message.email}</div>
+                        </div>
+                    </div>
+                    `
+                    messageSection.appendChild(info)
+
+                    //Message
+                    const msg = document.createElement('div');
+                    msg.className = 'padding-1rem font width-100 noselect'
+                    msg.style.cursor = 'pointer'
+
+                    msg.open = false
+                    msg.innerHTML = `<i class="fas fa-angle-right"></i>Click to show the message`
+
+                    //Hide and show message when clicking on it
+                    msg.addEventListener('click', () => {
+                        if (msg.open === true) {
+                            msg.open = false
+                            msg.innerHTML = `<i class="fas fa-angle-right"></i>Click to show the message`
+                        } else {
+                            msg.open = true
+                            msg.innerHTML = `
+                            <i class="fas fa-angle-down"></i>
+                            ${CryptoJS.AES.decrypt(message.message, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}
+                            `
+                        }
+                    })
+
+                    messageSection.appendChild(msg)
+
+                    //Replies
+                    message.replies.forEach(reply_item => {
+                        const reply = document.createElement('div');
+                        reply.className = 'padding-1rem width-100 noselect font'
+                        reply.style.cursor = 'pointer'
+                        reply.innerHTML = '<i class="fas fa-angle-right"></i>Click to show reply';
+                        reply.open = false
+
+                        reply.addEventListener('click', () => {
+                            if (reply.open === true) {
+                                reply.open = false
+                                reply.innerHTML = `<i class="fas fa-angle-right"></i>Click to show the reply`
+                            } else {
+                                reply.open = true
+                                reply.innerHTML = `
+                                <div class='container flex-dir-row justify-left'>
+                                <i class="fas fa-angle-down"></i>
+                                <div class='padding-5px color'>${reply_item.sender}</div>
+                                <div class='padding-5px color'>${reply_item.date.substring(8, 10)}-${reply_item.date.substring(5, 7)}-${reply_item.date.substring(0, 4)},${reply_item.date.substring(11, 16)}</div>
+                                </div>
+                                <div class='font'>${CryptoJS.AES.decrypt(reply_item.body, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
+                            `
+                            }
+                        })
+                        messageSection.appendChild(reply)
+                    })
+
+                    //Right half of the modal
+                    const replySection = document.createElement('div');
+                    replySection.className = 'container padding-1rem width-50'
+
+                    //Textarea
+                    const textarea = document.createElement('textarea');
+                    textarea.placeholder = 'Type a reply for this message here'
+                    replySection.appendChild(textarea)
+
+                    //Submit
+                    const submitBtn = document.createElement('button');
+                    submitBtn.innerText = 'Reply'
+                    submitBtn.className = 'button'
+                    submitBtn.addEventListener('click', () => {
+                        if (textarea.value.length !== 0) {
+
+                            fetch("/message/reply", {
+                                method: "post",
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+
+                                //make sure to serialize your JSON body
+                                body: JSON.stringify({
+                                    id: message._id,
+                                    sender: username,
+                                    receiver: message.email,
+                                    date: message.date,
+                                    reply: CryptoJS.AES.encrypt(textarea.value, "Secret Passphrase").toString()
+                                })
+                            })
+                                .then(response => response.json())
+                                .then((body) => {
+                                    if (document.querySelector('#error')) {
+                                        document.querySelector('#error').remove()
+                                    }
+                                    const msg = document.createElement('div');
+                                    msg.innerText = `${body.msg}`
+                                    msg.style.color = 'green';
+                                    msg.style.margin = '5px';
+                                    replySection.appendChild(msg);
+                                    submitBtn.disabled = true
+                                    textarea.value = '';
+                                    setTimeout(() => {
+                                        submitBtn.disabled = false
+                                        msg.remove()
+                                    }, 7000);
+                                    reply.innerHTML = `
+                                    <i class="fas fa-reply" style='color:green'></i>
+                                    <div class='strong'>Replied</div>
+                                    `
+                                });
+                        } else {
+                            const error = document.createElement('div');
+                            error.innerText = 'The reply must not be blank'
+                            error.style.color = 'red';
+                            error.style.margin = '5px';
+                            error.id = 'error'
+                            replySection.appendChild(error);
+                            setTimeout(() => {
+                                error.remove()
+                            }, 7000);
+                        }
+                    })
+                    replySection.appendChild(submitBtn)
+
+                    modalContent.appendChild(messageSection)
+                    modalContent.appendChild(replySection)
+                    modal.appendChild(modalContent);
+
+                    document.querySelector('body').appendChild(modal)
+
+                    //Exit modal
+                    document.querySelector('body').addEventListener('click', (e) => {
+                        if (e.target.classList.contains('modal'))
+                            modal.remove()
+                    })
+                })
+
+
+                date.className = email.className = fullName.className = reply.className = 'container padding-5px flex-dir-row width-100 justify-left';
+                messageContent.className = 'container padding-5px width-100 justify-left'
+            });
+
+            //Get all the child nodes of container named notification
+            const childrenNodes = Array.from(document.querySelectorAll('.message-item'));
+
+            //Iterate: The first 20 are displayed, the others are not
+            for (let i = 0; i < childrenNodes.length; i++) {
+                if (childrenNodes.length > 20) {
+                    let element = childrenNodes[i];
+                    if (i >= 20) {
+                        element.style.display = 'none';
+                    } else if (i <= 20) {
+                        element.style.display = 'flex';
+                    }
+                }
+            }
+
+            //Init an i value (shows how many items are displayd)
+            let i = 20
+            //Create show more button
+            const showMore = document.createElement('div');
+            showMore.className = 'padding-1rem pointer';
+            showMore.id = 'showMore'
+            showMore.innerText = 'Show more'
+
+            //Show more button event listener
+            showMore.addEventListener('click', () => {
+                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 20)
+                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                const j = i
+                for (i; i < j + 20; i++) {
+                    if (i < childrenNodes.length > 0) {
+                        const element = childrenNodes[i];
+                        element.style.display = 'flex';
+                    } else {
+                        showMore.remove()
+                        break
+                    }
+                }
+            })
+            if (body.length > 0) {
+                document.querySelector('#messages').appendChild(showMore)
+            }
+        });
+</script>

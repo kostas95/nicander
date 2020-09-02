@@ -1,0 +1,147 @@
+<style>
+    .content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    .border {
+        border-right: 5px solid #f8f9fa;
+    }
+
+    .big-h1 {
+        font-size: 1.8rem;
+    }
+
+    .h1-cont {
+        margin-top: 3rem;
+    }
+
+    .border>div {
+        font-size: 1.3rem;
+    }
+
+    .button {
+        margin: 0;
+    }
+
+    .padding-unique {
+        padding-top: 3rem;
+        padding-bottom: 5px;
+    }
+
+    label {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    u {
+        padding: 5px;
+    }
+</style>
+
+<div class="container width-100 padding-1rem content">
+    <div class="container flex-dir-row padding-1rem width-100 h1-cont">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="container big-h1 padding-5px">Your account is not authorized!</div>
+    </div>
+    <div class="container padding-1rem width-50 border">
+        <div class="text-left flex-dir-row padding-1rem width-100">
+            An e-mail has been sent to your e-mail address, containing a unique password.
+        </div>
+        <div class="text-left padding-1rem width-100">
+            Please copy this password and insert it to the input field below.
+        </div>
+        <div class="text-left padding-1rem width-100">
+            If you enter the correct password, your account will be authorized and you will be ready to go!
+        </div>
+        <div class="container padding-1rem width-100 flex-dir-row padding-unique">
+            Didn't receive an e-mail? <u>(Did you check your spam inbox? )</u>
+        </div>
+        <div class="container padding-5px width-100 resend-area">
+            <button id="resend" class="button">Resend e-mail</button>
+        </div>
+
+    </div>
+    <div class="container padding-1rem">
+        <label for="pw-input" class="container">Enter your unique password here</label>
+        <input class="input-field" id="pw-input" type="text" placeholder="Password">
+        <button id="submit" class="button-2">Submit password</button>
+    </div>
+</div>
+
+<script>
+
+    const id = '<%= id %>'
+    const password = document.querySelector('#pw-input');
+    const resend = document.querySelector('#resend')
+    const submit = document.querySelector('#submit');
+
+
+    submit.addEventListener('click', () => {
+        if (password.value.length > 0) {
+            fetch("/unauthorized/auth", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    id: id,
+                    password: password.value
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    if (body.url) {
+                        window.location.href = `${body.url}`
+                    }
+                    if (body.msg) {
+                        submit.innerHTML = `<i class="fas fa-times" style='color:red'></i>${body.msg}`
+                        submit.disabled = false
+
+                        setTimeout(() => {
+                            submit.disabled = false
+                            submit.innerHTML = 'Submit password'
+                        }, 5000);
+                    }
+                });
+        }
+    })
+
+    resend.addEventListener('click', () => {
+        const msg = document.createElement('div');
+        document.querySelector('.resend-area').appendChild(msg);
+        msg.innerHTML = '<i class="fa fa-spinner fa-spin" style="font-size:24px"></i>'
+        msg.style.paddingTop = '1rem';
+
+        fetch("/resendEmail", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                if (body.msg) {
+
+                    msg.innerText = `${body.msg}`;
+                    msg.style.color = 'green';
+
+
+                    setTimeout(() => {
+                        msg.remove()
+                    }, 10000);
+                }
+            });
+    })
+
+</script>

@@ -111,4 +111,44 @@
             document.querySelector('#dropdown').style.display = 'none';
         }
     })
+
+    //Get amount of reports and display it
+    fetch("/getReports", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.reports.length != 0) {
+                document.querySelectorAll('.navbar-item')[3].innerHTML = `Reports <div class='container' id='notifNum'>${body.reports.length}</div>
+                `;
+                document.querySelectorAll('.navbar-item')[3].addEventListener('click', () => {
+                    window.location.href = "/dashboard/reports";
+                })
+
+            }
+        })
+
+    //Get amount of reports and display it
+    fetch("/getMessages/unread", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.length != 0) {
+                document.querySelectorAll('.navbar-item')[4].innerHTML = `Contact Platform <div class='container' id='notifNum'>${body.length}</div>
+                `;
+                document.querySelectorAll('.navbar-item')[4].addEventListener('click', () => {
+                    window.location.href = "/dashboard/contact-platform";
+                })
+
+            }
+        })
 </script>

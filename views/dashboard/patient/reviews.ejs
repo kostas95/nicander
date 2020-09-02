@@ -1,0 +1,361 @@
+<style>
+    .rating-container {
+        padding: 1rem 5rem;
+    }
+
+    .rating-container>.container {
+        justify-content: left;
+    }
+
+    .rating-wrap {
+        background-color: #f8f8f8;
+        margin-top: 5px;
+        border-radius: 5px;
+    }
+
+    .rating-wrap>.container {
+        height: 180px
+    }
+
+    .button {
+        width: 80%;
+    }
+
+    .small-txt {
+        font-size: 14px;
+    }
+
+    textarea {
+        font-family: 'Roboto', sans-serif;
+        outline: none;
+        padding: 5px;
+    }
+
+    .wrap {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        max-width: 76.5rem;
+    }
+
+    #reviews-content {
+        border-right: 5px solid #f8f9fa;
+    }
+</style>
+
+<div class="container padding-2rem wrap">
+    <div class="container padding-1rem width-100">
+        <h1 class="big-h1 padding-1rem">My reviews</h1>
+    </div>
+    <div class="container padding-2rem width-100" id="reviews-content">
+
+    </div>
+</div>
+
+<script>
+    const id = '<%= id %>';
+
+    fetch("/getReviews/patient", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            id: id
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+
+            if (body.reviews.length === 0) {
+                document.querySelector('#reviews-content').innerText = 'You have not reviewed any appointment at this moment'
+            }
+            body.reviews.sort(function (a, b) {
+                var c = new Date(a.date);
+                var d = new Date(b.date);
+                return d - c;
+            }).forEach(review => {
+                const container = document.createElement('div');
+                container.className = 'container padding-5px width-50 flex-dir-row rating-wrap'
+
+                //Container that contains all the info about the review
+                const secondContainer = document.createElement('div');
+                secondContainer.className = 'container padding-1rem width-50 rating-container'
+                container.appendChild(secondContainer);
+
+                //Date
+                const dateContainer = document.createElement('div');
+                dateContainer.innerHTML = `
+                <i class="fas fa-calendar-alt"></i> 
+                <strong>${review.date.substring(8, 10)}-${review.date.substring(5, 7)}-${review.date.substring(0, 4)}, ${review.date.substring(11, 16)}</strong>
+                `
+                secondContainer.appendChild(dateContainer);
+
+                //Doctor's name
+                const doctorContainer = document.createElement('div');
+                doctorContainer.innerHTML = `
+                    <i class="fas fa-user-md"></i>
+                    <strong>${review.doctor.name} ${review.doctor.surname}</strong>
+                `;
+                secondContainer.appendChild(doctorContainer);
+
+                //Rating stars
+                const ratingContainer = document.createElement('div');
+                const starsContainer = document.createElement('div');
+                starsContainer.className = 'container padding-5px flex-dir-row'
+                for (let i = 1; i <= review.rating; i++) {
+                    const star = document.createElement('div');
+                    star.innerHTML = `<i class="fas fa-star"></i>`
+                    starsContainer.appendChild(star)
+                }
+                ratingContainer.appendChild(starsContainer)
+                secondContainer.appendChild(ratingContainer)
+
+                //Comment
+                const commentContainer = document.createElement('div');
+                if (review.comment === '') {
+                    commentContainer.innerHTML = `
+                    <i class="fas fa-comment"></i>
+                    <strong class='small-txt'>There is no comment submitted for this review</strong>
+                    `
+                } else {
+                    commentContainer.innerHTML = `
+                    <i class="fas fa-comment"></i>
+                    <strong class='small-txt'>${review.comment}</strong>
+                    `
+                }
+                secondContainer.appendChild(commentContainer)
+
+                //Set classnames
+                dateContainer.className = doctorContainer.className = ratingContainer.className = commentContainer.className = 'container padding-5px width-100 flex-dir-row'
+
+                //Button section
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'container padding-1rem width-50';
+
+                const editButton = document.createElement('button');
+                editButton.className = 'button';
+                editButton.innerText = 'Edit review';
+
+                buttonContainer.appendChild(editButton)
+                container.appendChild(buttonContainer)
+
+                document.querySelector('#reviews-content').appendChild(container)
+
+                //Add event listener for appointment rating
+                editButton.addEventListener('click', () => {
+
+                    const dateDiff = getDateDiff(review.date);
+
+                    const modal = document.createElement('div');
+                    modal.className = 'modal container';
+
+                    const modalContent = document.createElement('div');
+                    modalContent.className = 'modal-content container';
+
+                    modal.appendChild(modalContent);
+                    document.querySelector('body').appendChild(modal)
+
+                    document.querySelector('body').addEventListener('click', (e) => {
+                        if (e.target.classList.contains('modal'))
+                            modal.remove()
+                    })
+
+                    if (dateDiff > 90) {
+                        modalContent.innerHTML = `<div class='big-h1'>This appointment is too old, therefore you cannot edit it`
+                    }
+                    else {
+                        const starsCont = createContainer();
+
+                        starsCont.className = 'flex-dir-row padding-5px'
+
+                        let ratingValue;
+                        let starsArr = []
+
+                        for (i = 0; i < 5; i++) {
+                            const star = document.createElement('div');
+                            star.className = 'far fa-star fa-3x';
+                            star.value = i + 1;
+                            starsArr.push(star)
+                            //Click event
+                            star.addEventListener('click', () => {
+                                ratingValue = star.value;
+                                for (i = 0; i < 5; i++) {
+                                    if (i < star.value) {
+                                        starsArr[i].className = 'fas fa-star fa-3x';
+                                    } else {
+                                        starsArr[i].className = 'far fa-star fa-3x';
+                                    }
+                                }
+
+                            })
+                            //Hover event
+                            star.addEventListener('mouseover', () => {
+                                if (!ratingValue) {
+                                    for (i = 0; i < star.value; i++) {
+                                        starsArr[i].className = 'fas fa-star fa-3x';
+                                    }
+                                }
+                            })
+                            //Hover event
+                            star.addEventListener('mouseout', () => {
+                                if (!ratingValue) {
+                                    for (i = 0; i < star.value; i++) {
+                                        starsArr[i].className = 'far fa-star fa-3x';
+                                    }
+                                }
+                            })
+                            starsCont.appendChild(star)
+                        }
+                        const submit = document.createElement('i');
+                        submit.className = 'fas fa-check fa-3x';
+                        submit.style.margin = '0px 10px'
+                        submit.style.cursor = 'pointer'
+
+                        submit.addEventListener('click', () => {
+                            if (ratingValue) {
+                                fetch("/review", {
+                                    method: "post",
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+
+                                    //make sure to serialize your JSON body
+                                    body: JSON.stringify({
+                                        rating: ratingValue,
+                                        appointment_id: review.appointment_id,
+                                        comment: textarea.value,
+                                        edit: true
+                                    })
+                                })
+                                    .then(response => response.json())
+                                    .then((body) => {
+                                        if (document.querySelector('#msg')) {
+                                            document.querySelector('#msg').remove()
+                                        }
+                                        const msg = document.createElement('p');
+                                        if (body.type === 'fail') {
+                                            msg.style.color = 'red';
+
+                                        } else {
+                                            msg.style.color = 'green';
+                                        }
+                                        msg.innerText = `${body.msg}`
+
+                                        document.querySelector('body').addEventListener('click', (e) => {
+                                            if (e.target.classList.contains('modal'))
+                                                location.reload();
+                                        })
+
+                                        modalContent.appendChild(msg);
+                                        setTimeout(() => {
+                                            msg.remove()
+                                        }, 5000);
+                                    });
+                            } else {
+                                const errMsg = document.createElement('p');
+                                errMsg.style.color = 'red';
+                                errMsg.id = 'msg'
+                                errMsg.innerText = 'Please give a star rating'
+                                modalContent.appendChild(errMsg);
+                                setTimeout(() => {
+                                    errMsg.remove()
+                                }, 5000);
+                            }
+
+                        })
+
+                        const textarea = document.createElement('textarea')
+                        textarea.id = 'rate-textarea'
+                        textarea.placeholder = 'Write your opinion'
+                        textarea.style.width = '75%';
+                        textarea.style.resize = 'none';
+
+                        modalContent.appendChild(starsCont);
+                        modalContent.appendChild(textarea);
+                        modalContent.appendChild(submit)
+
+                    }
+                })
+            });
+
+            //Get all the child nodes of container named notification
+            const childrenNodes = Array.from(document.querySelectorAll('.rating-wrap'));
+
+            //Iterate: The first 5 are displayed, the others are not
+            for (let i = 0; i < childrenNodes.length; i++) {
+                if (childrenNodes.length > 5) {
+                    let element = childrenNodes[i];
+                    if (i >= 5) {
+                        element.style.display = 'none';
+                    } else if (i <= 5) {
+                        element.style.display = 'flex';
+                    }
+                }
+            }
+
+            //Init an i value (shows how many items are displayd)
+            let i = 5
+            //Create show more button
+            const showMore = document.createElement('div');
+            showMore.className = 'padding-1rem pointer';
+            showMore.id = 'showMore'
+            showMore.innerText = 'Show more'
+
+            //Show more button event listener
+            showMore.addEventListener('click', () => {
+                //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 5)
+                //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                const j = i
+                for (i; i < j + 5; i++) {
+                    if (i < childrenNodes.length > 0) {
+                        const element = childrenNodes[i];
+                        element.style.display = 'flex';
+                    } else {
+                        showMore.remove()
+                        break
+                    }
+                }
+            })
+
+            if (body.reviews.length > 0) {
+                document.querySelector('#reviews-content').appendChild(showMore)
+            }
+        });
+
+    function createContainer() {
+        const cont = document.createElement('div');
+        cont.className = 'container';
+
+        return cont;
+    }
+
+    function createButton(id, innerText) {
+        const btn = document.createElement('button')
+        btn.className = 'button small'
+        btn.id = `${id}`
+        btn.innerText = `${innerText}`
+
+        return btn;
+    }
+
+    function getDateDiff(reviewDate) {
+        const date1 = new Date(`${reviewDate.substring(5, 7)}/${reviewDate.substring(8, 10)}/${reviewDate.substring(0, 4)}`)
+
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+        const date2 = new Date(today)
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return diffDays
+    }
+</script>

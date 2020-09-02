@@ -71,44 +71,44 @@
     }
 
     // Functionality for bold, italic, line break, url
-    // const txtarea = document.querySelector('#postContent');
-    // const body = document.querySelector('body');
-    // body.addEventListener('mousedown', (e) => {
-    //     // console.log(txtarea.selectionStart, txtarea.selectionEnd)
-    //     body.addEventListener('mouseup', (e) => {
-    //         // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+    const txtarea = document.querySelector('#postContent');
+    const body = document.querySelector('body');
+    body.addEventListener('mousedown', (e) => {
+        // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+        body.addEventListener('mouseup', (e) => {
+            // console.log(txtarea.selectionStart, txtarea.selectionEnd)
 
 
-    //         // console.log(txtarea.selectionStart, txtarea.selectionEnd)
-    //         const beforeChange = txtarea.value.substring(0, txtarea.selectionStart);
-    //         const afterChange = txtarea.value.substring(txtarea.selectionEnd, txtarea.length);
-    //         const toBeChanged = txtarea.value.substring(txtarea.selectionStart, txtarea.selectionEnd);
+            // console.log(txtarea.selectionStart, txtarea.selectionEnd)
+            const beforeChange = txtarea.value.substring(0, txtarea.selectionStart);
+            const afterChange = txtarea.value.substring(txtarea.selectionEnd, txtarea.length);
+            const toBeChanged = txtarea.value.substring(txtarea.selectionStart, txtarea.selectionEnd);
 
-    //         document.getElementById('writing-palette').addEventListener('click', (e) => {
-    //             // const selectionEnd = txtarea.selectionEnd;
-    //             const postContent = document.getElementById('postContent');
-    //             if (e.target.className === 'fas fa-bold') {
-    //                 // console.log(selectionEnd)
-    //                 // postContent.value += `<b></b>`
-    //                 txtarea.value = `${beforeChange}<b>${toBeChanged}</b>${afterChange}`;
-    //                 // txtarea.focus()
-    //                 // txtarea.selectionEnd= selectionEnd;
-    //             }
-    //             if (e.target.className === 'fas fa-italic') {
-    //                 // postContent.value += `<i></i>`
-    //                 txtarea.value = `${beforeChange}<em>${toBeChanged}</em>${afterChange}`
-    //             }
-    //             if (e.target.className === 'fas fa-link') {
-    //                 // postContent.value += `<a href='https://WWW.EXAMPLE.COM'></a>`
-    //                 txtarea.value = `${beforeChange}${toBeChanged}<a href='https://EXAMPLE.COM'></a>${afterChange}`
-    //             }
-    //             if (e.target.className === 'fas fa-arrow-down') {
-    //                 // postContent.value += `<br>`
-    //                 txtarea.value = `${beforeChange}${toBeChanged}<br>${afterChange}`
-    //             }
-    //         })
-    //     })
-    // })
+            document.getElementById('writing-palette').addEventListener('click', (e) => {
+                // const selectionEnd = txtarea.selectionEnd;
+                const postContent = document.getElementById('postContent');
+                if (e.target.className === 'fas fa-bold') {
+                    // console.log(selectionEnd)
+                    // postContent.value += `<b></b>`
+                    txtarea.value = `${beforeChange}<b>${toBeChanged}</b>${afterChange}`;
+                    // txtarea.focus()
+                    // txtarea.selectionEnd= selectionEnd;
+                }
+                if (e.target.className === 'fas fa-italic') {
+                    // postContent.value += `<i></i>`
+                    txtarea.value = `${beforeChange}<em>${toBeChanged}</em>${afterChange}`
+                }
+                if (e.target.className === 'fas fa-link') {
+                    // postContent.value += `<a href='https://WWW.EXAMPLE.COM'></a>`
+                    txtarea.value = `${beforeChange}${toBeChanged}<a href='https://EXAMPLE.COM'></a>${afterChange}`
+                }
+                if (e.target.className === 'fas fa-arrow-down') {
+                    // postContent.value += `<br>`
+                    txtarea.value = `${beforeChange}${toBeChanged}<br>${afterChange}`
+                }
+            })
+        })
+    })
 
     // Preview post fucntionality
     const previewBtn = document.querySelector('.button-2')

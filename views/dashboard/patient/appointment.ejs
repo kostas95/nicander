@@ -34,7 +34,6 @@
         border: none;
         padding-top: 10px;
         padding-bottom: 10px;
-        margin-left: 25px;
         width: 80%;
         font-size: 14px;
         font-family: 'Roboto', sans-serif;
@@ -76,10 +75,29 @@
         padding: 1rem !important;
     }
 
-    /* 
-    #peerDiv {
-        z-index: -1;
-    } */
+    #textareaForm {
+        margin-left: 25px;
+    }
+
+    .files-modal>div {
+        align-items: flex-start;
+        overflow: auto;
+    }
+
+    .file:nth-child(2n+1) {
+        background-color: #ebebeb;
+    }
+
+    .file:hover {
+        background-color: rgba(109, 50, 109, 0.452);
+        ;
+        cursor: pointer;
+    }
+
+    .file {
+        width: 100%;
+        align-items: flex-start;
+    }
 </style>
 
 <div class="container width-100 padding-1rem flex-dir-row">
@@ -95,30 +113,49 @@
         <!-- Area where we type stuff -->
         <div class="container width-100 flex-dir-row" id="text-area">
             <!-- Textarea wrapper -->
-            <form class="container width-100 flex-dir-row" id="wrap-textarea-cont">
-                <!-- Textarea -->
-                <textarea name="" id="textArea" class="" placeholder="Type your message here..."></textarea>
+            <div class="container width-100 flex-dir-row" id="wrap-textarea-cont">
+                <form id="textareaForm" class="width-80 container">
+                    <!-- Textarea -->
+                    <textarea name="" id="textArea" class="width-100"
+                        placeholder="Type your message here..."></textarea>
+                </form>
                 <!-- Buttons -->
-                <label for="file">
-                    <i class="far fa-folder-open pointer" title="Choose file"></i>
-                </label>
-                <input type="file" name="file" id="file">
-                <i class="far fa-paper-plane pointer" title="Send message"></i>
-            </form>
+                <!-- We have a hidden i frame that's gonna be a target for our form when posts our data to the server. In this way, the page wont redirect -->
+                <style>
+                    .hide {
+                        position: absolute;
+                        top: -1px;
+                        left: -1px;
+                        width: 1px;
+                        height: 1px;
+                    }
+                </style>
+                <iframe name="hiddenFrame" class="hide"></iframe>
+                <form action="/appointment/<%= appointment_id %>" id="upload-files" method="POST" target="hiddenFrame"
+                    enctype="multipart/form-data" class="container flex-dir-row">
+                    <label for="file">
+                        <i class="far fa-folder-open pointer" title="Choose file"></i>
+                    </label>
+                    <input type="file" name="file" id="file">
+                    <i class="far fa-paper-plane pointer" title="Send message"></i>
+                </form>
+            </div>
+        </div>
+        <div class="container flex-dir-row padding-5px" id="files">
+            <div id="shared-files" class="pointer">Shared Files</div>
         </div>
     </div>
 
     <!-- Video Area -->
     <div class="container width-100" id="video-area">
         <div class="container" id="videos-container">
-            <h1 class="h1" id="make-call-header"></h1>
+            <h1 class="h1 text-center padding-1rem" id="make-call-header"></h1>
             <i class="fas fa-video fa-3x pointer"></i>
             <div id="peerDiv" class="embed-responsive embed-responsive-16by9">
             </div>
             <video id="myVideo" muted></video>
         </div>
     </div>
-</div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.2/simplepeer.min.js"></script>
@@ -127,13 +164,13 @@
 <script>
 
     let socket = io();
-    const appointment_id = '<%= appointment_id %>'
+    const appointment_id = '<%= appointment_id %>';
+    const user_id = '<%= id %>';
     let patient, doctor
-    //Alert if user is willing to exit this page
-    // window.onbeforeunload = function () {
-    //     return 'Are you sure you want to leave?';
-    //     console.log('asdf')
-    // };
+
+    function myConfirmation() {
+        return 'Are you sure you want to quit?';
+    }
 
     const videoArea = document.querySelector('#video-area'), chatArea = document.querySelector('#chat-area');
 
@@ -144,7 +181,24 @@
     const video = document.querySelector('video')
     const filter = document.querySelector('#filter')
     let client = {}
+    let timesConnected;
 
+    //Prevent from using scroll click to open link of the app in new tab
+    let navbarItems = document.querySelectorAll('.navbar-item');
+    console.log(Array.from(navbarItems))
+    let index = 0;
+    Array.from(navbarItems).forEach(item => {
+        if (index < 5) {
+            let aItem = item.parentElement
+            const newEl = document.createElement('div');
+            newEl.appendChild(item)
+            // document.querySelector('ul').appendChild(newEl)
+            aItem.replaceWith(newEl)
+            newEl.addEventListener('click', () => {
+                window.location.href = '/dashboard/my-appointments'
+            })
+        } index++
+    })
 
     setTimeout(() => {
         fetch("/getAppointments/1", {
@@ -156,12 +210,16 @@
 
             //make sure to serialize your JSON body
             body: JSON.stringify({
-                appointment_id: appointment_id
+                appointment_id: appointment_id,
+                'user.id': user_id,
+                type: 'patient'
             })
         })
             .then(response => response.json())
             .then((body) => {
                 console.log(body)
+                let timesConnected = body.patient.timesConnected;
+                console.log('Times connected: ', timesConnected)
                 patient = body.patient
                 doctor = body.doctor
                 document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`
@@ -202,12 +260,15 @@
                         setTimeout(() => {
                             modal.remove()
                         }, 1500);
+                        timesConnected++
+                        console.log('Times connected: ', timesConnected)
+                        window.onbeforeunload = myConfirmation;
                     })
 
                     addEventListenerIcon()
-
                 }
 
+                window.onbeforeunload = myConfirmation;
 
             });
     }, 500);
@@ -466,6 +527,9 @@
             document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} aborted the call. You can call later.`;
         } else if (type === 'cancelself') {
             document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`;
+        } else if (type === 'endcall') {
+            document.querySelector('#make-call-header').innerText = `Thank you for using our video conference tool. We hope you were satisfied and you will use it again.`;
+            callButton.remove()
         }
     }
 
@@ -517,7 +581,6 @@
             min = `0${min}`
         }
         if (hh < 10) {
-            console.log('asdf')
             hh = `0` + hh
         }
         if (today.getSeconds() < 10) {
@@ -560,7 +623,11 @@
         navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true,
-            video: { width: 320, height: 240 }
+            video: {
+                height: { min: 106, ideal: 212, max: 320 },
+                width: { min: 106 * (320 / 240), ideal: 212 * (320 / 240), max: 240 },
+            },
+            facingMode: 'user'
         })
             .then(stream => {
                 socket.emit('NewClient')
@@ -572,16 +639,18 @@
                 const endBtn = document.createElement('i');
                 endBtn.className = 'fas fa-phone-slash fa-2x padding-left-right-12px pointer';
                 endBtn.addEventListener('click', () => {
-                    stopBothVideoAndAudio(stream)
-                    document.querySelector('#myVideo').style.display = 'none'
-                    if (document.querySelector('#peerVideo'))
-                        document.querySelector('#peerVideo').remove()
-                    document.querySelector('#buttons-container').remove()
-                    restoreToInitial('cancelself')
-                    socket.emit('endCall', {
-                        end: true,
-                        from: 'patient'
-                    })
+                    if (confirm('Are you sure you want to end the video call? If you want to just pause it, press the pause button')) {
+                        stopBothVideoAndAudio(stream)
+                        document.querySelector('#myVideo').remove()
+                        if (document.querySelector('#peerVideo'))
+                            document.querySelector('#peerVideo').remove()
+                        document.querySelector('#buttons-container').remove()
+                        restoreToInitial('endcall')
+                        socket.emit('endCall', {
+                            end: true,
+                            from: 'patient'
+                        })
+                    }
                 })
                 //Mute button
                 let muted = false;
@@ -605,9 +674,9 @@
                 //End call
                 socket.on('endCall', (data) => {
                     document.querySelector('#peerVideo').remove()
-                    document.querySelector('#myVideo').style.display = 'none'
+                    document.querySelector('#myVideo').remove()
                     document.querySelector('#buttons-container').remove()
-                    restoreToInitial('cancelself')
+                    restoreToInitial('endcall')
                     stopBothVideoAndAudio(stream)
                 })
                 //used to initialize a peer
@@ -659,19 +728,7 @@
                 })
                 socket.on('SessionActive', function () {
                     console.log('Session Active.')
-                    let video = document.createElement('video')
-                    video.id = 'peerVideo'
-                    video.srcObject = stream
-                    document.querySelector('#peerDiv').appendChild(video)
-                    var p = video.play();
-                    if (p !== undefined) p.catch(function () { });
 
-                    let videos = Array.from(document.querySelectorAll('#peerVideo'))
-                    for(i = 0; i < videos.length-1; i++){
-                        let video = videos[i]
-                        console.log(video)
-                        video.remove()
-                    }
                 })
                 socket.on('Disconnect', function () {
                     console.log('disconnect')
@@ -682,26 +739,140 @@
                     }
                 })
             })
-            .catch(err => document.write(err))
+            .catch(err => console.log(err))
     }
 
     function stopBothVideoAndAudio(stream) {
         if (document.getElementById("peerVideo"))
             document.getElementById("peerVideo").remove();
-
         if (client.peer) {
             client.peer.destroy()
         }
         stream.getTracks().forEach(function (track) {
-            if (track.readyState == 'live') {
-                track.stop();
-            }
+            track.stop();
         });
     }
 
     // mute (black screen)
     function muteStream(stream) {
         stream.getTracks().forEach(track => track.enabled = !track.enabled);
-        console.log(stream.getTracks())
     }
+
+    //When select one file from folder, submit immediately
+    document.getElementById("file").onchange = function (e) {
+        document.querySelector('#upload-files').submit()
+        socket.emit('fileUploaded', {
+            from: 'patient'
+        })
+    };
+
+    //Share files event listener
+    document.querySelector('#shared-files').addEventListener('click', (e) => {
+        if (document.querySelector('#dot')) {
+            document.querySelector('#dot').remove()
+        }
+        fetch("/getFiles", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                appointment_id: appointment_id
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                //Create modal
+                const modal = document.createElement('div');
+                modal.className = 'modal container';
+
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content container files-modal';
+                const cont = document.createElement('div');
+                cont.className = 'container width-100 padding-1rem';
+                cont.id = 'files-area'
+                modalContent.appendChild(cont)
+                if (!body.err) {
+                    body.sort(function (a, b) {
+                        var c = new Date(a.uploadDate);
+                        var d = new Date(b.uploadDate);
+                        return d - c;
+                    }).forEach(file => {
+                        const elemCont = document.createElement('form');
+                        elemCont.method = "get";
+                        elemCont.className = 'container file'
+                        elemCont.id = file._id
+                        elemCont.target = 'hiddenFrame'
+                        elemCont.action = `/download/${file.filename}`
+                        elemCont.addEventListener('click', e => {
+                            elemCont.submit()
+                        })
+                        if (file.contentType.includes('image')) {
+                            elemCont.innerHTML = `
+                        <div class='container flex-dir-row padding-5px'>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <i class="far fa-file-image"></i>    
+                            </div>    
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Filename: </strong>
+                                <span>${file.filename}</span>
+                            </div>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Date: </strong>
+                                <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
+                            </div>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Sent by: </strong>
+                                <span>${file.metadata.user_type}</span>
+                            </div>
+                        </div>
+                        `
+                        } else {
+                            elemCont.innerHTML = `
+                        <div class='container flex-dir-row padding-5px' id='${file._id}'>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <i class="far fa-file-alt"></i>    
+                            </div>    
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Filename: </strong>
+                                <span>${file.filename}</span>
+                            </div>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Date: </strong>
+                                <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
+                            </div>
+                            <div class='margin-left-right-10px padding-5px'>
+                                <strong>Sent by: </strong>
+                                <span>${file.metadata.user_type}</span>
+                            </div>
+                        </div>
+                        `
+                        }
+                        cont.appendChild(elemCont)
+                    })
+                }
+                //Append modal
+                modal.appendChild(modalContent);
+                document.querySelector('body').appendChild(modal)
+
+                document.querySelector('body').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('fas') || e.target.classList.contains('modal'))
+                        modal.remove()
+                })
+            });
+
+    })
+
+    socket.on('fileUploaded', () => {
+        if (!document.querySelector('#dot')) {
+            const dot = document.createElement('div')
+            dot.id = 'dot'
+            document.querySelector('#files').appendChild(dot);
+        }
+    })
+
+
 </script>

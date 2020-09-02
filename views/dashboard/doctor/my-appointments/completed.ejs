@@ -169,12 +169,25 @@
 
                         const cont = createContainer();
 
+                        const btn = createButton('viewApp', 'View appointment')
+                        btn.addEventListener('click', () => {
+                            window.location.href = `/appointment/${appointment._id}`
+                        })
+
                         //Here we must have the rating of the user
 
-                        // cont.appendChild(btn)
+                        cont.appendChild(btn)
                         appointmentSection.appendChild(cont)
 
                         history.appendChild(appointmentElement)
+                    }
+                    function createButton(id, innerText) {
+                        const btn = document.createElement('button')
+                        btn.className = 'button small'
+                        btn.id = `${id}`
+                        btn.innerText = `${innerText}`
+
+                        return btn;
                     }
 
                     //Append right section to appointment container

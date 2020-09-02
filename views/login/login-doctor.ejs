@@ -11,6 +11,18 @@
         padding-right: 5rem;
         border-right: 5px solid #f8f9fa;
     }
+
+    a {
+        color: #535353;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    body {
+        overflow: auto;
+    }
 </style>
 <div class="container">
     <div id='login-header' class="container flex-dir-row">
@@ -29,6 +41,9 @@
                 <input type="password" id="password" name='password' class='input-field'>
                 <input type="text" id="type" name='type' class='input-field' value="doctor">
                 <input type="submit" value="Login" class="button">
+                <div class="padding-1rem width-100 text-left">
+                    <a href="#" id="forgotPassword" class="text-left">Forgot password?</a>
+                </div>
                 <div class="message-log">
                     <%= error %>
                 </div>
@@ -77,4 +92,81 @@
     function styleBorder(field, color) {
         field.style.border = `1px solid ${color}`
     }
+
+    document.querySelector('#forgotPassword').addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal container';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content container';
+
+        const header = document.createElement('h1');
+        header.innerText = 'Forgot your password?';
+        header.className = 'container padding-1rem width-100 big-h1';
+        modalContent.appendChild(header)
+
+        const description = document.createElement('div');
+        description.className = 'container padding-1rem width-100'
+        // description.style.lineHeight = '2rem'
+        description.innerText = 'Type in your email address and we will send you a new password via e-mail. Then you will be able to login, using the new password.'
+        modalContent.appendChild(description)
+
+        const inputField = document.createElement('input');
+        inputField.type = 'email';
+        inputField.className = 'input-field';
+        inputField.placeholder = 'Type your email address';
+        modalContent.appendChild(inputField);
+
+        const submitButton = document.createElement('button');
+        submitButton.className = 'button';
+        submitButton.innerText = 'Send me a new password';
+        modalContent.appendChild(submitButton);
+
+        submitButton.addEventListener('click', () => {
+            if (document.querySelector('#msg')) {
+                document.querySelector('#msg').remove()
+            }
+            const msg = document.createElement('div');
+            msg.innerHTML = `<i class="fa fa-spinner fa-spin" style="font-size:24px"></i>`
+            modalContent.appendChild(msg);
+
+            if (inputField.value.length > 0) {
+                fetch("/password/forgot", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        email: inputField.value,
+                        type: 'doctor'
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+
+                        msg.innerText = `${body.msg}`;
+                        msg.style.padding = '1rem'
+                        msg.id = 'msg'
+
+                        if (body.type === 'success') {
+                            msg.style.color = 'green';
+                        } else {
+                            msg.style.color = 'red';
+                        }
+                    });
+
+            }
+        })
+
+        modal.appendChild(modalContent);
+        document.querySelector('body').appendChild(modal)
+
+        document.querySelector('body').addEventListener('click', (e) => {
+            if (e.target.classList.contains('fas') || e.target.classList.contains('modal'))
+                modal.remove()
+        })
+    })
 </script>

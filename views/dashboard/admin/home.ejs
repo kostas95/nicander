@@ -1,9 +1,172 @@
 <style>
-    h1 {
-        font-size: 2rem;
-        font-weight: lighter;
+    .margin-right-20rem {
+        margin-right: 20rem;
+    }
+
+    .margin-left-10rem {
+        margin-left: 10rem;
+    }
+
+    .width-75vw {
+        width: 75vw;
+    }
+
+    .flex-left {
+        align-self: start;
+    }
+
+    .align-left {
+        align-items: flex-start;
+    }
+
+    .border-style {
+        border-right: 5px solid #f8f9fa;
+    }
+
+    .content {
+        background: #f2f1f1;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        width: 40vw;
     }
 </style>
-<div class="dashboard-container">
-    <h1>Welcome <%= username %></h1>
+
+<div class="container padding-2rem">
+
+    <div class="container border-style padding-2rem margin-right-20rem margin-left-10rem">
+        <div class="container padding-2rem width-75vw flex-left">
+            <h1 class="h1 margin-bottom-1rem text-left flex-left">Welcome <%= username %></h1>
+        </div>
+        <div class="container padding-2rem width-75vw flex-left">
+            <h1 class="h1 margin-bottom-1rem text-left flex-left">Unauthorized doctors</h1>
+            <div class="container width-100 align-left" id="unauthorized-container">
+
+            </div>
+        </div>
+        <div class="container padding-2rem width-75vw flex-left">
+            <h1 class="h1 margin-bottom-1rem text-left flex-left">Report requests</h1>
+            <div class="container width-100 align-left" id="reports-container">
+
+            </div>
+        </div>
+        <div class="container padding-2rem width-75vw flex-left">
+            <h1 class="h1 margin-bottom-1rem text-left flex-left">Unread messages</h1>
+            <div class="container width-100 align-left" id="messages-container">
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    const reportsContainer = document.querySelector('#reports-container')
+    const messagesContainer = document.querySelector('#messages-container')
+    const unauthorizedContainer = document.querySelector('#unauthorized-container')
+
+
+    //Get amount of reports and display it
+    fetch("/getReports", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.reports.length != 0) {
+                reportsContainer.innerHTML = `
+                    <div class="container content" >
+                        <div class='padding-1rem'>There are ${body.reports.length} reported doctors!</div>
+                        <button class='button width-50' >
+                            <a style='color:white' href='/dashboard/reports'>Examine the report requests</a>
+                        </button>
+                    </div>
+                    `
+            } else {
+                reportsContainer.innerHTML = `
+                    <div class="container content" >
+                        <div class='padding-1rem'>There are no report requests at this moment.</div>
+                    </div>
+                    `
+            }
+        })
+
+    //Get amount of reports and display it
+    fetch("/getMessages/unread", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+            if (body.length != 0) {
+                messagesContainer.innerHTML = `
+                    <div class="container content" >
+                        <div class='padding-1rem'>There are ${body.length} messages that need your attention!</div>
+                        <button class='button width-50' >
+                            <a style='color:white' href='/dashboard/contact-platform'>Read them now</a>
+                        </button>
+                    </div>
+                    `
+            } else {
+                messagesContainer.innerHTML = `
+                <div class="container content" >
+                    <div class='padding-1rem'>There are no unread messages at this moment.</div>
+                </div>
+                `
+            }
+        })
+
+    //Get anauth doctors number
+    fetch("/getUsers/admin", {
+        method: "post",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+
+        //make sure to serialize your JSON body
+        body: JSON.stringify({
+            usertype: 'doctor'
+        })
+    })
+        .then(response => response.json())
+        .then((body) => {
+            let unauthUsers = 0
+            if (body.length != 0) {
+                body.forEach(user => {
+                    if (user.authorized === false) {
+                        unauthUsers++
+                    }
+                });
+
+                if (unauthUsers === 1) {
+                    unauthorizedContainer.innerHTML = `
+                    <div class="container content" >
+                        <div class='padding-1rem'>${unauthUsers} doctor needs to be authorized!</div>
+                        <button class='button width-50' >
+                            <a style='color:white' href='/dashboard/users-management/doctors'>Authorize him now</a>
+                        </button>
+                    </div>
+                    `
+                } else if (unauthUsers > 1) {
+                    unauthorizedContainer.innerHTML = `
+                    <div class="container content" >
+                        <div class='padding-1rem'>${unauthUsers} doctors need to be authorized!</div>
+                        <button class='button width-50' >
+                            <a style='color:white' href='/dashboard/users-management/doctors'>Authorize them now</a>
+                        </button>
+                    </div>
+                    `
+                }
+            } else {
+                unauthorizedContainer.innerHTML = `
+                <div class="container content" >
+                    <div class='padding-1rem'>All doctors are authorized at this moment.</div>
+                </div>
+                `
+            }
+        })
+</script>

@@ -1,0 +1,218 @@
+<style>
+    .justify-left {
+        justify-content: flex-start;
+    }
+
+    .align-top {
+        justify-content: flex-start;
+    }
+
+    .align-top2 {
+        align-items: flex-start;
+    }
+
+    .message-item>div {
+        min-height: 140px;
+    }
+
+    .strong {
+        padding: 5px;
+    }
+
+    .message-item {
+        border-radius: 5px;
+        margin-top: 5px;
+        background-color: #f8f8f8;
+    }
+
+    .modal-content {
+        padding: 1rem;
+        height: 100vh;
+    }
+
+    textarea {
+        width: 75%;
+        height: 50vh;
+        outline: none;
+        font-family: 'Roboto', sans-serif;
+        padding: 10px;
+        border: 1px solid rgb(226, 226, 226);
+        border-radius: 5px;
+    }
+
+    input,
+    select,
+    label {
+        width: 75% !important;
+        margin: 0;
+    }
+
+    .button {
+        margin: 3rem 0 0 0;
+    }
+
+    label {
+        margin: 10px;
+    }
+
+    .font {
+        font-size: 1.5rem;
+    }
+
+    .color {
+        color: #868686;
+        font-size: 12px;
+        font-weight: bolder;
+    }
+
+    .content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    .content {
+        padding: 1rem 0 10rem 0;
+    }
+</style>
+
+<div class="container padding-1rem width-100 content">
+    <div class="container width-100">
+        <h1 class="container padding-5px width-100 big-h1 flex-dir-row"><i class="fas fa-paper-plane"></i>Email
+            Notifications</h1>
+    </div>
+    <div class="container flex-dir-row padding-2rem">
+        <a href="/dashboard/email-notifications/history">
+            <div class="dashboard-headers width-100"><i class="fas fa-history"></i>Email Notifications History</div>
+        </a>
+    </div>
+    <div class="container padding-1rem width-100" id="textarea-container">
+        <label for="subject" class="big-h1">Email subject</label>
+        <input type="text" name="subject" id="subject" class="input-field" placeholder="Insert this email's subject">
+        <label for="body" class="big-h1">Email body</label>
+        <div class="container flex-dir-row padding-1rem" id='writing-palette'>
+            <i class="fas fa-bold" title="Bold"></i>
+            <i class="fas fa-italic" title="Italic"></i>
+            <i class="fas fa-link" title="Add URL"></i>
+        </div>
+        <textarea name="body" id="body" placeholder="Insert this email's body"></textarea>
+        <label for="select" class="big-h1">Send to:</label>
+        <select name="users" id="select">
+            <option value="all">All users</option>
+            <option value="doctors">Doctors</option>
+            <option value="patients">Patients</option>
+        </select>
+        <button id="submit" class="button">Send Email</button>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+<script>
+
+    const button = document.querySelector('#submit'),
+        subject = document.querySelector('#subject'),
+        body = document.querySelector('#body'),
+        select = document.querySelector('#select');
+    const name = '<%= name %>', surname = '<%= surname %>';
+    const username = name + ' ' + surname;
+
+    body.value = "The standard Lorem Ipsum passage, used since the 1500 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    subject.value = 'Test lorem ipsum dolor sit amet bla bla bla'
+    // Functionality for bold, italic, line break, url
+    body.addEventListener('mousedown', (e) => {
+        body.addEventListener('mouseup', (e) => {
+            const beforeChange = body.value.substring(0, body.selectionStart);
+            const afterChange = body.value.substring(body.selectionEnd, body.length);
+            const toBeChanged = body.value.substring(body.selectionStart, body.selectionEnd);
+
+            document.getElementById('writing-palette').addEventListener('click', (e) => {
+                // const selectionEnd = txtarea.selectionEnd;
+                const postContent = document.getElementById('postContent');
+                if (e.target.className === 'fas fa-bold') {
+                    // console.log(selectionEnd)
+                    // postContent.value += `<b></b>`
+                    body.value = `${beforeChange}<b>${toBeChanged}</b>${afterChange}`;
+                    // txtarea.focus()
+                    // txtarea.selectionEnd= selectionEnd;
+                }
+                if (e.target.className === 'fas fa-italic') {
+                    // postContent.value += `<i></i>`
+                    body.value = `${beforeChange}<em>${toBeChanged}</em>${afterChange}`
+                }
+                if (e.target.className === 'fas fa-link') {
+                    // postContent.value += `<a href='https://WWW.EXAMPLE.COM'></a>`
+                    body.value = `${beforeChange}${toBeChanged}<a href='https://EXAMPLE.COM'></a>${afterChange}`
+                }
+            })
+        })
+    })
+
+
+    button.addEventListener('click', () => {
+
+        if (subject.value.length === 0 || body.value.length === 0) {
+            if (subject.value.length === 0) {
+                borderErr(subject)
+            }
+            if (body.value.length === 0) {
+                borderErr(body)
+            }
+        } else {
+            if (confirm(`Are you sure you want to send this email to: ${select.value} users?`)) {
+
+                button.innerHTML = '<i style="color:white" class="fa fa-spinner fa-spin">'
+
+                fetch("/email", {
+                    method: "post",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    //make sure to serialize your JSON body
+                    body: JSON.stringify({
+                        subject: CryptoJS.AES.encrypt(subject.value, "Secret Passphrase").toString(),
+                        body: CryptoJS.AES.encrypt(body.value, "Secret Passphrase").toString(),
+                        receivers: select.value,
+                        sender: username
+                    })
+                })
+                    .then(response => response.json())
+                    .then((body) => {
+                        if (body.type === 'success') {
+                            button.innerHTML = `
+                        <i class="fas fa-check" style='color:green'></i> ${body.msg}
+                        `
+                        } else {
+                            button.innerHTML = `
+                        <i class="fas fa-times" style='color:red'></i> ${body.msg}
+                        `
+                        }
+                        subject.value = ''
+                        document.querySelector('#body').value = ''
+
+                        button.disabled = true
+
+                        setTimeout(() => {
+                            button.disabled = false
+                            button.innerHTML = 'Send Email'
+                        }, 10000);
+                    });
+            }
+        }
+
+    })
+
+    function borderErr(element) {
+        element.style.border = '1px solid red';
+        setTimeout(() => {
+            element.style.border = '1px solid rgb(226, 226, 226)'
+        }, 10000);
+    }
+</script>
