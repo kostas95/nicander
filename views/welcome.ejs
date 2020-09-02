@@ -173,10 +173,10 @@
 
 <script>
 
-    //When refresh go to top
-    // window.onbeforeunload = function () {
-    //     window.scrollTo(0, 0);
-    // }
+    // When refresh go to top
+    window.onbeforeunload = function () {
+        window.scrollTo(0, 0);
+    }
 
     // Background change every 15sec
     let i = 1;
@@ -371,7 +371,6 @@
             })
             if (s_found === 1) {
 
-                console.log(specialtiesArr)
                 specialtiesArr.forEach((specialty) => {
                     createResult(specialties, specialty)
                 })
@@ -514,7 +513,6 @@
             } else if (el.classList.contains('backinleft')) {
                 el.classList.add('animate__animated', 'animate__backInLeft')
             } else if (el.classList.contains('bounceIn')) {
-                console.log('ok')
                 el.style.visibility = 'visible'
                 el.classList.add('animate__animated', 'animate__bounceIn')
             }
