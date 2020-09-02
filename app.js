@@ -3026,7 +3026,7 @@ app.get('*', function (req, res) {
                      if (data.type === 'patient') {
                         //Then we need to send it to the doctor
                         if (data.typing === true) {
-                           socket.broadcast.to(appointment.doctor.socket_id).emit('typing', `${appointment.patient.name} ${appointment.patient.name} is typing...`)
+                           socket.broadcast.to(appointment.doctor.socket_id).emit('typing', `${appointment.patient.name} ${appointment.patient.surname} is typing...`)
                         }
                         //If he's no longer typing 
                         else {
@@ -3036,7 +3036,7 @@ app.get('*', function (req, res) {
                      // Else if doctor sent data that he's typing 
                      else if (data.type === 'doctor') {
                         if (data.typing === true) {
-                           socket.broadcast.to(appointment.patient.socket_id).emit('typing', `Dr. ${appointment.doctor.name} ${appointment.doctor.name} is typing...`)
+                           socket.broadcast.to(appointment.patient.socket_id).emit('typing', `Dr. ${appointment.doctor.name} ${appointment.doctor.surname} is typing...`)
                         }
                         //If he's no longer typing                         
                         else {

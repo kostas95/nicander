@@ -324,9 +324,15 @@
         .then((body) => {
             const appointmentsContainer = document.querySelector('#appointments-container');
             let count = 0;
+            let futureAppointments = 0;
+            body.appointments.forEach(appointment => {
+                if(appointment.type === 'appointment') {
+                    futureAppointments++
+                }
+            })
 
             if (body.result === 'success') {
-                appointmentsContainer.innerHTML = `<div class='container padding-1rem'>You have ${body.appointments.length} upcoming appointments</div>`
+                appointmentsContainer.innerHTML = `<div class='container padding-1rem'>You have ${futureAppointments} upcoming appointments</div>`
                 body.appointments.sort(function (a, b) {
                     var c = new Date(a.timestamp);
                     var d = new Date(b.timestamp);
