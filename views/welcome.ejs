@@ -172,6 +172,12 @@
 </div>
 
 <script>
+
+    //When refresh go to top
+    // window.onbeforeunload = function () {
+    //     window.scrollTo(0, 0);
+    // }
+
     // Background change every 15sec
     let i = 1;
     const background = document.querySelector('#background-image');
@@ -452,13 +458,18 @@
 
     let last_known_scroll_position = 0;
     let ticking = false;
-    Array.from(document.querySelectorAll('.img')).forEach(el => {
-        isScrolledIntoView(el)
-    })
 
-    Array.from(document.querySelectorAll('.text')).forEach(el => {
-        isScrolledIntoView(el)
-    })
+    setTimeout(() => {
+        isScrolledIntoView(backInLeft)
+
+        fadeIn.forEach(el => {
+            isScrolledIntoView(el)
+        })
+
+        bounce.forEach(el => {
+            isScrolledIntoView(el)
+        })
+    }, 200);
 
     function doSomething(scroll_pos) {
 
