@@ -450,7 +450,7 @@
 
     const backInLeft = document.querySelector('.backinleft');
     const fadeIn = Array.from(document.querySelectorAll('.fadeIn'));
-    let bounce;
+    let bounce = Array.from(document.querySelectorAll('.bounceIn'));
     setTimeout(() => {
         bounce = Array.from(document.querySelectorAll('.bounceIn'));
     }, 1000);
@@ -478,10 +478,12 @@
             isScrolledIntoView(el)
         })
 
-        bounce.forEach(el => {
-            console.log(el)
-            isScrolledIntoView(el)
-        })
+        setTimeout(() => {
+            bounce.forEach(el => {
+                console.log(el)
+                isScrolledIntoView(el)
+            })
+        }, 1000);
     }
 
     window.addEventListener('scroll', function (e) {
