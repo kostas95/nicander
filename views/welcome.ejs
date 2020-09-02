@@ -480,7 +480,6 @@
 
         setTimeout(() => {
             bounce.forEach(el => {
-                console.log(el)
                 isScrolledIntoView(el)
             })
         }, 1000);
@@ -517,7 +516,6 @@
                 el.classList.add('animate__animated', 'animate__backInLeft')
             } else if (el.classList.contains('bounceIn')) {
                 el.style.visibility = 'visible'
-                console.log(el.style.visibility, el)
                 el.classList.add('animate__animated', 'animate__bounceIn')
             }
         }
