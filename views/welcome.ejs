@@ -453,7 +453,7 @@
     let bounce;
     setTimeout(() => {
         bounce = Array.from(document.querySelectorAll('.bounceIn'));
-    }, 150);
+    }, 100);
 
     let last_known_scroll_position = 0;
     let ticking = false;
@@ -468,7 +468,7 @@
         bounce.forEach(el => {
             isScrolledIntoView(el)
         })
-    }, 200);
+    }, 100);
 
     function doSomething(scroll_pos) {
 
@@ -514,6 +514,7 @@
                 el.classList.add('animate__animated', 'animate__backInLeft')
             } else if (el.classList.contains('bounceIn')) {
                 el.style.visibility = 'visible'
+                console.log(el.style.visibility, el)
                 el.classList.add('animate__animated', 'animate__bounceIn')
             }
         }
