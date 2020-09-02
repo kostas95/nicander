@@ -453,22 +453,22 @@
     let bounce;
     setTimeout(() => {
         bounce = Array.from(document.querySelectorAll('.bounceIn'));
-    }, 100);
+    }, 1000);
 
     let last_known_scroll_position = 0;
     let ticking = false;
 
-    setTimeout(() => {
-        isScrolledIntoView(backInLeft)
+    // setTimeout(() => {
+    //     isScrolledIntoView(backInLeft)
 
-        fadeIn.forEach(el => {
-            isScrolledIntoView(el)
-        })
+    //     fadeIn.forEach(el => {
+    //         isScrolledIntoView(el)
+    //     })
 
-        bounce.forEach(el => {
-            isScrolledIntoView(el)
-        })
-    }, 100);
+    //     bounce.forEach(el => {
+    //         isScrolledIntoView(el)
+    //     })
+    // }, 1000);
 
     function doSomething(scroll_pos) {
 
@@ -479,6 +479,7 @@
         })
 
         bounce.forEach(el => {
+            console.log(el)
             isScrolledIntoView(el)
         })
     }
