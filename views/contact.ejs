@@ -23,6 +23,44 @@
         width: 100%;
         margin-top: 5px;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        * {
+            padding: 0 !important;
+        }
+
+        .padding-5px {
+            padding: 5px 0 !important;
+        }
+
+        #main-container {
+            padding: 1rem 0.5rem !important;
+        }
+
+        .width-50 {
+            width: 100% !important;
+            border: none;
+        }
+
+        .form {
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+
+        textarea,
+        input {
+            width: 90%;
+        }
+
+        button {
+            padding: 5px 1rem !important;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+    }
 </style>
 
 <div class="container padding-1rem width-100 justify-top" id="main-container">
@@ -42,14 +80,15 @@
         </div>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js" integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
 
 <script>
 
     const submit = document.querySelector('.button');
     const message = document.querySelector('textarea'),
         name = document.querySelector('#name'), surname = document.querySelector('#surname'), email = document.querySelector('#email')
-    
+
     submit.addEventListener('click', () => {
 
         if (message.value === '' || name.value === '' || surname.value === '' || email.value === '') {

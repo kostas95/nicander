@@ -185,7 +185,7 @@
 
     //Prevent from using scroll click to open link of the app in new tab
     let navbarItems = document.querySelectorAll('.navbar-item');
-    console.log(Array.from(navbarItems))
+
     let index = 0;
     Array.from(navbarItems).forEach(item => {
         if (index < 5) {
@@ -217,9 +217,7 @@
         })
             .then(response => response.json())
             .then((body) => {
-                console.log(body)
                 let timesConnected = body.patient.timesConnected;
-                console.log('Times connected: ', timesConnected)
                 patient = body.patient
                 doctor = body.doctor
                 document.querySelector('#make-call-header').innerText = `Dr. ${doctor.name} ${doctor.surname} is online. Call him now.`
@@ -250,7 +248,6 @@
                     //Get event "accessChat"
                     //This event triggers the removal of the modal
                     socket.on('accessChat', (data) => {
-                        console.log(data)
                         modalContent.innerHTML = `
                         <div class="container width-100 padding-1rem">
                             <h1 class='big-h1'>The doctor has joined... You're entering the appointment</h1>
@@ -261,7 +258,6 @@
                             modal.remove()
                         }, 1500);
                         timesConnected++
-                        console.log('Times connected: ', timesConnected)
                         window.onbeforeunload = myConfirmation;
                     })
 
@@ -275,7 +271,6 @@
 
     //Get event if patient disconnects
     socket.on('peerDisconnected', (data) => {
-        console.log('DOCTOR LEFT')
         //Create modal
         const modal = document.createElement('div');
         modal.className = 'modal container';

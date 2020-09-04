@@ -119,7 +119,7 @@
             }
         })
 
-    //Get anauth doctors number
+    //Get unauth doctors number
     fetch("/getUsers/admin", {
         method: "post",
         headers: {
@@ -135,6 +135,7 @@
         .then(response => response.json())
         .then((body) => {
             let unauthUsers = 0
+            console.log(body)
             if (body.length != 0) {
                 body.forEach(user => {
                     if (user.authorized === false) {
@@ -160,6 +161,12 @@
                         </button>
                     </div>
                     `
+                } else {
+                    unauthorizedContainer.innerHTML = `
+                <div class="container content" >
+                    <div class='padding-1rem'>All doctors are authorized at this moment.</div>
+                </div>
+                `
                 }
             } else {
                 unauthorizedContainer.innerHTML = `

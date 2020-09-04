@@ -23,6 +23,65 @@
     body {
         overflow: auto;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        * {
+            padding: 0 !important;
+        }
+
+        #login-container {
+            padding: 1rem !important;
+        }
+
+        #login-header {
+            align-items: flex-start;
+            padding-left: 1rem !important;
+        }
+
+        #form-container {
+            width: 100% !important;
+            border: none;
+            border-bottom: 1px solid #535353;
+        }
+
+        .form,
+        label,
+        .input-field {
+            width: 100%;
+        }
+
+        .form {
+            padding-bottom: 1rem !important;
+        }
+
+        .input-field,
+        .button {
+            padding: 5px !important;
+        }
+
+        .button {
+            margin-bottom: 10px;
+        }
+
+        #haveAccountMsg {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .modal-content {
+            height: 60vh;
+            padding: 1rem !important;
+            justify-content: center;
+        }
+
+        .modal-content>.button {
+            width: 50%;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+    }
 </style>
 <div class="container">
     <div id='login-header' class="container flex-dir-row">

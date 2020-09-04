@@ -13,6 +13,85 @@
     <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
 </head>
+<style>
+    /* mobile */
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+
+        /* navbar */
+
+        #navbar {
+            flex-direction: column;
+        }
+
+        #navbar>:first-child {
+            margin-top: 1rem;
+        }
+
+        #navbar ul {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        #logo {
+            width: 10px;
+            height: 10px;
+        }
+
+        ul {
+            width: 100% !important;
+        }
+
+        ul * {
+            font-size: 12px;
+            margin: 10px 5px !important;
+        }
+
+        ul>li {
+            margin: 10px 5px !important;
+        }
+
+        .flex-dir-row {
+            flex-direction: column !important;
+        }
+
+        #section-1 h1 {
+            font-size: 2rem !important;
+        }
+
+        #dropdown {
+            width: 100px;
+            top: 1rem;
+            margin: 0;
+        }
+
+        footer {
+            height: auto;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-content {
+            overflow: auto;
+            height: 90vh;
+            width: 100vw;
+            padding: 0;
+        }
+
+        .modal-content>.container {
+            padding: 10px !important;
+        }
+
+        /* galaxy fold */
+        @media only screen and (max-width: 280px) and (max-height: 653px) {
+            ul * {
+                font-size: 9px !important;
+                margin: 2px !important;
+            }
+        }
+    }
+</style>
 
 <body>
 

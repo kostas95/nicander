@@ -185,7 +185,7 @@
 
     //Prevent from using scroll click to open link of the app in new tab
     let navbarItems = document.querySelectorAll('.navbar-item');
-    console.log(Array.from(navbarItems))
+
     let index = 0;
     Array.from(navbarItems).forEach(item => {
         if (index < 4) {
@@ -217,9 +217,9 @@
         })
             .then(response => response.json())
             .then((body) => {
-                console.log(body)
+
                 timesConnected = body.doctor.timesConnected;
-                console.log('Times connected: ', timesConnected)
+                
                 patient = body.patient
                 doctor = body.doctor
                 document.querySelector('#make-call-header').innerText = `Your patient, ${patient.name} ${patient.surname} is online. Call him now.`
@@ -260,7 +260,7 @@
                             modal.remove()
                         }, 1500);
                         timesConnected++
-                        console.log('Times connected: ', timesConnected)
+                        
                         window.onbeforeunload = myConfirmation;
                     })
 
@@ -489,7 +489,7 @@
         if (from === 'doctor') {
             contName.innerText = `You`
         } else if (from === 'patient') {
-            contName.innerText = `${data.doctor.name} ${data.doctor.surname}`
+            contName.innerText = `${data.patient.name} ${data.patient.surname}`
         }
         contName.className = 'container width-100'
         contName.id = 'chat-name'

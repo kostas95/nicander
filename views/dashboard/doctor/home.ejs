@@ -151,7 +151,6 @@
 <script>
     let users = [];
     const id = '<%= id %>';
-    console.log(id)
     const appointments = document.querySelector('#appointments-container');
     let total = []
 
@@ -192,8 +191,7 @@
                             let appointmentSection = document.createElement('div');
                             appointmentSection.className = `container padding-left-right-12px min-height border`
                             appointmentSection.innerHTML = `
-                            <a id='name' href='/profiles/${appointment.doctor.id}'>${appointment.doctor.name} ${appointment.doctor.surname}</a>
-                            <div id='specialty' class='strong'>${appointment.doctor.specialty}</div>
+                            <div style="color:#3498db;">${appointment.patient.name} ${appointment.patient.surname}</div>
                             `
                             //Append left section to appointment container
                             appointmentElement.appendChild(appointmentSection)

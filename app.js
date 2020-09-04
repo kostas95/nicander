@@ -255,7 +255,7 @@ app.get('/unauthorized', ensureAuthenticated, function (req, res) {
             id: req.user._id
          }
       }
-      res.render('unauthorized', params);
+      res.render('dashboard/unauthorized', params);
    } else if (req.user.emailAuthorized === true) {
       res.redirect('/dashboard')
    }
@@ -1368,7 +1368,6 @@ app.post('/dashboard/personal-details/password/d', ensureAuthenticated, (req, re
 
 //Get doctor's appointments
 app.post('/getAppointments/d', ensureAuthenticated, (req, res) => {
-   console.log(req.body)
    Appointment.find({
       'doctor.id': req.body.doctor_id,
       type: req.body.type
@@ -2481,7 +2480,6 @@ app.post('/password/forgot', (req, res) => {
       } else {
 
          const newPassword = CryptoJS.AES.decrypt(makeid(12), "Secret Passphrase").toString();
-         console.log(newPassword)
 
          bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newPassword, salt, (err, hash) => {
@@ -2670,7 +2668,7 @@ app.get('*', function (req, res) {
                      }
                   }
                   else if (!req.user) {
-                     res.render('dashboard/doctor_profile', {
+                     res.render('doctor_profile', {
                         layout: 'layout.ejs',
                         prof_id: prof_id,
                         items: items

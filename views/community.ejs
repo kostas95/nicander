@@ -41,7 +41,7 @@
         animation: animate1 2s forwards 0s ease-in-out;
     }
 
-    @keyframes  animate1 {
+    @keyframes animate1 {
         0% {
             background-color: #fff;
         }
@@ -50,12 +50,78 @@
             background-color: #f8f8f8;
         }
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        * {
+            padding: 0 !important;
+        }
+
+        #main-container {
+            padding: 1rem 0.5rem !important;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .width-70 {
+            width: 100% !important;
+            border: none;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+
+        .border h1 {
+            flex-direction: row !important;
+            font-size: 12px;
+        }
+
+        .delay-3 {
+            font-size: 1.5rem;
+        }
+
+        #total-users,
+        #patients,
+        #doctors,
+        #appointments-past,
+        #appointments-future,
+        #voters,
+        #upvotes,
+        .fa-thumbs-up {
+            font-size: 12px;
+            margin: 0 5px;
+        }
+
+        .border {
+            padding: 8px 0 !important;
+        }
+
+        @media only screen and (max-width: 280px) and (max-height: 653px) {
+            .border h1 {
+                flex-direction: row !important;
+                font-size: 10px;
+            }
+
+            #total-users,
+            #patients,
+            #doctors,
+            #appointments-past,
+            #appointments-future,
+            #voters,
+            #upvotes,
+            .fa-thumbs-up {
+                font-size: 10px !important;
+                margin: 0 2px;
+            }
+        }
+    }
 </style>
 
 <div class="container padding-1rem width-100 justify-top" id="main-container">
     <div class="container padding-1rem width-100">
         <div class="container padding-5px width-70 align-left">
-            <h1 class="delay-3 animate__animated animate__bounce bigger-h1 padding-5px margin-bottom-2rem">Nicander community
+            <h1 class="delay-3 animate__animated animate__bounce bigger-h1 padding-5px margin-bottom-2rem">Nicander
+                community
             </h1>
 
             <!-- Users -->
@@ -193,18 +259,23 @@
         });
 
     function animateValue(id, start, end, duration) {
-        var range = end - start;
-        var current = start;
-        var increment = end > start ? 1 : -1;
-        var stepTime = Math.abs(Math.floor(duration / range));
-        var obj = document.getElementById(id);
-        var timer = setInterval(function () {
-            current += increment;
-            obj.innerHTML = current;
-            if (current == end) {
-                clearInterval(timer);
-            }
-        }, stepTime);
+        if (end !== 0) {
+            var range = end - start;
+            var current = start;
+            var increment = end > start ? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function () {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        } else {
+            var obj = document.getElementById(id);
+            obj.innerHTML = 0;
+        }
     }
 
 

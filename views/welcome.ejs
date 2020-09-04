@@ -39,6 +39,7 @@
     #searchbar-cont {
         position: relative;
         background-color: #fff;
+        flex-direction: row !important;
     }
 
     #search-results {
@@ -89,6 +90,107 @@
     .fadeIn,
     .backinleft {
         visibility: hidden;
+    }
+
+    /* media for ipad pro */
+    @media only screen and (max-width: 1024px) and (max-height: 1366px) {
+        #section-1>img {
+            width: 70vw;
+            height: 80vh;
+        }
+
+        .fadeIn>.fas {
+            margin: 50px !important;
+        }
+    }
+
+    /* media for most mobiles */
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+
+        @media (orientation:portrait) {
+
+            /* section-1 */
+            #section-1>img {
+                width: 100vw;
+                height: 60vh;
+            }
+        }
+
+        @media (orientation:landscape) {
+
+            /* section-1 */
+            #section-1>img {
+                width: 60vw;
+                height: 90vh;
+            }
+        }
+
+        /* Section-2 */
+        .backinleft {
+            width: 100%;
+            padding: 20px !important;
+        }
+
+        #main-welcome {
+            width: 100vw;
+        }
+
+        #main-welcome strong {
+            font-size: 1rem !important;
+        }
+
+        #main-welcome .backinleft,
+        #main-welcome a {
+            font-size: 1rem !important;
+        }
+
+        #section-2 {
+            margin: 40px 0;
+        }
+
+        #section-2 .strong {
+            width: 100%;
+            font-size: 1.5rem !important;
+        }
+
+        /* Section-3 */
+        #section-3 h2 {
+            font-size: 1.5rem !important;
+            text-align: center !important;
+            margin: 0 auto !;
+        }
+
+        #section-3 .fas {
+            font-size: 2rem;
+            margin: 1rem 0;
+            width: 4rem;
+            height: 4rem;
+        }
+
+        .paragraph {
+            font-size: 14px;
+        }
+
+        .fadeIn {
+            margin: 1rem 0;
+        }
+
+        footer {
+            height: auto;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-content {
+            overflow: auto;
+            height: 90vh;
+            width: 100vw;
+            padding: 0;
+        }
+
+        .modal-content>.container {
+            padding: 10px !important;
+        }
     }
 </style>
 <div class='container width-100'>
@@ -453,7 +555,7 @@
     let bounce = Array.from(document.querySelectorAll('.bounceIn'));
     setTimeout(() => {
         bounce = Array.from(document.querySelectorAll('.bounceIn'));
-    }, 1000);
+    }, 2000);
 
     let last_known_scroll_position = 0;
     let ticking = false;
@@ -482,7 +584,7 @@
             bounce.forEach(el => {
                 isScrolledIntoView(el)
             })
-        }, 1000);
+        }, 2000);
     }
 
     window.addEventListener('scroll', function (e) {

@@ -53,6 +53,51 @@
     #phone {
         margin-bottom: 5px;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        * {
+            padding: 0 !important;
+        }
+
+        /* #main-container {
+            padding: 1rem 0.5rem !important;
+        } */
+
+        .width-50 {
+            width: 100% !important;
+            border: none;
+        }
+
+        #total {
+            display: inline-block;
+            margin: 10px auto;
+        }
+
+        .parent-div {
+            padding: 10px 0 !important;
+        }
+
+        .parent-div>* {
+            width: 100% !important;
+        }
+
+        #info-container {
+            padding: 10px !important;
+        }
+
+        #star-rating{
+            flex-direction: row !important;
+        }
+
+        .button {
+            padding: 8px !important;
+            width: 80% !important;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+    }
 </style>
 
 <div class="container width-100" id="super-cont">
@@ -91,7 +136,7 @@
                 Specialty: <strong>${users[0].specialty}</strong>`
             }
             users.forEach(user => {
-                console.log(user)
+                
                 const parentDiv = document.createElement('div');
                 parentDiv.className = 'container flex-dir-row parent-div';
                 parentDiv.id = `${user._id}`;
@@ -149,7 +194,7 @@
                     .then(response => response.json())
                     .then((body) => {
                         let total = 0;
-                        
+
                         const starRating = document.createElement('div');
                         starRating.id = 'star-rating'
                         const reviewsSection = document.querySelector('#reviews');
@@ -177,7 +222,7 @@
 
                             infoDiv.appendChild(starRating)
                         } else {
-                            
+
                             rating.innerText = `This doctor is not rated`;
                             rating.id = 'rating'
                             infoDiv.appendChild(rating)
