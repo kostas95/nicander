@@ -122,9 +122,32 @@
     .fa-frown {
         color: red;
     }
+
+    @media only screen and (max-width: 767px) and (max-height: 1024px) {
+        #main-container * {
+            padding: 0 !important;
+        }
+
+        #main-container {
+            padding: 1rem 0.5rem !important;
+        }
+
+        .width-50, .width-75vw {
+            width: 100% !important;
+            border: none;
+        }
+
+        .border-style {
+            margin: 0;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+    }
 </style>
 
-<div class="container padding-2rem">
+<div id='main-container' class="container padding-2rem">
 
     <div class="container border-style padding-2rem margin-right-20rem margin-left-10rem">
         <div class="container padding-2rem width-75vw ">
@@ -325,9 +348,9 @@
             const appointmentsContainer = document.querySelector('#appointments-container');
             let count = 0;
             let futureAppointments = 0;
-            if(body.appointments){
+            if (body.appointments) {
                 body.appointments.forEach(appointment => {
-                    if(appointment.type === 'appointment') {
+                    if (appointment.type === 'appointment') {
                         futureAppointments++
                     }
                 })
