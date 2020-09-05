@@ -84,6 +84,20 @@
     })
         .then(response => response.json())
         .then((result) => {
+            console.log('This is the location:')
+            console.log(result)
+        });
+
+    fetch(`http://worldtimeapi.org/api/ip/${ip_address}`, {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((result) => {
+            console.log('This is the time UTC:')
             console.log(result)
         });
 
