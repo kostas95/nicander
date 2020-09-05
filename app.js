@@ -613,6 +613,7 @@ app.get('/dashboard/notifications', ensureAuthenticated, (req, res) => {
             layout: 'dashboard/doctor/layout',
             email: req.user.email,
             username: req.user.name,
+            ip: req.user.ip,
             id: req.user._id
          })
       } else if (req.user.type === 'patient') {
@@ -620,6 +621,7 @@ app.get('/dashboard/notifications', ensureAuthenticated, (req, res) => {
             layout: 'dashboard/patient/layout',
             email: req.user.email,
             username: req.user.name,
+            ip: req.user.ip,
             id: req.user._id
          })
       }
