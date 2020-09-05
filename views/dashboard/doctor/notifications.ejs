@@ -47,7 +47,7 @@
         flex: 1;
     }
 
-    a{
+    a {
         color: #000;
     }
 </style>
@@ -60,6 +60,32 @@
     </div>
 </div>
 <script>
+    var xmlhttp = new XMLHttpRequest();
+    var ip_address = '<%= ip %>';
+    var auth = '3c777f45-b7a8-40f8-887a-120dbff0e972';
+    var url = "https://ipfind.co/?auth=" + auth + "&ip=" + ip_address;
+
+    // xmlhttp.onreadystatechange = function () {
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         var result = JSON.parse(this.responseText);
+    //         console.log(result);
+    //     }
+    // };
+
+    // xmlhttp.open("GET", url, true);
+    // xmlhttp.send();
+
+    fetch(url, {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((result) => {
+            console.log(result)
+        });
 
     const id = '<%= id %>',
         notificationsContent = document.querySelector('#notifications-content');
