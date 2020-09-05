@@ -269,6 +269,8 @@ app.get('/dashboard', ensureAuthenticated, function (req, res) {
    if (req.user.emailAuthorized === false) {
       res.redirect('/unauthorized')
    } else if (req.user.emailAuthorized === true) {
+      var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      console.log(ip)
       if (req.user.type === 'admin') {
          res.render('dashboard/admin/home', {
             layout: 'dashboard/admin/layout',
