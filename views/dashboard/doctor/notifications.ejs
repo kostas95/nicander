@@ -86,20 +86,22 @@
         .then((result) => {
             console.log('This is the location:')
             console.log(result)
+
+            fetch(`http://api.timezonedb.com/v2.1/get-time-zone?key=HH923ZVEX5W8&format=json&by=zone&zone=${result.timezone}`, {
+                method: "get",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then((result) => {
+                    console.log('This is the time UTC:')
+                    console.log(result)
+                });
         });
 
-    fetch(`https://worldtimeapi.org/api/ip/${ip_address}`, {
-        method: "get",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-    })
-        .then(response => response.json())
-        .then((result) => {
-            console.log('This is the time UTC:')
-            console.log(result)
-        });
+
 
     const id = '<%= id %>',
         notificationsContent = document.querySelector('#notifications-content');
