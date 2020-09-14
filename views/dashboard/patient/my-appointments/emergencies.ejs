@@ -117,29 +117,24 @@
 
     const id = `<%= id %>`;
     const history = document.querySelector('#history-content-wrap');
-    document.getElementsByClassName('head-btn')[2].style.textDecoration = 'underline';
+    document.getElementsByClassName('head-btn')[4].style.textDecoration = 'underline';
     let total = []
 
 
-    fetch("/getAppointments/p", {
-        method: "post",
+    fetch("/getEmergencies/completed", {
+        method: "get",
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-        },
-
-        //make sure to serialize your JSON body
-        body: JSON.stringify({
-            patient_id: id,
-            type: 'completed'
-        })
+        }
     })
         .then(response => response.json())
         .then((body) => {
-            if (body.result === 'success') {
-                body.appointments.sort(function (a, b) {
-                    var c = new Date(a.timestamp);
-                    var d = new Date(b.timestamp);
+            
+            if (body.length > 0) {
+                body.sort(function (a, b) {
+                    var c = new Date(a.date);
+                    var d = new Date(b.date);
                     return d - c;
                 }).forEach(appointment => {
 
@@ -153,7 +148,7 @@
                     appointmentSection.className = `container padding-left-right-12px min-height border`
                     appointmentSection.innerHTML = `
                         <a id='name' href='/profiles/${appointment.doctor.id}'>${appointment.doctor.name} ${appointment.doctor.surname}</a>
-                        <div id='specialty' class='strong'>${appointment.doctor.specialty}</div>
+                        <div id='specialty' class='strong'>System doctor</div>
                     `
                     //Append left section to appointment container
                     appointmentElement.appendChild(appointmentSection)
@@ -161,9 +156,11 @@
                     //Create middle section of container
                     appointmentSection = document.createElement('div');
                     appointmentSection.className = `container padding-left-right-12px min-height border flex-dir-row strong`
+
+                    appointment.date = new Date(appointment.date).toString().substring(0,25)
                     appointmentSection.innerHTML = `
                         <div><i class="fas fa-calendar-alt"></i></div>
-                        <div class='font-12px'>${appointment.timestamp}</div>
+                        <div class='font-12px'>${appointment.date}</div>
                     `
                     //Append middle section to appointment container
                     appointmentElement.appendChild(appointmentSection)
@@ -181,152 +178,13 @@
 
                         const cont = createContainer();
 
-                        const btn = createButton('rateApp', 'Rate appointment')
-
                         const btn2 = createButton('viewApp', 'View appointment')
-
-                        //Add event listener for appointment rating
-                        btn.addEventListener('click', () => {
-
-                            const dateDiff = getDateDiff(appointment.date)
-
-                            const modal = document.createElement('div');
-                            modal.className = 'modal container';
-
-                            const modalContent = document.createElement('div');
-                            modalContent.className = 'modal-content container';
-
-                            modal.appendChild(modalContent);
-
-                            document.querySelector('body').appendChild(modal)
-
-                            document.querySelector('body').addEventListener('click', (e) => {
-                                if (e.target.classList.contains('modal'))
-                                    modal.remove()
-                            })
-
-                            if (dateDiff > 90) {
-                                modalContent.innerHTML = `<div class='big-h1'>This appointment is too old, therefore you cannot edit it`
-                            } else {
-                                const starsCont = createContainer();
-
-                                starsCont.className = 'flex-dir-row padding-5px'
-
-                                let ratingValue;
-                                let starsArr = []
-
-                                for (i = 0; i < 5; i++) {
-                                    const star = document.createElement('div');
-                                    star.className = 'far fa-star fa-3x';
-                                    star.value = i + 1;
-                                    starsArr.push(star)
-                                    //Click event
-                                    star.addEventListener('click', () => {
-                                        ratingValue = star.value;
-                                        console.log(ratingValue)
-                                        for (i = 0; i < 5; i++) {
-                                            if (i < star.value) {
-                                                starsArr[i].className = 'fas fa-star fa-3x';
-                                            } else {
-                                                starsArr[i].className = 'far fa-star fa-3x';
-                                            }
-                                        }
-
-                                    })
-                                    //Hover event
-                                    star.addEventListener('mouseover', () => {
-                                        if (!ratingValue) {
-                                            for (i = 0; i < star.value; i++) {
-                                                starsArr[i].className = 'fas fa-star fa-3x';
-                                            }
-                                        }
-                                    })
-                                    //Hover event
-                                    star.addEventListener('mouseout', () => {
-                                        if (!ratingValue) {
-                                            for (i = 0; i < star.value; i++) {
-                                                starsArr[i].className = 'far fa-star fa-3x';
-                                            }
-                                        }
-                                    })
-                                    starsCont.appendChild(star)
-                                }
-                                const submit = document.createElement('i');
-                                submit.className = 'fas fa-check fa-3x';
-                                submit.style.margin = '0px 10px'
-                                submit.style.cursor = 'pointer'
-
-                                submit.addEventListener('click', () => {
-                                    console.log(ratingValue)
-                                    if (ratingValue) {
-                                        fetch("/review", {
-                                            method: "post",
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Accept': 'application/json'
-                                            },
-
-                                            //make sure to serialize your JSON body
-                                            body: JSON.stringify({
-                                                rating: ratingValue,
-                                                appointment_id: appointment._id,
-                                                comment: textarea.value,
-                                                doctor: appointment.doctor,
-                                                patient: appointment.patient
-                                            })
-                                        })
-                                            .then(response => response.json())
-                                            .then((body) => {
-                                                console.log(document.querySelector('#msg'))
-                                                if (document.querySelector('#msg')) {
-                                                    document.querySelector('#msg').remove()
-                                                }
-                                                const msg = document.createElement('p');
-                                                if (body.type === 'fail') {
-                                                    msg.style.color = 'red';
-
-                                                } else {
-                                                    msg.style.color = 'green';
-                                                }
-                                                msg.innerText = `${body.msg}`
-
-                                                modalContent.appendChild(msg);
-                                                setTimeout(() => {
-                                                    msg.remove()
-                                                }, 5000);
-                                            });
-                                    } else {
-                                        const errMsg = document.createElement('p');
-                                        errMsg.style.color = 'red';
-                                        errMsg.id = 'msg'
-                                        errMsg.innerText = 'Please give a star rating'
-                                        modalContent.appendChild(errMsg);
-                                        setTimeout(() => {
-                                            errMsg.remove()
-                                        }, 5000);
-                                    }
-
-                                })
-
-                                const textarea = document.createElement('textarea')
-                                textarea.id = 'rate-textarea'
-                                textarea.placeholder = 'Write your opinion'
-                                textarea.style.width = '75%';
-                                textarea.style.resize = 'none';
-
-                                modalContent.appendChild(starsCont);
-                                modalContent.appendChild(textarea);
-                                modalContent.appendChild(submit)
-
-                            }
-                        })
 
                         //Add event listener for appointment viewing
                         btn2.addEventListener('click', () => {
-                            window.location.href = `/appointment/${appointment._id}`
+                            window.location.href = `/emergency/appointment/${appointment._id}`
                         })
 
-                        cont.appendChild(btn)
                         cont.appendChild(btn2)
                         appointmentSection.appendChild(cont)
 

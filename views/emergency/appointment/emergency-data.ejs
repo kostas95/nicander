@@ -1,0 +1,330 @@
+<style>
+    .width-99 {
+        width: 99% !important;
+    }
+
+    #register-container {
+        justify-content: center;
+        align-items: center;
+    }
+
+    input,
+    label {
+        width: 20vw !important;
+    }
+
+    #form-container h2 {
+        width: 100%;
+    }
+
+    #mm,
+    #yy,
+    #dd {
+        width: 5vw;
+    }
+
+    #postal_code {
+        width: 20vw;
+    }
+
+    #form-container {
+        padding-right: 5rem;
+        border-right: 5px solid #f8f9fa;
+    }
+
+    a {
+        color: #535353 !important;
+        text-decoration: none !important;
+    }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        * {
+            padding: 0 !important;
+        }
+
+        #reg-container {
+            padding: 1rem !important;
+        }
+
+        #login-header {
+            align-items: flex-start;
+            padding-left: 1rem !important;
+        }
+
+        #form-container {
+            width: 100% !important;
+            border: none;
+            border-bottom: 1px solid #535353;
+        }
+
+        .form,
+        label,
+        .input-field {
+            width: 100%;
+        }
+
+        .form {
+            padding-bottom: 1rem !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .form * {
+            width: 100% !important;
+        }
+
+        .input-field,
+        .button,
+        select {
+            padding: 5px !important;
+        }
+
+        .button {
+            margin-bottom: 10px;
+        }
+
+        #haveAccountMsg {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        footer {
+            padding: 1rem !important;
+        }
+    }
+</style>
+
+<div class="container">
+    <div id='login-header' class="container flex-dir-row">
+        <div class="container" id='log-container'>
+            <i class="fas fa-user-plus fa-2x"></i>
+            <h3>Tell us who you are</h3>
+        </div>
+    </div>
+    <div id="register-container" class="container">
+        <div class="container flex-dir-row">
+
+            <div id="form-container" class="container">
+
+                <div class="container flex-dir-row">
+                    <div class="container">
+                        <label>First Name</label>
+                        <input type="text" id="name" class='input-field' name="name"
+                            value="<%= typeof name != 'undefined' ? name : '' %>">
+                    </div>
+                    <div class="container">
+                        <label>Last Name</label>
+                        <input type="text" id="surname" class='input-field' name="surname"
+                            value="<%= typeof surname != 'undefined' ? surname : '' %>">
+                    </div>
+                </div>
+                <div class="container flex-dir-row width-99">
+                    <div class="container width-99">
+                        <label class="width-99">Email</label>
+                        <input type="email" id="email" class='input-field width-99' name='email'
+                            value="<%= typeof email != 'undefined' ? email : '' %>">
+                    </div>
+                </div>
+                <div class="container flex-dir-row width-99">
+                    <div class="container width-99">
+                        <label class="width-99">Gender</label>
+                        <select name="gender" id="gender" class="width-99">
+                            <option value>Select your gender</option>
+                            <option value='male'>Male</option>
+                            <option value='female'>Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="container flex-dir-row">
+                    <div class="container flex-dir-row">
+                        <div class="container">
+                            <label class="width-99">Date of birth</label>
+                            <div class="container flex-dir-row">
+                                <select name="dd" id="dd"></select>
+                                <select name="mm" id="mm"></select>
+                                <select name="yy" id="yy"></select>
+                            </div>
+                            </select>
+                        </div>
+                        <div class="container">
+                            <label>Telephone</label>
+                            <input type="text" id="telephone" name="telephone" class='input-field'
+                                value="<%= typeof telephone != 'undefined' ? telephone : '' %>">
+                        </div>
+                    </div>
+                </div>
+                <input type="submit" value="Proceed to appointment" class="button" id="submit-btn">
+                <a href="/patient/login" class="margin-top-1rem">I have an account!</a>
+                <div class="message-log">
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // Check for blank fields
+    const name = document.getElementById('name');
+    const surname = document.getElementById('surname');
+    const email = document.getElementById('email'); ('c_password');
+    const gender = document.getElementById('gender');
+    const month = document.getElementById('mm');
+    const day = document.getElementById('dd');
+    const year = document.getElementById('yy');
+    const telephone = document.getElementById('telephone');
+    const message = document.querySelector('.message-log')
+
+    // name.value = 'asdf'
+    // surname.value = 'asdf'
+    // email.value = 'asdf@asdf'
+    // gender.value = 'Male'
+    // day.value = '1'
+    // month.value = '1'
+    // year.value = '1'
+    // telephone.value = '111111'
+
+
+    document.querySelector('#submit-btn').addEventListener('click', (e) => {
+
+        if (name.value === '' || surname.value === '' || gender.value === '' || email.value === '' || telephone.value === '' || year.value === '' || day.value === '' || month.value === '') {
+            if (name.value === '') {
+                styleBorder(name, 'red')
+            }
+            else {
+                styleBorder(name, 'rgb(226, 226, 226)')
+            }
+            if (surname.value === '') {
+                styleBorder(surname, 'red')
+            }
+            else {
+                styleBorder(surname, 'rgb(226, 226, 226)')
+            }
+            if (email.value === '') {
+                styleBorder(email, 'red')
+            }
+            else {
+                styleBorder(email, 'rgb(226, 226, 226)')
+            }
+            if (gender.value === '') {
+                styleBorder(gender, 'red')
+            }
+            else {
+                styleBorder(gender, 'rgb(226, 226, 226)')
+            }
+            if (month.value === '') {
+                styleBorder(month, 'red')
+            }
+            else {
+                styleBorder(month, 'rgb(226, 226, 226)')
+            }
+            if (day.value === '') {
+                styleBorder(day, 'red')
+            }
+            else {
+                styleBorder(day, 'rgb(226, 226, 226)')
+            }
+            if (year.value === '') {
+                styleBorder(year, 'red')
+            }
+            else {
+                styleBorder(year, 'rgb(226, 226, 226)')
+            }
+            if (telephone.value === '') {
+                styleBorder(telephone, 'red')
+            }
+            else {
+                styleBorder(telephone, 'rgb(226, 226, 226)')
+            }
+            message.style.display = 'block';
+            message.innerText = 'Please fill all fields correctly!'
+            e.preventDefault()
+        }
+        else {
+            name.value = capitalizeFirstLetter(name.value);
+            surname.value = capitalizeFirstLetter(surname.value);
+
+            fetch("/emergency/appointment", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    name: name.value,
+                    surname: surname.value,
+                    gender: gender.value,
+                    email: email.value,
+                    telephone: telephone.value,
+                    year: year.value,
+                    day: day.value,
+                    month: month.value,
+                    registered: false
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    window.location.href = body.url
+                });
+        }
+    })
+
+    function styleBorder(field, color) {
+        field.style.border = `1px solid ${color}`
+    }
+
+    // SELECT: 31 days month options
+    for (let i = 0; i <= 31; i++) {
+        const option = document.createElement('option');
+        if (i > 0) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'dd';
+            option.value = ''
+        }
+        day.appendChild(option);
+    }
+
+    // SELECT: 12 months options
+    for (let i = 0; i <= 12; i++) {
+        const option = document.createElement('option');
+        if (i > 0) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'mm';
+            option.value = ''
+        }
+        month.appendChild(option);
+    }
+
+    var dt = new Date();
+    let currentYear = dt.getFullYear();
+
+    // SELECT: Years from this year minus 100 years, until 18 years before this year options
+    for (let i = currentYear - 100; i <= currentYear; i++) {
+        const option = document.createElement('option');
+        if (i > currentYear - 100) {
+            option.value = i;
+            option.innerText = i
+        }
+        else {
+            option.innerText = 'yy';
+            option.value = ''
+        }
+        year.appendChild(option);
+    }
+
+    function capitalizeFirstLetter(string) {
+        string = string.toLowerCase();
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>

@@ -55,6 +55,7 @@
         padding: 10px;
         max-height: 20vh;
         overflow: auto;
+        z-index: 200 !important;
     }
 
     .search-results-items {
@@ -90,6 +91,14 @@
     .fadeIn,
     .backinleft {
         visibility: hidden;
+    }
+
+    .button-2 {
+        margin-top: 1rem;
+        width: 40vw;
+        z-index: -1;
+        /* in order for the z index to work */
+        position: relative;
     }
 
     /* media for ipad pro */
@@ -214,6 +223,7 @@
                         </div>
                     </div>
                 </div>
+                <a href="/emergency"><button class="button-2 animate__animated animate__fadeIn">I'm on emergency</button></a>
             </div>
 
         </div>

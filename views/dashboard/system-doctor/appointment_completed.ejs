@@ -165,7 +165,7 @@
     const comments = document.querySelector('#comments_txt')
 
     setTimeout(() => {
-        fetch("/getAppointments/1", {
+        fetch("/getEmergencies/1", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -181,9 +181,10 @@
         })
             .then(response => response.json())
             .then((body) => {
+                console.log(body)
                 patient = body.patient
                 doctor = body.doctor
-
+                body.date = new Date(body.date).toString().substring(0,25)
                 body.chat.forEach(data => {
                     createMessageBubble(data, data.from);
                 });
@@ -198,8 +199,8 @@
 
                 dateInfo.innerHTML = `
                 <div>Date</div> 
-                <div>${body.timestamp}</div>`;
-                
+                <div>${body.date}</div>`;
+                console.log(body.diagnosis)
                 if (body.diagnosis.diagnosis || body.diagnosis.comments || body.diagnosis.treatment) {
                     diagnosis.value = body.diagnosis.diagnosis
                     comments.value = body.diagnosis.comments
@@ -213,7 +214,7 @@
                         treatmentValue = treatment.value,
                         commentsValue = comments.value
 
-                    fetch("/diagnosis", {
+                    fetch("/diagnosis/emergency", {
                         method: "post",
                         headers: {
                             'Content-Type': 'application/json',
@@ -349,7 +350,7 @@
 
         const contName = document.createElement('div');
         if (from === 'patient') {
-            contName.innerText = `You`
+            contName.innerText = `Patient`
         } else if (from === 'doctor') {
             contName.innerText = `Dr. ${data.doctor.name} ${data.doctor.surname}`
         }

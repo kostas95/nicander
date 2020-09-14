@@ -1,0 +1,222 @@
+<style>
+    .flex-left {
+        align-items: flex-start;
+    }
+
+    button {
+        width: 250px !important;
+    }
+
+    #container_wrap {
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        margin-top: 5px;
+    }
+
+    #emergencies_content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    .flex>.container>strong {
+        flex: 2;
+        color: #6d6d6d;
+    }
+
+    .flex>.container>div {
+        flex: 5;
+        font-size: 1.2rem;
+        margin-left: 5px;
+    }
+
+    .small-date {
+        font-size: 1.2rem;
+    }
+
+    .small-date:nth-child(2) {
+        margin-left: 5px;
+    }
+
+    .justify-left {
+        justify-content: flex-start !important;
+    }
+
+    #users {
+        padding: 5rem 1rem 1rem 1rem;
+    }
+
+    .head-btn {
+        color: rgb(109, 50, 109) !important;
+        font-size: 1.5rem;
+    }
+
+    .head-btn:hover {
+        opacity: 0.7;
+    }
+
+    .underline {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container" id="emergencies_content">
+    <div class="container width-100">
+        <h1 class="big-h1 width-100"><i class="fas fa-history"></i> Emergency appointments requests</h1>
+        <div class="container flex-dir-row padding-1rem width-100">
+            <a href="/dashboard">
+                <div class="padding-1rem pointer head-btn"><i class="fas fa-exclamation"></i>Emergencies requests</h1>
+                </div>
+            </a>
+            <a href="/dashboard/emergencies/history">
+                <div class="padding-1rem pointer head-btn underline"><i class="fas fa-history"></i>Emergencies history
+                    </h1>
+                </div>
+            </a>
+            <a href="/dashboard/emergencies/ignored">
+                <div class="padding-1rem pointer head-btn"><i class="fas fa-times"></i>Ignored Requests</h1>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container width-100 padding-1rem" id="appointments">
+
+    </div>
+</div>
+<script>
+    fetch("/getEmergencies/completed", {
+        method: "get",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    })
+        .then(response => response.json())
+        .then((body) => {
+
+            if (body.length === 0) {
+                document.querySelector('#appointments').innerText = 'There are no emergency requests at this moment'
+            }
+            body.sort(function (a, b) {
+                var c = new Date(a.date);
+                var d = new Date(b.date);
+                return d - c;
+            }).forEach(appointment => {
+
+                setTimeout(() => {
+                    const appointments_container = document.querySelector('#appointments');
+
+                    const container_wrap = document.createElement('div');
+                    container_wrap.className = 'container padding-1rem width-50 flex-dir-row emergency';
+                    container_wrap.id = 'container_wrap'
+
+                    const container = document.createElement('div');
+                    container.className = 'container padding-1rem width-80 flex-left flex';
+
+                    const fullName_div = document.createElement('div');
+
+                    const email_div = document.createElement('div');
+                    const telephone_div = document.createElement('div');
+
+                    const dob_div = document.createElement('div');
+                    const date_div = document.createElement('div');
+
+                    const buttons_wrap = document.createElement('div');
+                    buttons_wrap.className = 'container padding-1rem width-50'
+                    const accept_btn = document.createElement('button');
+                    accept_btn.className = 'button'
+                    accept_btn.innerText = `View`
+
+                    accept_btn.addEventListener('click', (e) => {
+                        window.location.href = `/emergency/appointment/${appointment._id}`
+                        console.log('accept')
+                    })
+
+                    fullName_div.className = email_div.className = telephone_div.className = dob_div.className = date_div.className = 'container flex-dir-row padding-5px width-100'
+                    appointment.date = new Date(appointment.date).toString()
+
+                    if (appointment.registered === true) {
+                        fullName_div.innerHTML =
+                            `<strong class='padding-5px'>${appointment.patient.name} ${appointment.patient.surname}</strong> (registered)<div> </div>`;
+                    } else {
+                        fullName_div.innerHTML =
+                            `<strong class='padding-5px'>${appointment.patient.name} ${appointment.patient.surname}</strong> (unregistered)<div> </div>`;
+                    }
+                    email_div.innerHTML =
+                        `<i class="fas fa-at"></i></strong><div>${appointment.patient.email}</div>`;
+                    telephone_div.innerHTML =
+                        `<i class="fas fa-phone-alt"></i><div> ${appointment.patient.telephone}</div>`;
+                    dob_div.innerHTML =
+                        `<i class="fas fa-birthday-cake"></i><div> ${appointment.patient.day}/${appointment.patient.month}/${appointment.patient.year}</div>`;
+                    date_div.innerHTML =
+                        `<i class="fas fa-calendar-alt"></i> 
+                        <div class='container flex-dir-row justify-left'>
+                        <div class='small-date'>${appointment.date.substring(0, 25)}</div>
+                        </div>`;
+
+                    container.appendChild(fullName_div)
+                    container.appendChild(email_div)
+                    container.appendChild(telephone_div)
+                    container.appendChild(dob_div)
+                    container.appendChild(date_div)
+                    buttons_wrap.appendChild(accept_btn)
+                    container_wrap.appendChild(container)
+                    container_wrap.appendChild(buttons_wrap)
+                    appointments_container.appendChild(container_wrap)
+
+                }, 500);
+            });
+
+            setTimeout(() => {
+
+                //Get all the child nodes of container named emergency
+                const childrenNodes = Array.from(document.querySelectorAll('.emergency'));
+
+                //Iterate: The first 5 are displayed, the others are not
+                for (let i = 0; i < childrenNodes.length; i++) {
+                    if (childrenNodes[i]) {
+                        let element = childrenNodes[i];
+                        if (i > 5) {
+                            element.style.display = 'none';
+                        } else if (i <= 5) {
+                            element.style.display = 'flex';
+                        }
+                    }
+                }
+
+                //Init an i value (shows how many items are displayd)
+                let i = 5
+                //Create show more button
+                const showMore = document.createElement('div');
+                showMore.className = 'padding-1rem pointer';
+                showMore.id = 'showMore'
+                showMore.innerText = 'Show more'
+
+                //Show more button event listener
+                showMore.addEventListener('click', () => {
+                    //Get in a constant the current value of i, j shows us how many items are displayed at this moment and then we will add a number of items that we want to display (i.e 5)
+                    //Then at the end of the process, "i" will have reached the amount of displayed items. Then if the showMore button is clicked again, j will take the new value (same as j) and will show once again the exact amount of child nodes that are displayed
+                    const j = i
+                    for (i; i < j + 5; i++) {
+                        if (i < childrenNodes.length > 0) {
+                            const element = childrenNodes[i];
+                            element.style.display = 'flex';
+                        } else {
+                            showMore.remove()
+                            break
+                        }
+                    }
+                })
+
+                if (body.length !== 0) {
+                    document.querySelector('#emergencies_content').appendChild(showMore)
+                }
+            }, 500);
+        });
+</script>

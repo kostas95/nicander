@@ -83,10 +83,21 @@
 
 <div class="container padding-1rem width-100">
     <div class="container flex-dir-row padding-1rem width-100">
-        <a href="/dashboard/my-appointments"><h1 class="padding-1rem pointer head-btn">Appointments</h1></a>
-        <a href="/dashboard/my-appointments/requests"><h1 class="padding-1rem pointer head-btn">Requests</h1></a>
-        <a href="/dashboard/my-appointments/history"><h1 class="padding-1rem pointer head-btn">History</h1></a>
-        <a href="/dashboard/my-appointments/cancelled"><h1 class="padding-1rem pointer head-btn">Rejected/Cancelled</h1></a>
+        <a href="/dashboard/my-appointments">
+            <h1 class="padding-1rem pointer head-btn">Appointments</h1>
+        </a>
+        <a href="/dashboard/my-appointments/requests">
+            <h1 class="padding-1rem pointer head-btn">Requests</h1>
+        </a>
+        <a href="/dashboard/my-appointments/history">
+            <h1 class="padding-1rem pointer head-btn">History</h1>
+        </a>
+        <a href="/dashboard/my-appointments/cancelled">
+            <h1 class="padding-1rem pointer head-btn">Rejected/Cancelled</h1>
+        </a>
+        <a href="/dashboard/my-appointments/emergencies">
+            <h1 class="padding-1rem pointer head-btn">Emergencies</h1>
+        </a>
     </div>
     <div class="container padding-2rem width-100 text-left" id="cancelled">
         <h1 class="font-bigger-lighter text-left" id="cancelled-head">Rejected or cancelled appointments</h1>
@@ -194,7 +205,7 @@
             }
             //Get all the child nodes of container named notification
             const childrenNodes = Array.from(document.querySelectorAll('.appointment-content'));
-            
+
             //Iterate: The first 5 are displayed, the others are not
             for (let i = 0; i < childrenNodes.length; i++) {
                 if (childrenNodes.length > 5) {
@@ -230,7 +241,7 @@
                     }
                 }
             })
-            
+
             if (cancelled.innerText === '') {
                 cancelled.innerText = `There are no cancelled appointments at this moment`
             } else {

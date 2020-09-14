@@ -73,6 +73,9 @@
         <a href="/dashboard/users-management/doctors">
             <div class="dashboard-headers"><i class="fas fa-user-nurse"></i>Doctors</div>
         </a>
+        <a href="/dashboard/users-management/system-doctors">
+            <div class="dashboard-headers"><i class="fas fa-user-md"></i>System doctors</div>
+        </a>
         <a href="/dashboard/users-management/patients">
             <div class="dashboard-headers" id="underline"><i class="fas fa-user"></i>Patients</div>
         </a>
@@ -347,6 +350,21 @@
     })
 
     function patientElement(id, date, email, name, surname, dd, mm, yy, authorized) {
+
+        if (email.length > 15) {
+            let oldEmail = email
+            email = ''
+            i = 0
+            oldEmail.split('@').forEach(element => {
+                if (i === 0) {
+                    email += `${element}@ `
+                } else {
+                    email += `${element} `
+                }
+                i++
+            })
+        }
+
         const parent = document.createElement('div');
         parent.className = 'container data-cont';
 

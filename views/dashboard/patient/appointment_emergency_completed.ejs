@@ -80,15 +80,13 @@
         align-items: flex-start;
     }
 
-    textarea {
+    #diagnosis_content,
+    #treatment_content,
+    #comments_content {
+        margin-top: 1rem;
         max-height: 14vh;
-
-    }
-
-    textarea {
-        padding: 1rem;
-        outline: none;
-        font-family: 'Roboto', sans-serif;
+        overflow: auto;
+        border-bottom: 1px solid rgb(224, 224, 224);
     }
 </style>
 
@@ -126,17 +124,15 @@
         <!-- Diagnosis -->
         <div class="container padding-1rem width-100" id="diagnosis-wrap">
             <h1 class="h1">Doctor diagnosis</h1>
-            <h1>Please enter an official diagnosis to this appointment</h1>
             <div class="container padding-1rem width-100" id="diagnosis">
-                <textarea name="diagnosis" id="diagnosis_txt" placeholder="Type your diagnosis..."></textarea>
+
             </div>
             <div class="container padding-1rem width-100" id="treatment">
-                <textarea name="treatment" id="treatment_txt" placeholder="Type the suggested treatment..."></textarea>
+
             </div>
             <div class="container padding-1rem width-100" id="comments">
-                <textarea name="comments" id="comments_txt" placeholder="Add further comments..."></textarea>
+
             </div>
-            <button class="button" id="submit_diagnosis">Submit diagnosis</button>
         </div>
     </div>
 </div>
@@ -159,13 +155,12 @@
     let timesConnected;
     const patientInfo = document.querySelector('#patient_info'), doctorInfo = document.querySelector('#doctor_info'), dateInfo = document.querySelector('#date_info')
 
-    const submitDiagnosis = document.querySelector('#submit_diagnosis')
-    const diagnosis = document.querySelector('#diagnosis_txt')
-    const treatment = document.querySelector('#treatment_txt')
-    const comments = document.querySelector('#comments_txt')
+    const diagnosis = document.querySelector('#diagnosis')
+    const treatment = document.querySelector('#treatment')
+    const comments = document.querySelector('#comments')
 
     setTimeout(() => {
-        fetch("/getAppointments/1", {
+        fetch("/getEmergencies/1", {
             method: "post",
             headers: {
                 'Content-Type': 'application/json',
@@ -183,7 +178,7 @@
             .then((body) => {
                 patient = body.patient
                 doctor = body.doctor
-
+                body.date = new Date(body.date).toString().substring(0,25)
                 body.chat.forEach(data => {
                     createMessageBubble(data, data.from);
                 });
@@ -198,48 +193,36 @@
 
                 dateInfo.innerHTML = `
                 <div>Date</div> 
-                <div>${body.timestamp}</div>`;
-                
+                <div>${body.date}</div>`;
+
                 if (body.diagnosis.diagnosis || body.diagnosis.comments || body.diagnosis.treatment) {
-                    diagnosis.value = body.diagnosis.diagnosis
-                    comments.value = body.diagnosis.comments
-                    treatment.value = body.diagnosis.treatment
+                    diagnosis.innerHTML = `
+                    <div class='diag_head'>Diagnosis</div>
+                    <div class='padding-1rem' id='diagnosis_content'>${body.diagnosis.diagnosis}</div>
+                    `
+                    comments.innerHTML = `
+                    <div class='diag_head'>Comments</div>
+                    <div class='padding-1rem' id='comments_content'>${body.diagnosis.comments}</div>
+                    `
+                    treatment.innerHTML = `
+                    <div class='diag_head'>Treatment</div>
+                    <div class='padding-1rem' id='treatment_content'>${body.diagnosis.treatment}</div>
+                    `
+                } else if (!body.diagnosis.diagnosis || !body.diagnosis.comments || !body.diagnosis.treatment){
+                    diagnosis.innerHTML = `
+                    <div class='diag_head'>Diagnosis</div>
+                    <div class='padding-1rem'>Doctor hasn't published a diagnosis yet</div>
+                    `
+                    comments.innerHTML = `
+                    <div class='diag_head'>Comments</div>
+                    <div class='padding-1rem'>Doctor hasn't published any comments yet</div>
+                    `
+                    treatment.innerHTML = `
+                    <div class='diag_head'>Treatment</div>
+                    <div class='padding-1rem'>Doctor hasn't published any treatment yet</div>
+                    `
                 }
 
-                //Submit diagnosis data
-
-                submitDiagnosis.addEventListener('click', (e) => {
-                    const diagnosisValue = diagnosis.value,
-                        treatmentValue = treatment.value,
-                        commentsValue = comments.value
-
-                    fetch("/diagnosis", {
-                        method: "post",
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-
-                        //make sure to serialize your JSON body
-                        body: JSON.stringify({
-                            diagnosis: diagnosisValue,
-                            treatment: treatmentValue,
-                            comments: commentsValue,
-                            appointment_id: body._id
-                        })
-                    })
-                        .then(response => response.json())
-                        .then((body) => {
-                            if (!document.querySelector('#msg')) {
-                                const msg = document.createElement('div');
-                                msg.id = 'msg';
-                                msg.innerText = `${body.msg}`;
-                                msg.className = 'padding-5px'
-                                msg.style.color = 'green'
-                                document.querySelector('#diagnosis-wrap').appendChild(msg)
-                            }
-                        });
-                })
             });
     }, 100);
 
@@ -289,48 +272,50 @@
                         })
                         if (file.contentType.includes('image')) {
                             elemCont.innerHTML = `
-                        <div class='container flex-dir-row padding-5px'>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <i class="far fa-file-image"></i>    
-                            </div>    
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Filename: </strong>
-                                <span>${file.filename}</span>
+                            <div class='container flex-dir-row padding-5px'>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <i class="far fa-file-image"></i>    
+                                </div>    
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Filename: </strong>
+                                    <span>${file.filename}</span>
+                                </div>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Date: </strong>
+                                    <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
+                                </div>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Sent by: </strong>
+                                    <span>${file.metadata.user_type}</span>
+                                </div>
                             </div>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Date: </strong>
-                                <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
-                            </div>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Sent by: </strong>
-                                <span>${file.metadata.user_type}</span>
-                            </div>
-                        </div>
-                        `
+                            `
                         } else {
                             elemCont.innerHTML = `
-                        <div class='container flex-dir-row padding-5px' id='${file._id}'>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <i class="far fa-file-alt"></i>    
-                            </div>    
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Filename: </strong>
-                                <span>${file.filename}</span>
+                            <div class='container flex-dir-row padding-5px' id='${file._id}'>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <i class="far fa-file-alt"></i>    
+                                </div>    
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Filename: </strong>
+                                    <span>${file.filename}</span>
+                                </div>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Date: </strong>
+                                    <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
+                                </div>
+                                <div class='margin-left-right-10px padding-5px'>
+                                    <strong>Sent by: </strong>
+                                    <span>${file.metadata.user_type}</span>
+                                </div>
                             </div>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Date: </strong>
-                                <span>${file.uploadDate.substring(8, 10)}-${file.uploadDate.substring(5, 7)}-${file.uploadDate.substring(0, 4)},</div><div class='small-date'>${file.uploadDate.substring(11, 16)}</span>
-                            </div>
-                            <div class='margin-left-right-10px padding-5px'>
-                                <strong>Sent by: </strong>
-                                <span>${file.metadata.user_type}</span>
-                            </div>
-                        </div>
-                        `
+                            `
                         }
                         cont.appendChild(elemCont)
                     })
+
                 }
+
                 //Append modal
                 modal.appendChild(modalContent);
                 document.querySelector('body').appendChild(modal)

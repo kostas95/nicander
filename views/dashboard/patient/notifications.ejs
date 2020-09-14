@@ -45,7 +45,7 @@
         flex: 1;
     }
 
-    a{
+    a {
         color: #000;
     }
 </style>
@@ -107,7 +107,7 @@
             })
             //Get all the child nodes of container named notification
             const childrenNodes = Array.from(document.querySelectorAll('.display-child'));
-            
+
             //Iterate: The first 20 are displayed, the others are not
             for (let i = 0; i < childrenNodes.length; i++) {
                 if (childrenNodes.length > 20) {
@@ -163,17 +163,18 @@
         // Append all days
         arr.forEach(notification => {
             notification.newTimestamp = `${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)}`
-            
+
             if (notification.newTimestamp === date) {
                 const notificationElement = document.createElement('div')
                 notificationElement.className = 'display-child container flex-dir-row padding-1rem width-100 notification-element';
                 notificationElement.style.justifyContent = 'flex-start'
                 notificationElement.style.position = 'relative'
+                notification.timestamp = new Date(notification.timestamp).toString().substring(0, 24)
                 if (notification.status === 'unseen') {
-                    notificationElement.innerHTML = `<div class='strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)},</div><div class='small-date'>${notification.timestamp.substring(11, 16)}</div></div>`
+                    notificationElement.innerHTML = `<div class='strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp}</div></div>`
                     notificationElement.style.borderBottom = '1px solid #3333'
                 } else {
-                    notificationElement.innerHTML = `<div class='not-strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp.substring(8, 10)}-${notification.timestamp.substring(5, 7)}-${notification.timestamp.substring(0, 4)},</div><div class='small-date'>${notification.timestamp.substring(11, 16)}</div></div>`
+                    notificationElement.innerHTML = `<div class='not-strong'><a href='${notification.href}'>${notification.content}</a></div><div class='container flex-dir-row date-time'><div class='small-date'>${notification.timestamp}</div></div>`
                     notificationElement.style.borderBottom = '1px solid #3333'
                 }
 

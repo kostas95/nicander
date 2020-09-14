@@ -21,13 +21,10 @@ const Grid = require('gridfs-stream');
 const methodOverride = require('method-override');
 // var MongoClient = require('mongodb').MongoClient
 const mongoose = require('mongoose');
-const Patient = require('./models/Patient')
-const Doctor = require('./models/Doctor')
-const Admin = require('./models/Admin')
-const User = require('./models/User')
-const Chat = require('./models/Chat')
-const Post = require('./models/Post')
+const User = require('./models/User');
+const Post = require('./models/Post');
 const Appointment = require('./models/Appointment')
+const EmergencyAppointment = require('./models/EmergencyAppointment')
 const Notification = require('./models/Notification')
 const Message = require('./models/Message')
 const Email = require('./models/Email')
@@ -101,15 +98,41 @@ const storage = new GridFsStorage({
                return reject(err);
             }
             const filename = buf.toString('hex') + path.extname(file.originalname);
-            const fileInfo = {
-               filename: filename,
-               bucketName: 'uploads',
-               metadata: {
-                  appointment_id: req.originalUrl.split(/[/]/)[2],
-                  user_type: req.user.type
+            //For unregistered users
+            console.log(req.user)
+            if (typeof req.user === "undefined") {
+               const fileInfo = {
+                  filename: filename,
+                  bucketName: 'uploads',
+                  metadata: {
+                     appointment_id: req.originalUrl.split(/[/]/)[3],
+                     user_type: 'patient'
+                  }
+               };
+               resolve(fileInfo);
+            } else {
+               if (req.originalUrl.split(/[/]/)[2] === 'appointment') {
+                  const fileInfo = {
+                     filename: filename,
+                     bucketName: 'uploads',
+                     metadata: {
+                        appointment_id: req.originalUrl.split(/[/]/)[3],
+                        user_type: req.user.type
+                     }
+                  };
+                  resolve(fileInfo);
+               } else {
+                  const fileInfo = {
+                     filename: filename,
+                     bucketName: 'uploads',
+                     metadata: {
+                        appointment_id: req.originalUrl.split(/[/]/)[2],
+                        user_type: req.user.type
+                     }
+                  };
+                  resolve(fileInfo);
                }
-            };
-            resolve(fileInfo);
+            }
          });
       });
    }
@@ -180,6 +203,69 @@ app.get('/contact', forwardAuthenticated, function (req, res) {
    res.render('contact');
 });
 
+//(GET) Emergency Page Route
+app.get('/emergency', forwardAuthenticated, function (req, res) {
+   res.render('emergency/emergency');
+});
+
+//(GET) Emergency Page Route
+app.get('/emergency/appointment', forwardAuthenticated, function (req, res) {
+   res.render('emergency/appointment/emergency-data');
+});
+
+//(POST) Emergency-appointment Page Route
+app.post('/emergency/appointment', forwardAuthenticated, function (req, res) {
+   const newAppointment = new EmergencyAppointment({
+      doctor: req.body.doctor,
+      patient: req.body,
+      registered: false
+   });
+
+   newAppointment.save().then(appointment => {
+      res.json({
+         url: `/emergency/appointment/${appointment._id}`
+      })
+   })
+});
+
+//(POST) Emergency-appointment Page Route (registered user)
+app.post('/emergency/appointment/registered', ensureAuthenticated, function (req, res) {
+   console.log(req.body.id)
+   User.findOne({
+      _id: req.body.id
+   }, function (err, user) {
+      if (err) {
+         res.send(err);
+      }
+
+      const newAppointment = new EmergencyAppointment({
+         patient: {
+            id: user._id,
+            name: user.name,
+            surname: user.surname,
+            email: user.email,
+            telephone: user.telephone,
+            year: user.yy,
+            day: user.dd,
+            month: user.mm,
+            gender: user.gender
+         },
+         registered: true
+      });
+
+      newAppointment.save().then(appointment => {
+         res.json({
+            url: `/emergency/appointment/${appointment._id}`
+         })
+      })
+   });
+});
+
+//(GET) Emergency-appointment Page Route
+app.get('/emergency/report', forwardAuthenticated, function (req, res) {
+   res.render('emergency/adr/emergency-report');
+});
+
 //Register & Login Routes
 //(GET) Patient Register & Login
 app.get('/patient/register', forwardAuthenticated, function (req, res) {
@@ -202,6 +288,11 @@ app.get('/doctor/login', forwardAuthenticated, function (req, res) {
 //(GET) Admin Login
 app.get('/admin/login', forwardAuthenticated, function (req, res) {
    res.render('login/login-admin', { error: req.flash('error') });
+});
+
+//(GET) System doctor Login
+app.get('/system-doctor/login', forwardAuthenticated, function (req, res) {
+   res.render('login/login-system-doctor', { error: req.flash('error') });
 });
 
 // Login POST requests
@@ -230,6 +321,20 @@ app.post('/admin/login', (req, res, next) => {
       failureRedirect: '/admin/login',
       failureFlash: true
    })(req, res, next);
+});
+
+//(POST) System doctor Logins to system
+app.post('/system-doctor/login', (req, res, next) => {
+   passport.authenticate('local', {
+      successRedirect: '/dashboard',
+      failureRedirect: '/system-doctor/login',
+      failureFlash: true
+   })(req, res, next);
+});
+
+//(POST) Post info in order to see an emergency doctor
+app.post('/emergency/appointment', (req, res) => {
+   console.log(req.body)
 });
 
 //ROUTES THAT MULTIPLE USER TYPES CAN VISIT
@@ -269,14 +374,6 @@ app.get('/dashboard', ensureAuthenticated, function (req, res) {
    if (req.user.emailAuthorized === false) {
       res.redirect('/unauthorized')
    } else if (req.user.emailAuthorized === true) {
-
-      // Get client ip
-      var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-      req.session.passport.user.ip = ip
-
-      console.log(req.session.passport.user)
-
       if (req.user.type === 'admin') {
          res.render('dashboard/admin/home', {
             layout: 'dashboard/admin/layout',
@@ -293,6 +390,17 @@ app.get('/dashboard', ensureAuthenticated, function (req, res) {
          res.render('dashboard/doctor/home', {
             layout: 'dashboard/doctor/layout',
             username: req.user.name,
+            email: req.user.email,
+            id: req.user._id
+         });
+
+      }
+      if (req.user.type === 'systemDoctor') {
+
+         res.render('dashboard/system-doctor/home', {
+            layout: 'dashboard/system-doctor/layout',
+            username: req.user.name,
+            surname: req.user.surname,
             email: req.user.email,
             id: req.user._id
          });
@@ -384,6 +492,8 @@ app.get('/dashboard/my-appointments', ensureAuthenticated, (req, res) => {
             email: req.user.email,
             id: req.user._id
          });
+      } else {
+         res.render('notFound')
       }
    }
 })
@@ -409,6 +519,8 @@ app.get('/dashboard/my-appointments/requests', ensureAuthenticated, (req, res) =
             email: req.user.email,
             id: req.user._id
          });
+      } else {
+         res.render('notFound')
       }
    }
 })
@@ -434,6 +546,8 @@ app.get('/dashboard/my-appointments/history', ensureAuthenticated, (req, res) =>
             email: req.user.email,
             id: req.user._id
          });
+      } else {
+         res.render('notFound')
       }
    }
 })
@@ -459,7 +573,58 @@ app.get('/dashboard/my-appointments/cancelled', ensureAuthenticated, (req, res) 
             email: req.user.email,
             id: req.user._id
          });
+      } else {
+         res.render('notFound')
       }
+   }
+})
+
+//My appointments page: Emergencies
+app.get('/dashboard/my-appointments/emergencies', ensureAuthenticated, (req, res) => {
+   if (req.user.emailAuthorized === false) {
+      res.redirect('/unauthorized')
+   } else if (req.user.emailAuthorized === true) {
+      if (req.user.type === 'patient') {
+         res.render('dashboard/patient/my-appointments/emergencies', {
+            layout: 'dashboard/patient/layout',
+            username: req.user.name,
+            surname: req.user.surname,
+            email: req.user.email,
+            id: req.user._id
+         });
+      } else {
+         res.render('notFound')
+      }
+   }
+})
+
+//System doctor emergency appointments history
+app.get('/dashboard/emergencies/history', ensureAuthenticated, (req, res) => {
+   if (req.user.type === 'systemDoctor') {
+
+      res.render('dashboard/system-doctor/appointments-history', {
+         layout: 'dashboard/system-doctor/layout',
+         username: req.user.name,
+         email: req.user.email,
+         id: req.user._id
+      });
+   } else {
+      res.render('notFound')
+   }
+})
+
+//System doctor emergency appointments ignored
+app.get('/dashboard/emergencies/ignored', ensureAuthenticated, (req, res) => {
+   if (req.user.type === 'systemDoctor') {
+
+      res.render('dashboard/system-doctor/appointments-ignored', {
+         layout: 'dashboard/system-doctor/layout',
+         username: req.user.name,
+         email: req.user.email,
+         id: req.user._id
+      });
+   } else {
+      res.render('notFound')
    }
 })
 
@@ -476,6 +641,8 @@ app.get('/dashboard/reviews', ensureAuthenticated, (req, res) => {
             email: req.user.email,
             id: req.user._id
          });
+      } else {
+         res.render('notFound')
       }
    }
 })
@@ -613,7 +780,6 @@ app.get('/dashboard/notifications', ensureAuthenticated, (req, res) => {
             layout: 'dashboard/doctor/layout',
             email: req.user.email,
             username: req.user.name,
-            ip: req.user.ip,
             id: req.user._id
          })
       } else if (req.user.type === 'patient') {
@@ -621,7 +787,6 @@ app.get('/dashboard/notifications', ensureAuthenticated, (req, res) => {
             layout: 'dashboard/patient/layout',
             email: req.user.email,
             username: req.user.name,
-            ip: req.user.ip,
             id: req.user._id
          })
       }
@@ -703,6 +868,24 @@ app.get('/dashboard/users-management/doctors', ensureAuthenticated, function (re
          username: req.user.name,
          email: req.user.email,
          id: req.user._id
+      });
+   } else {
+      res.render('notFound')
+   }
+})
+
+//Manage System Doctors
+app.get('/dashboard/users-management/system-doctors', ensureAuthenticated, function (req, res) {
+   if (req.user.type === 'admin') {
+      res.render('dashboard/admin/users-management/system-doctors', {
+         layout: 'dashboard/admin/layout',
+         username: req.user.name,
+         email: req.user.email,
+         id: req.user._id,
+         error: null,
+         error2: null,
+         msg: null,
+         msg2: null
       });
    } else {
       res.render('notFound')
@@ -902,6 +1085,14 @@ app.post('/getUsers/admin', ensureAuthenticated, (req, res) => {
             res.json(user);
          });
       }
+      if (req.body.usertype === 'systemDoctor') {
+         User.find({ type: req.body.usertype }, function (err, user) {
+            if (err) {
+               res.send(err);
+            }
+            res.json(user);
+         });
+      }
       if (req.body.usertype === 'patient') {
          User.find({ type: req.body.usertype }, function (err, user) {
             if (err) {
@@ -976,6 +1167,11 @@ app.post('/delUser', ensureAuthenticated, (req, res) => {
                } else if (user.type === 'admin') {
                   res.json({
                      msg: 'Admin removed from system',
+                     url: '/dashboard/users-management/admins'
+                  })
+               } else if (user.type === 'systemDoctor') {
+                  res.json({
+                     msg: 'System doctor removed from system',
                      url: '/dashboard/users-management/admins'
                   })
                }
@@ -1107,6 +1303,58 @@ app.post('/dashboard/users-management/admins', ensureAuthenticated, function (re
    }
 })
 
+//Add system doctor
+app.post('/dashboard/users-management/system-doctors', ensureAuthenticated, (req, res) => {
+   User.findOne({
+      email: req.body.email,
+      type: 'systemDoctor'
+   }).then((doctor) => {
+      if (doctor) {
+         res.render('dashboard/admin/users-management/system-doctors', {
+            layout: 'dashboard/admin/layout',
+            username: req.user.name,
+            email: req.user.email,
+            id: req.user._id,
+            error: 'Email in use',
+            msg: null,
+            error2: null,
+            msg2: null
+         });
+      } else {
+         const newDoc = new User({
+            name: req.body.name,
+            surname: req.body.surname,
+            email: req.body.email,
+            password: req.body.password,
+            type: 'systemDoctor',
+            authorized: true,
+            emailAuthorized: true
+         });
+
+         bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newDoc.password, salt, (err, hash) => {
+               if (err) throw err;
+               newDoc.password = hash;
+               newDoc
+                  .save()
+                  .then(doctor => {
+                     res.render('dashboard/admin/users-management/system-doctors', {
+                        layout: 'dashboard/admin/layout',
+                        username: req.user.name,
+                        email: req.user.email,
+                        id: req.user._id,
+                        msg: 'Doctor added',
+                        error: null,
+                        error2: null,
+                        msg2: null
+                     });
+                  })
+                  .catch(err => console.log(err));
+            });
+         });
+      }
+   });
+})
 
 //Get patient's info for his profile (patient_profile page)
 app.post('/getUsers/patient/a', ensureAuthenticated, (req, res) => {
@@ -1620,7 +1868,7 @@ app.post('/getAppointments/p', ensureAuthenticated, (req, res) => {
 
 // @route GET /download/:filename
 // @desc  Download single file object
-app.get('/download/:filename', ensureAuthenticated, (req, res) => {
+app.get('/download/:filename', (req, res) => {
    gfs.files.findOne({
       filename: req.params.filename
    }, (err, file) => {
@@ -2058,6 +2306,48 @@ app.post('/diagnosis', (req, res) => {
       }).save().then(notification => {
          true
       })
+
+   })
+})
+
+//Diagnosis emergency
+app.post('/diagnosis/emergency', (req, res) => {
+
+   EmergencyAppointment.findOne({
+      _id: req.body.appointment_id,
+   }).exec(function (err, appointment) {
+      if (err) {
+         res.json(err)
+      } else {
+
+         const newDiagnosis = {
+            diagnosis: req.body.diagnosis,
+            treatment: req.body.treatment,
+            comments: req.body.comments,
+            appointment_id: req.body.appointment_id
+         };
+
+         appointment.diagnosis = newDiagnosis
+
+         appointment.save().then(data => {
+            res.json({
+               'msg': 'Diagnosis added successfully',
+               type: 'success'
+            })
+         })
+      }
+
+      if (appointment.registered === true) {
+         //Add the noti here
+         const notification = new Notification({
+            status: 'unseen',
+            content: `Dr.${appointment.doctor.surname} ${appointment.doctor.name} has added a diagnosis for the appointment on ${new Date(appointment.date).toString().substring(0, 25)}`,
+            user_id: appointment.patient.id,
+            href: `/appointment/${appointment._id}`
+         }).save().then(notification => {
+            true
+         })
+      }
 
    })
 })
@@ -2536,7 +2826,7 @@ app.post('/systemVote', (req, res) => {
          res.json(err)
       } else {
          if (!review) {
-            const newSysReview =new SysReview( {
+            const newSysReview = new SysReview({
                vote: req.body.vote,
                user_id: req.body.id
             })
@@ -2544,9 +2834,9 @@ app.post('/systemVote', (req, res) => {
             newSysReview.save().then(sysReview => {
                res.json({
                   msg: 'Thank you for voting'
-               })   
+               })
             })
-            
+
          } else if (review) {
             review.vote = req.body.vote;
             review.save()
@@ -2587,6 +2877,78 @@ app.get('/getSysReviews', (req, res) => {
          res.json(reviews)
       }
    })
+})
+
+//get emergencies requests
+app.get('/getEmergencies/requests', ensureAuthenticated, (req, res) => {
+   EmergencyAppointment.find({
+      type: 'appointment'
+   }, (err, appointments) => {
+      if (err) throw err;
+      else {
+         res.json(appointments)
+      }
+   })
+})
+
+//get 1 emergency appointment
+app.post('/getEmergencies/1', ensureAuthenticated, (req, res) => {
+   EmergencyAppointment.findOne({
+      _id: req.body.appointment_id
+   }, (err, appointment) => {
+      if (err) throw err;
+      else {
+         res.json(appointment)
+      }
+   })
+})
+
+//get emergencies completed
+app.get('/getEmergencies/completed', ensureAuthenticated, (req, res) => {
+   EmergencyAppointment.find({
+      type: 'completed'
+   }, (err, appointments) => {
+      if (err) throw err;
+      else {
+         res.json(appointments)
+      }
+   })
+})
+
+//get emergencies ignored
+app.get('/getEmergencies/ignored', ensureAuthenticated, (req, res) => {
+   EmergencyAppointment.find({
+      type: 'ignored'
+   }, (err, appointments) => {
+      if (err) throw err;
+      else {
+         res.json(appointments)
+      }
+   })
+})
+
+//get emergencies ignored
+app.post('/ignoreEmergency', ensureAuthenticated, (req, res) => {
+   EmergencyAppointment.findOne({
+      _id: req.body.id
+   }, (err, appointment) => {
+      if (err) throw err;
+      else {
+         appointment.type = 'ignored'
+         appointment.ignored_by = `${req.body.doctor}`
+         appointment.save().then(data => {
+            res.json({
+               msg: 'Emergency appointment ignored'
+            })
+         })
+      }
+   })
+})
+
+//post adr data
+app.post('/adr', (req, res) => {
+   console.log(req.body)
+   res.json('got it')
 })
 
 // Logout
@@ -3227,8 +3589,6 @@ app.get('*', function (req, res) {
                })
 
                socket.on('disconnect', function () {
-
-
                   if (clients > 0) {
                      if (clients <= 2)
                         this.broadcast.emit("Disconnect")
@@ -3299,10 +3659,377 @@ app.get('*', function (req, res) {
                res.json(appointment)
             }
          })
+
+
+      })
+   } else if (req.originalUrl.split(/[/]/)[1] === 'emergency') {
+
+      appointment_id = req.originalUrl.split(/[/]/)[3];
+
+      app.post(`/emergency/appointment/${appointment_id}`, _upload.single('file'), (req, res) => {
+         res.json({ file: req.file });
+      })
+
+      //Get all uploaded files
+      app.post('/getFiles', (req, res) => {
+         gfs.files.find({ 'metadata.appointment_id': req.body.appointment_id }).toArray((err, files) => {
+            // Check if files
+            if (!files || files.length === 0) {
+               res.json({
+                  err: 'No files exist'
+               });
+            } else {
+               // Files exist
+               res.json(files);
+            }
+
+         });
+      });
+
+      EmergencyAppointment.findOne({
+         _id: appointment_id
+      }, function (err, appointment) {
+         if (err) {
+            res.send(err)
+         }
+         if (appointment && appointment.connectedUsers === 0 && !appointment.patient.socket_id && appointment.type === 'appointment') {
+
+            io.on('connection', function (socket) {
+               io.removeAllListeners();
+
+               appointment.connectedUsers++
+               appointment.patient.socket_id = socket.id;
+
+               appointment.save()
+
+               socketEvents(socket)
+            })
+
+            if (!req.user) {
+               res.render('emergency/appointment/emergency-appointment')
+            } else {
+               res.render('emergency/appointment/emergency-appointment', {
+                  layout: 'dashboard/patient/layout',
+                  username: req.user.name,
+                  email: req.user.email,
+                  id: req.user._id
+               })
+            }
+         }
+         else if (appointment && appointment.connectedUsers === 1 && req.user.type === 'systemDoctor' && appointment.type === 'appointment') {
+
+            io.on('connection', function (socket) {
+               io.removeAllListeners();
+
+               appointment.connectedUsers++
+               appointment.doctor = {
+                  id: req.user._id,
+                  socket_id: socket.id,
+                  name: req.user.name,
+                  surname: req.user.surname,
+                  email: req.user.email
+               };
+
+               appointment.save().then(appointment => {
+                  socket.broadcast.to(appointment.patient.socket_id).emit('accessChat')
+
+                  socketEvents(socket)
+               })
+            })
+
+            res.render('dashboard/system-doctor/emergency-appointment', {
+               layout: 'dashboard/system-doctor/layout',
+               username: req.user.name,
+               email: req.user.email,
+               id: req.user._id
+            })
+         }
+         else if (appointment.type === 'completed' && req.user.type === 'systemDoctor') {
+            res.render('dashboard/system-doctor/appointment_completed', {
+               layout: 'dashboard/system-doctor/layout',
+               username: req.user.name,
+               email: req.user.email,
+               id: req.user._id
+            })
+         }
+         else if (appointment.type === 'completed' && req.user.type === 'patient') {
+            res.render('dashboard/patient/appointment_emergency_completed', {
+               layout: 'dashboard/patient/layout',
+               username: req.user.name,
+               email: req.user.email,
+               id: req.user._id
+            })
+         }
+         else {
+            res.render('notFound')
+         }
+      })
+
+      app.post('/getAppointments/emergency/1', (req, res) => {
+         EmergencyAppointment.findOne({
+            _id: req.body.appointment_id
+         }, function (err, appointment) {
+            if (err) {
+               res.json(err)
+            } else {
+               res.json(appointment)
+            }
+         })
       })
    }
    else {
       res.render('notFound');
+   }
+
+   function socketEvents(socket) {
+      socket.on('typing', (data) => {
+         //We're getting the appointment's data because we need the socket ids of our patient and our doctor
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+
+            // If patient sent data that he's typing
+            if (data.type === 'patient') {
+               //Then we need to send it to the doctor
+               if (data.typing === true) {
+                  socket.broadcast.to(appointment.doctor.socket_id).emit('typing', `${appointment.patient.name} ${appointment.patient.surname} is typing...`)
+               }
+               //If he's no longer typing 
+               else {
+                  socket.broadcast.to(appointment.doctor.socket_id).emit('typing', ``)
+               }
+            }
+            // Else if doctor sent data that he's typing 
+            else if (data.type === 'doctor') {
+               if (data.typing === true) {
+                  socket.broadcast.to(appointment.patient.socket_id).emit('typing', `Dr. ${appointment.doctor.name} ${appointment.doctor.surname} is typing...`)
+               }
+               //If he's no longer typing                         
+               else {
+                  socket.broadcast.to(appointment.patient.socket_id).emit('typing', ``)
+               }
+            }
+         })
+      })
+
+      socket.on('sendMessage', (data) => {
+         //We're getting the appointment's data because we need the socket ids of our patient and our doctor
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+
+            //Push message data to the database's array where chat data is stored
+            appointment.chat.push(data);
+            appointment.save();
+
+            // If the message is from the patient
+            if (data.from === 'patient') {
+               //Send to doctor
+               socket.broadcast.to(appointment.doctor.socket_id).emit('receiveMessage', data)
+            }
+            // Else if the message is from the doctor 
+            else if (data.from === 'doctor') {
+               //Send to patient
+               socket.broadcast.to(appointment.patient.socket_id).emit('receiveMessage', data)
+            }
+         })
+      })
+
+      function accessChat(socketID) {
+         socket.broadcast.to(socketID).emit('accessChat', 'true')
+      }
+
+      socket.on('fileUploaded', (data) => {
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+            if (data.from === 'patient') {
+               socket.broadcast.to(appointment.doctor.socket_id).emit('fileUploaded')
+            } else if (data.from === 'doctor') {
+               socket.broadcast.to(appointment.patient.socket_id).emit('fileUploaded')
+            }
+         })
+      })
+
+      socket.on('callEvent', (data) => {
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+            if (data.caller === 'patient') {
+               socket.broadcast.to(appointment.doctor.socket_id).emit('callEvent', {
+                  caller: `${appointment.patient.name} ${appointment.patient.surname}`
+               })
+            } else if (data.caller === 'doctor') {
+               socket.broadcast.to(appointment.patient.socket_id).emit('callEvent', {
+                  caller: `${appointment.doctor.name} ${appointment.doctor.surname}`
+               })
+            }
+         })
+      })
+
+      socket.on('cancelCall', (data) => {
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+            if (data.from === 'patient') {
+               socket.broadcast.to(appointment.doctor.socket_id).emit('cancelCall', {
+                  caller: `${appointment.patient.name} ${appointment.patient.surname}`
+               })
+            } else if (data.from === 'doctor') {
+               socket.broadcast.to(appointment.patient.socket_id).emit('cancelCall', {
+                  caller: `${appointment.doctor.name} ${appointment.doctor.surname}`
+               })
+            }
+         })
+      })
+
+      socket.on('acceptCall', (data) => {
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+            if (data.from === 'patient') {
+               socket.broadcast.to(appointment.doctor.socket_id).emit('acceptCall', {
+                  caller: `${appointment.patient.name} ${appointment.patient.surname}`
+               })
+            } else if (data.from === 'doctor') {
+               socket.broadcast.to(appointment.patient.socket_id).emit('acceptCall', {
+                  caller: `${appointment.doctor.name} ${appointment.doctor.surname}`
+               })
+            }
+         })
+      })
+
+      socket.on('endCall', (data) => {
+         EmergencyAppointment.findOne({
+            _id: appointment_id,
+         }, function (err, appointment) {
+            if (data.from === 'patient') {
+               socket.broadcast.to(appointment.doctor.socket_id).emit('endCall', {
+                  end: true
+               })
+            } else if (data.from === 'doctor') {
+               socket.broadcast.to(appointment.patient.socket_id).emit('endCall', {
+                  end: true
+               })
+            }
+         })
+      })
+
+      //Video offer
+
+      socket.on('videoOffer', (data) => {
+         online.forEach(user => {
+            if (user.id === data.receiver.id) {
+               socket.broadcast.to(user.socketID).emit('videoOffer', data)
+            }
+         })
+      })
+
+      socket.on('callAnswer', (data) => {
+         let uid = data.uid
+         online.forEach(user => {
+            if (user.id === data.answerTo.id) {
+               socket.broadcast.to(user.socketID).emit('videoOfferAnswer', data)
+               //data to send with videoOfferAnswer are the same with the received from callAnswer:
+               //    {
+               //       answer: 'accept/decline',
+               //       answerFrom: {
+               //           id: data.receiver.id,
+               //           name: data.receiver.name
+               //       },
+               //       answerTo: {
+               //           id: data.sender.senderId,
+               //           name: data.sender.senderName
+               //       }
+               //   }
+            }
+         })
+      })
+
+      socket.on("NewClient", function () {
+         if (clients < 2) {
+            if (clients == 1) {
+               socket.emit('CreatePeer')
+            }
+         }
+         else {
+            socket.emit('SessionActive')
+            socket.emit('CreatePeer')
+         }
+         clients++;
+      })
+
+      socket.on('Offer', function (offer) {
+         socket.broadcast.emit("BackOffer", offer)
+      })
+
+      socket.on('Answer', function (data) {
+         this.broadcast.emit("BackAnswer", data)
+      })
+
+      socket.on('disconnect', function () {
+         if (clients > 0) {
+            if (clients <= 2)
+               this.broadcast.emit("Disconnect")
+            clients--
+         }
+
+         if (!req.user) {
+            EmergencyAppointment.findOne({
+               _id: appointment_id,
+            }, function (err, appointment) {
+               if (err) {
+                  console.log(err)
+               }
+               if (appointment.connectedUsers > 1) {
+                  appointment.type = 'completed'
+                  appointment.save()
+                  //Send event that patient disconnected
+                  socket.broadcast.to(appointment.doctor.socket_id).emit('peerDisconnected', `Patient left`)
+               } else {
+                  appointment.remove()
+               }
+
+            })
+
+         }
+         else {
+            if (req.user.type === 'patient') {
+               EmergencyAppointment.findOne({
+                  _id: appointment_id,
+               }, function (err, appointment) {
+                  if (err) {
+                     console.log(err)
+                  }
+                  
+                  if (appointment.connectedUsers > 1) {
+                     appointment.type = 'completed'
+                     appointment.save()
+                     //Send event that patient disconnected
+                     socket.broadcast.to(appointment.doctor.socket_id).emit('peerDisconnected', `Patient left`)
+                  } else {
+                     appointment.remove()
+                  }
+
+               })
+            }
+            else if (req.user.type === 'systemDoctor') {
+               EmergencyAppointment.findOne({
+                  _id: appointment_id,
+               }, function (err, appointment) {
+                  if (err) {
+                     console.log(err)
+                  }
+                  appointment.type = 'completed'
+                  appointment.save()
+                  //Send event that doctor disconnected
+                  socket.broadcast.to(appointment.patient.socket_id).emit('peerDisconnected', `Doctor left`)
+
+               })
+
+            }
+         }
+      })
    }
 
 

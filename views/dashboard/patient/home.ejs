@@ -123,6 +123,11 @@
         color: red;
     }
 
+    #emergency {
+        margin: 20px 0 0 0 !important;
+        width: 50% !important;
+    }
+
     @media only screen and (max-width: 767px) and (max-height: 1024px) {
         #main-container * {
             padding: 0;
@@ -143,7 +148,8 @@
             font-size: 1.5rem;
         }
 
-        #main-container h1:first-child, #searchbar-cont {
+        #main-container h1:first-child,
+        #searchbar-cont {
             margin-bottom: 20px;
         }
 
@@ -151,7 +157,8 @@
             padding: 5px !important;
         }
 
-        .width-50, .width-75vw {
+        .width-50,
+        .width-75vw {
             width: 100% !important;
             border: none;
         }
@@ -161,7 +168,7 @@
             justify-content: center !important;
         }
 
-        #appointments-container>*{
+        #appointments-container>* {
             margin-bottom: 10px;
         }
 
@@ -213,6 +220,7 @@
                     </div>
                 </div>
             </div>
+            <button class="button flex-left" id="emergency">I'm on emergency</button>
 
         </div>
         <div class="container padding-2rem width-75vw">
@@ -373,6 +381,25 @@
             searchresults.style.display = 'none';
             open_ = false;
         }
+    })
+
+    document.querySelector('#emergency').addEventListener('click', () => {
+        fetch("/emergency/appointment/registered", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                id: id
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                window.location.href = body.url
+            });
     })
 
     fetch("/getAppointments/p", {

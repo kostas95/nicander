@@ -1,0 +1,604 @@
+<style>
+    #main-container {
+        min-height: 90vh;
+    }
+
+    .position-parent {
+        position: relative;
+    }
+
+    .position-parent>.field {
+        position: absolute;
+        top: 0;
+        margin: 5rem 0 0 0;
+    }
+
+    .flex-left {
+        align-items: flex-start;
+    }
+
+    .big-h1 {
+        text-align: center !important;
+        margin-bottom: 10px;
+    }
+
+    #buttons-cont {
+        background-color: #e2e2e2;
+    }
+
+    .button {
+        width: 100px;
+        margin: 10px !important;
+    }
+
+    .fa-caret-right,
+    .fa-caret-left {
+        color: #fff !important;
+    }
+
+    label {
+        margin: 0 10px;
+        font-weight: 500 !important;
+    }
+
+    textarea {
+        border: 1px solid rgb(226, 226, 226);
+        margin: 10px;
+        outline: none;
+        padding: 10px;
+        font-size: 14px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .display-none {
+        display: none;
+    }
+
+    .display-flex {
+        display: flex;
+    }
+
+    .transform-x-leave-next {
+        transition: all 1s ease-in-out 0s;
+        transform: translateX(-100vw);
+    }
+
+    .transform-x-come-next {
+        transition: all 1s ease-in-out 0s;
+        transform: translateX(0vw) !important;
+    }
+
+    .transform-x-leave-prev {
+        transition: all 1s ease-in-out 0s;
+        transform: translateX(100vw);
+    }
+
+    .transform-x-come-prev {
+        transition: all 1s ease-in-out 0s;
+        transform: translateX(0vw) !important;
+    }
+
+    .transform-x-100 {
+        transform: translateX(100vw);
+    }
+
+    .transform-x--100 {
+        transform: translateX(-100vw);
+    }
+
+    #medicine-section {
+        max-width: 95vw;
+        overflow-x: auto;
+        /* overflow-y: hidden; */
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    #medicine-container {
+        position: relative;
+    }
+
+    #results {
+        justify-content: flex-start !important;
+        padding: 10px 0;
+        width: 30vw;
+        background: white;
+        margin: 10px;
+        border: 1px solid rgb(226, 226, 226);
+        position: absolute;
+        top: 35px;
+        display: none;
+        max-height: 300px;
+        overflow: auto;
+    }
+
+    .result-element {
+        cursor: pointer;
+    }
+
+    .result-element:hover {
+        background-color: rgb(180, 180, 180);
+    }
+
+    .small {
+        font-size: 10px;
+        color: rgb(95, 95, 95);
+    }
+
+    .fa-times {
+        position: absolute;
+        top: 0;
+        right: 0;
+        cursor: pointer;
+    }
+
+    .parent-x {
+        position: relative;
+    }
+
+    #add-medicine {
+        cursor: pointer;
+    }
+</style>
+<div class="container width-100">
+    <div class="container width-100 flex-dir-row" id="buttons-cont">
+        <button class="button" id='previous'><i class="fas fa-caret-left fa-2x"></i></button>
+        <button class="button" id="next"><i class="fas fa-caret-right fa-2x"></i></button>
+    </div>
+    <div class="container position-parent width-100 padding-2rem">
+        <!-- 1 -->
+        <div class="container width-100 field display-flex">
+            <h1 class="big-h1 width-100">1.Patient Details</h1>
+            <div class="container flex-left">
+                <label for="name">Patient Name:</label>
+                <input type="text" class="input-field" id="name" name="name">
+
+                <label for="name">Patient Surame:</label>
+                <input type="text" class="input-field" id="surname" name="surname">
+
+                <label for="gender">Gender:</label>
+                <select name="gender" id="gender">
+                    <option value>Select your gender</option>
+                    <option value='male'>Male</option>
+                    <option value='female'>Female</option>
+                </select>
+
+                <label for="age">Date of Birth</label>
+                <input type="date" class="input-field" id="dob" name="dob">
+            </div>
+        </div>
+        <!-- 2 -->
+        <div class="container width-100 field display-none">
+            <h1 class="big-h1">2.Health Information</h1>
+            <div class="container flex-left">
+                <label for="name">Reason for taking medicines(s)(Disease/Symptoms):</label>
+                <textarea name="reason" id="reason"></textarea>
+
+                <label for="advised">Medicines Advised by:</label>
+                <select name="advised" id="advised">
+                    <option value>Select an option</option>
+                    <option value='doctor'>Doctor</option>
+                    <option value='pharmacist'>Pharmacist</option>
+                    <option value='friends/relatives'>Friends/Relatives</option>
+                    <option value='self (past disease)'>Self (Past disease experienced)</option>
+                    <option value='self (no disease)'>Self (No past disease experienced)</option>
+                </select>
+            </div>
+        </div>
+        <!-- 3 -->
+        <div class="container width-100 field display-none">
+            <h1 class="big-h1">3.Details of Person Reporting the Side Effect</h1>
+            <div class="container flex-left">
+                <label for="address">Address</label>
+                <input type="text" name="address" id="address" class="input-field">
+                <label for="telephone">Telephone</label>
+                <input type="text" name="telephone" id="telephone" class="input-field">
+                <label for="email">Email</label>
+                <input type="text" name="email" id="email" class="input-field">
+            </div>
+        </div>
+        <!-- 4 -->
+        <div class="container width-100 field display-none" id="container">
+            <h1 class="big-h1">4.Details of Medicine Taking/Taken</h1>
+            <div class="container flex-dir-row" id="medicine-section">
+                <div class="container medicine-cont">
+                    <label for="medicine">Name of Medicine</label>
+                    <div id="medicine-container">
+                        <input type="text" id="medicine" class="input-field" name="medicine" autocomplete="off">
+                        <div class="container" id="results">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                    <label for="quantity">Quantity of Medicines taken (e.g. 250 mg. Two times a day)</label>
+                    <input type="text" name="quantity" id="quantity" class="input-field">
+                    <label for="exp-date">Expiry Date of Medicine</label>
+                    <input type="date" id="exp-date" name="exp-date" class="input-field">
+                    <label for="date-start">Date of Start of Medicines</label>
+                    <input type="date" name="date-start" id="date-start" class="input-field">
+                    <label for="date-stop">Date of Stop of Medicines</label>
+                    <input type="date" name="date-stop" id="date-stop" class="input-field">
+                    <select name="dosage" id="dosage">
+                        <option value>Select dosage form</option>
+                        <option value='capsule'>Capsule</option>
+                        <option value='injection'>Injection</option>
+                        <option value='oral liquids'>Oral Liquids</option>
+                        <option value='inhalation'>Inhalation</option>
+                        <option value='suppository'>Suppository</option>
+                        <option value='topical'>Topical</option>
+                        <option value='parenteral'>Parenteral</option>
+                    </select>
+                </div>
+            </div>
+            <div id="add-medicine" class="big-h1 container flex-dir-row"><i class="fas fa-plus"></i>Add medicine</div>
+        </div>
+        <!-- 5 -->
+        <div class="container width-100 field display-none">
+            <h1 class="big-h1">5.About the Side Effect</h1>
+            <div class="container flex-left side-effect-area">
+                <label for="effect-start">When did the side effect start?</label>
+                <input type="date" id="effect-start" class="input-field" name="effect-start">
+                <label for="effect-continuing">Side Effect is still Continuing?</label>
+                <select name="effect-continuing" id="effect-continuing">
+                    <option value>Select answer</option>
+                    <option value='yes'>Yes</option>
+                    <option value='no'>No</option>
+                </select>
+            </div>
+        </div>
+        <!-- 6 -->
+        <div class="container width-100 field display-none">
+            <h1 class="big-h1">6.How bad was the Side Effect?</h1>
+            <div class="container flex-left">
+                <label for="severity-side-effect"></label>
+                <select name="effect-severity" id="effect-severity">
+                    <option value>Select answer</option>
+                    <option value='did not affect daily activities'>Affect daily activities</option>
+                    <option value='affect daily activities'>Affect daily activities</option>
+                    <option value='admitted to hospital'>Admitted to hospital</option>
+                    <option value='death'>Death</option>
+                    <option value='others'>Others</option>
+                </select>
+            </div>
+        </div>
+        <!-- 7 -->
+        <div class="container width-100 field display-none">
+            <h1 class="big-h1">7.Describe the Side Effect (What did you do to manage the side effect?)</h1>
+            <div class="container flex-left">
+                <textarea name="side-effect-description" id="side-effect-description"></textarea>
+            </div>
+            <button id="submit-adr" class="button-2">Submit report</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // "https://api.fda.gov/drug/event.json?search=patient.drug.medicinalproduct:aerolin&limit=20
+
+    //Input fields
+    const name = document.querySelector('#name')
+    const surname = document.querySelector('#surname')
+    const gender = document.querySelector('#gender')
+    const dob = document.querySelector('#dob')
+    const reason = document.querySelector('#reason')
+    const advised_by = document.querySelector('#advised')
+    const address = document.querySelector('#address')
+    const telephone = document.querySelector('#telephone')
+    const email = document.querySelector('#email')
+    const side_effect_start = document.querySelector('#effect-start')
+    const side_effect_continuing = document.querySelector('#effect-continuing')
+    const side_effect_severity = document.querySelector('#effect-severity')
+    const side_effect_description = document.querySelector('#side-effect-description')
+
+    const formFieldsCollection = document.getElementsByClassName('field');
+    const formFields = Array.from(formFieldsCollection);
+    let index = 0;
+
+    const next = document.querySelector('#next');
+    const previous = document.querySelector('#previous');
+    let stop_ = false
+
+    // object to be stored in database
+
+    let medicines = []
+
+    next.addEventListener('click', (e) => {
+
+        if (index >= 0 && index < formFields.length - 1) {
+            if (formFields[index].children[1].id !== 'medicine-section') {
+                Array.from(formFields[index].children[1].children).forEach(element => {
+                    if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+
+                        if (element.value.length <= 0) {
+                            stop_ = true
+                        } else {
+                            stop_ = false
+                        }
+                    }
+                })
+            } else {
+                Array.from(formFields[index].children[1].children).forEach(child => {
+                    Array.from(child.children).forEach(element => {
+                        if (element.id === 'medicine-container') {
+                            if (element.children[0].value.length <= 0) {
+                                stop_ = true
+                            } else {
+                                stop_ = false
+                            }
+                        }
+                        if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+                            if (element.value.length <= 0) {
+                                stop_ = true
+                            }
+                            else if (element.value.length > 0 && stop_ === true) {
+                                stop_ = true
+                            } else {
+                                stop_ = false
+                            }
+                        }
+                    })
+                })
+            }
+
+            if (stop_ === false) {
+                next.disabled = true;
+                previous.disabled = true;
+                //Set className to default
+                formFields[index].className = 'container width-100 field display-flex'
+
+                //Move leaving (old) element to 100vw left
+                formFields[index].classList.add("transform-x-leave-next");
+
+                //Move coming (new) element to 100vw right
+                formFields[index + 1].classList.add("transform-x-100");
+                //Remove display none from new element
+                formFields[index + 1].classList.remove("display-none");
+                //Add display flex to new element
+                formFields[index + 1].classList.add("display-flex");
+
+                //Old element to be hidden
+                setTimeout(() => {
+                    //Remove display flex from old element
+                    formFields[index].classList.remove("display-flex");
+                    //Add display none to old element
+                    formFields[index].classList.add("display-none");
+                    index++;
+                    next.disabled = false;
+                    previous.disabled = false;
+                }, 1000);
+
+                //Bring new element to center
+                setTimeout(() => {
+                    formFields[index + 1].classList.add("transform-x-come-next");
+                }, 0);
+            } else {
+                if (!document.querySelector('.message-log')) {
+                    const errMsg = document.createElement('div');
+                    errMsg.className = 'message-log'
+                    errMsg.innerText = 'Please fill all fields'
+                    document.querySelector('.position-parent').appendChild(errMsg)
+                    setTimeout(() => {
+                        errMsg.remove()
+                    }, 5000);
+                }
+            }
+
+        }
+    })
+
+    previous.addEventListener('click', (e) => {
+        if (index > 0 && index < formFields.length) {
+
+            next.disabled = true;
+            previous.disabled = true;
+
+            //Set className to default
+            formFields[index].className = 'container width-100 field display-flex'
+
+            //Move leaving (old) element to 100vw left
+            formFields[index].classList.add("transform-x-leave-prev");
+
+            //Move coming (new) element to 100vw left
+            formFields[index - 1].classList.add("transform-x--100");
+            //Remove display none from new element
+            formFields[index - 1].classList.remove("display-none");
+            //Add display flex to new element
+            formFields[index - 1].classList.add("display-flex");
+
+            //Old element to be hidden
+            setTimeout(() => {
+                //Remove display flex from old element
+                formFields[index].classList.remove("display-flex");
+                //Add display none to old element
+                formFields[index].classList.add("display-none");
+                index--;
+                next.disabled = false;
+                previous.disabled = false;
+            }, 1000);
+
+            //Bring new element to center
+            setTimeout(() => {
+                formFields[index - 1].classList.add("transform-x-come-prev");
+            }, 0);
+        }
+    })
+
+    const addMedicine = document.querySelector('#add-medicine');
+
+    addMedicine.addEventListener('click', () => {
+        const newElement = document.createElement('div');
+        newElement.className = 'container parent-x medicine-cont';
+        newElement.innerHTML = `
+        <label for="medicine">Name of Medicine</label>
+        <div id="medicine-container">
+            <input type="text" id="medicine" class="input-field" name="medicine" autocomplete="off">
+            <div class="container" id="results">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
+        </div>
+        <label for="quantity">Quantity of Medicines taken (e.g. 250 mg. Two times a day)</label>
+        <input type="text" name="quantity" id="quantity" class="input-field">
+        <label for="exp-date">Expiry Date of Medicine</label>
+        <input type="date" id="exp-date" name="exp-date" class="input-field">
+        <label for="date-start">Date of Start of Medicines</label>
+        <input type="date" name="date-start" id="date-start" class="input-field">
+        <label for="date-stop">Date of Stop of Medicines</label>
+        <input type="date" name="date-stop" id="date-stop" class="input-field">
+        <select name="dosage" id="dosage">
+            <option value>Select dosage form</option>
+            <option value='capsule'>Capsule</option>
+            <option value='injection'>Injection</option>
+            <option value='oral liquids'>Oral Liquids</option>
+            <option value='inhalation'>Inhalation</option>
+            <option value='suppository'>Suppository</option>
+            <option value='topical'>Topical</option>
+            <option value='parenteral'>Parenteral</option>
+        </select>
+        <i class="fas fa-times"></i>
+        `
+
+        document.querySelector('#medicine-section').appendChild(newElement)
+        medicinesFields()
+    })
+
+    medicinesFields()
+
+    function medicinesFields() {
+        const medicineInputsCollection = document.querySelectorAll('#medicine');
+
+        const medicineInputsArray = Array.from(medicineInputsCollection);
+
+        medicineInputsArray.forEach((inputField) => {
+            inputField.addEventListener('keyup', (e) => {
+                //Get results field as the fourth node of the parent
+                const results = e.target.parentElement.childNodes[3];
+
+                if (inputField.value.length > 0) {
+                    fetchMedicine(inputField.value, e.target, results)
+                    results.style.display = 'flex';
+                } else {
+                    results.style.display = 'none';
+                }
+            })
+        })
+
+    }
+
+    function fetchMedicine(inputFieldValue, target, results) {
+        var proxyUrl = 'https://afternoon-meadow-78869.herokuapp.com/',
+            targetUrl = `https://www.galinos.gr/service/drugs/search?query=${inputFieldValue}`
+        fetch(proxyUrl + targetUrl)
+            .then(blob => blob.json())
+            .then(data => {
+
+                const container = target.parentElement
+                results.innerHTML = ``
+
+                if (data.hits) {
+                    data.hits.forEach(medicine => {
+                        if (medicine.type === 'drug' || medicine.type === 'substance' || medicine.type === 'medicine') {
+                            const result = document.createElement('div');
+                            result.className = 'padding-5px result-element width-100'
+                            result.innerHTML = `<div>${medicine.id}</div><div class='small'>${medicine.type}</div>`
+                            result.addEventListener('click', (e) => {
+
+                                target.value = medicine.id;
+                                results.style.display = 'none';
+                            })
+                            results.appendChild(result)
+                        }
+                    })
+                    if (results.innerHTML.length === 0) {
+                        results.innerHTML = `No results`
+                    }
+                } else {
+                    results.innerHTML = `No results`
+                }
+            })
+            .catch(e => {
+                console.log(e);
+                return e;
+            });
+    }
+
+    document.querySelector('#effect-continuing').addEventListener('click', (e) => {
+        if (e.target.value === 'no' && !document.querySelector('#new-input-side-effect')) {
+            const newInput = document.createElement('input');
+            const newInputLabel = document.createElement('label');
+            newInputLabel.for = 'new-input-side-effect';
+            newInputLabel.id = 'new-input-side-effect-label';
+            newInputLabel.innerText = 'When did the side effect stop?';
+            newInput.className = 'input-field';
+            newInput.id = 'new-input-side-effect'
+            newInput.type = 'date'
+            document.querySelector('.side-effect-area').appendChild(newInputLabel)
+            document.querySelector('.side-effect-area').appendChild(newInput)
+        }
+        if (e.target.value === 'yes' && document.querySelector('#new-input-side-effect')) {
+            document.querySelector('#new-input-side-effect').remove()
+            document.querySelector('#new-input-side-effect-label').remove()
+        }
+    })
+
+    // functionality of x button and delete a medicine section
+    document.querySelector('body').addEventListener('click', (e) => {
+        if (e.target.classList.contains("fa-times")) {
+            e.target.parentElement.remove()
+        }
+    })
+
+    //submit form
+    document.querySelector('#submit-adr').addEventListener('click', (e) => {
+        let report_data = {
+            name: name.value,
+            surname: surname.value,
+            gender: gender.value,
+            dob: dob.value,
+            reason: reason.value,
+            advised_by: advised_by.value,
+            address: address.value,
+            telephone: telephone.value,
+            email: email.value,
+            medicines: [],
+            side_effect_start: side_effect_start.value,
+            side_effect_continuing: side_effect_continuing.value,
+            side_effect_severity: side_effect_severity.value,
+            side_effect_description: side_effect_description.value
+        }
+        const side_effect_end = document.querySelector('#new-input-side-effect')
+        if (side_effect_end) {
+            report_data.side_effect_end = side_effect_end.value
+        }
+
+        report_data.medicines.splice(0, medicines.length)
+        if (side_effect_description.value.length > 0) {
+            Array.from(document.querySelectorAll('.medicine-cont')).forEach(medicine => {
+
+                let info = {
+                    name: medicine.children[1].children[0].value,
+                    quantity: medicine.children[3].value,
+                    expiry_date: medicine.children[5].value,
+                    date_start: medicine.children[7].value,
+                    date_stop: medicine.children[9].value,
+                    dosage: medicine.children[10].value,
+                }
+                report_data.medicines.push(info)
+            })
+        }
+
+        fetch("/adr", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify(report_data)
+        })
+            .then(response => response.json())
+            .then((body) => {
+                alert(body)
+            });
+    })
+</script>
