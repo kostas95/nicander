@@ -1,0 +1,439 @@
+<style>
+    .flex-left {
+        align-items: flex-start;
+    }
+
+    .flex-left2 {
+        justify-content: flex-start;
+    }
+
+    button {
+        width: 250px !important;
+    }
+
+    #container_wrap {
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        margin-top: 5px;
+    }
+
+    #adr_content {
+        min-height: 93.2vh;
+        justify-content: flex-start;
+        padding: 0 0 1rem 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 1rem 0 1rem 0 !important;
+    }
+
+    .transparent {
+        background-color: transparent;
+    }
+
+    .flex>.container>strong {
+        flex: 2;
+        color: #6d6d6d;
+    }
+
+    .flex>.container>div {
+        flex: 5;
+        font-size: 1.2rem;
+        margin-left: 5px;
+    }
+
+    .small-date {
+        font-size: 1.2rem;
+    }
+
+    .small-date:nth-child(2) {
+        margin-left: 5px;
+    }
+
+    .justify-left {
+        justify-content: flex-start !important;
+    }
+
+    #users {
+        padding: 5rem 1rem 1rem 1rem;
+    }
+
+    .head-btn {
+        color: rgb(109, 50, 109) !important;
+        font-size: 1.5rem;
+    }
+
+    .head-btn:hover {
+        opacity: 0.7;
+    }
+
+    .underline {
+        text-decoration: underline;
+    }
+
+    #adr_container {
+        align-items: flex-start;
+    }
+
+    #adr_container>div:first-child {
+        width: 35%;
+    }
+
+    #adr_container>div:nth-child(2) {
+        width: 65%;
+    }
+
+    #adr_container>div {
+        min-height: 70vh;
+        justify-content: flex-start;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    .report-element {
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        margin: 1rem 0;
+    }
+</style>
+
+<div class="container" id="adr_content">
+    <div class="container width-100">
+        <h1 class="big-h1 width-100"><i class="fas fa-file-medical"></i> Adverse reactions reporting forms</h1>
+        <div class="container flex-dir-row padding-1rem width-100">
+            <!-- <a href="/dashboard/reporting-forms">
+                <div class="padding-1rem pointer head-btn underline"><i class="fas fa-file-medical"></i>Reporting forms
+                    </h1>
+                </div>
+            </a> -->
+            <!-- <a href="/dashboard/reporting-forms/stats">
+                <div class="padding-1rem pointer head-btn"><i class="fas fa-chart-bar"></i>Stats</h1>
+                </div>
+            </a> -->
+        </div>
+    </div>
+    <div class="container width-100 padding-1rem flex-dir-row" id="adr_container">
+        <div class="container padding-1rem" id="filters_container">
+            <h1 class="big-h1 transparent">Criteria</h1>
+            <!-- 1 -->
+            <label for="date-from">Date from:</label>
+            <input type="date" id="date-from" class="input-field">
+            <!-- 2 -->
+            <label for="date-to">Date to:</label>
+            <input type="date" id="date-to" class="input-field">
+            <!-- 3 -->
+            <label for="name">Name:</label>
+            <input type="text" id="name" class="input-field">
+            <!-- 4 -->
+            <label for="telephone">Telephone:</label>
+            <input type="text" id="telephone" class="input-field">
+            <!-- 5 -->
+            <!-- <label for="drug">Drug:</label>
+            <input type="text" id="drug" class="input-field"> -->
+            <!-- 6 -->
+            <label for="severity">Severity:</label>
+            <select name="severity" id="severity">
+                <option value=''>None</option>
+                <option value='did not affect daily activities'>Did not affect daily activities</option>
+                <option value='affect daily activities'>Affect daily activities</option>
+                <option value='admitted to hospital'>Admitted to hospital</option>
+                <option value='death'>Death</option>
+                <option value='others'>Others</option>
+            </select>
+            <!-- submit -->
+            <button class="button-2" id="criteriaBtn">Add criteria</button>
+        </div>
+        <div class="container padding-1rem" id="reports_container">
+            <h1 class="big-h1 transparent">Reports</h1>
+            <div class="container padding-1rem width-100" id="reports">
+            </div>
+            <button class="button" id="showMore">Show more</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
+<script>
+
+    //When refresh force to top
+    window.onbeforeunload = function () {
+        window.scrollTo(0, 0);
+    }
+
+    const name = '<%= username %>'
+    const surname = '<%= surname %>'
+    const fullName = `${name} ${surname}`
+    let amount = 10;
+    let start = 0, end = 10;
+    const reports = document.querySelector('#reports');
+
+    fetchData(start, end)
+
+    document.querySelector('#showMore').addEventListener('click', (e) => {
+        start += 10;
+        end += 10;
+        let scroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+        window.scrollTo(0, scroll - 100)
+
+        fetchDataCriteria(start, end)
+        console.log(start, end)
+    })
+
+    function fetchData(start, end) {
+        fetch("/adr/getReports", {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            //make sure to serialize your JSON body
+            body: JSON.stringify({
+                start: start,
+                end: end
+            })
+        })
+            .then(response => response.json())
+            .then((body) => {
+                
+                if (start === 0 && end === 10) {
+                    reports.innerHTML = '';
+                }
+                body.forEach(report => {
+                    createReportElement(report)
+                });
+            });
+    }
+
+    function createReportElement(report) {
+        //Container of report
+        const reportElement = document.createElement('div');
+        reportElement.className = 'container width-90 padding-1rem report-element';
+
+
+        //Patient info
+        const patientInfo = document.createElement('div');
+        patientInfo.className = 'container width-100 padding-5px flex-dir-row'
+        reportElement.appendChild(patientInfo)
+
+        //Full Name
+        const fullName = document.createElement('div');
+        fullName.className = 'container flex-dir-row padding-left-right-12px big-h1';
+        fullName.innerText = `${decrypt(report.name)} ${decrypt(report.surname)}`
+        patientInfo.appendChild(fullName)
+        //Date report was submitted
+        // console.log(report.date.substring(0,4))
+        // console.log(report.date.substring(5,7))
+        // console.log(report.date.substring(8,10))
+        report.date = `${report.date.substring(0, 10)}`
+        const date = document.createElement('div');
+        date.className = 'container flex-dir-row padding-left-right-12px big-h1';
+        date.innerText = `${report.date.toString().substring(0, 25)}`
+        patientInfo.appendChild(date)
+        //Gender
+        const gender = document.createElement('div');
+        gender.className = 'container flex-dir-row  padding-left-right-12px big-h1';
+        if (decrypt(gender) === 'Male') {
+            gender.innerHTML = `<i class="fas fa-mars"></i>`
+        } else {
+            gender.innerHTML = `<i class="fas fa-venus"></i>`
+        }
+        patientInfo.appendChild(gender)
+        //DOB
+        const dob = document.createElement('div');
+        dob.className = 'container flex-dir-row padding-left-right-12px big-h1';
+        dob.innerHTML = `<i class="fas fa-birthday-cake"></i>${decrypt(report.dob)}`
+        patientInfo.appendChild(dob)
+
+
+        //Contact info
+        const contactInfo = document.createElement('div');
+        contactInfo.style.marginBottom = '1rem'
+        contactInfo.className = 'container width-100 padding-5px flex-dir-row'
+        reportElement.appendChild(contactInfo)
+
+        //address
+        const address = document.createElement('div');
+        address.className = 'container flex-dir-row width-100';
+        address.innerHTML = `<i class="fas fa-map-marker-alt"></i>${decrypt(report.address)}`
+        contactInfo.appendChild(address)
+        //telephone
+        const telephone = document.createElement('div');
+        telephone.className = 'container flex-dir-row width-100';
+        telephone.innerHTML = `<i class="fas fa-phone"></i>${decrypt(report.telephone)}`
+        contactInfo.appendChild(telephone)
+        //email
+        const email = document.createElement('div');
+        email.className = 'container flex-dir-row width-100';
+        email.innerHTML = `<i class="fas fa-at"></i>${decrypt(report.email)}`
+        contactInfo.appendChild(email)
+
+
+        //Reason info
+        const reason = document.createElement('div');
+        reason.className = 'container width-100 padding-5px flex-dir-row flex-left2'
+        reason.innerHTML = `<div class='container padding-right-12px'>Reason:</div>
+                <div class='container padding-right-12px'>${decrypt(report.reason)}</div>`
+        reportElement.appendChild(reason)
+
+
+        //advisedBy info
+        const advisedBy = document.createElement('div');
+        advisedBy.className = 'container width-100 padding-5px flex-dir-row flex-left2'
+        advisedBy.innerHTML = `<div class='container padding-right-12px'>Advised by:</div>
+                <div class='container padding-right-12px'>${decrypt(report.advised_by)}</div>`
+        reportElement.appendChild(advisedBy)
+
+        //medicines
+        report.medicines.forEach(medicine => {
+            let medicineElement = document.createElement('div');
+            medicineElement.className = 'container width-100 padding-5px flex-left drugSection'
+            medicineElement.innerHTML = `
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='strong padding-right-12px'>Name:</div>
+                        <div> ${decrypt(medicine.name)}
+                        </div>
+                    </div>
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='strong padding-right-12px'>Date started:</div> 
+                        <div class='padding-right-12px'>${decrypt(medicine.date_start)}</div>  
+                        <div class='strong padding-right-12px'>Date stopped:</div> 
+                        <div class='padding-right-12px'>${decrypt(medicine.date_stop)}
+                        </div>
+                    </div>
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='strong padding-right-12px'>Dosage form:</div> 
+                        <div class='padding-right-12px'>
+                        ${decrypt(medicine.dosage)}
+                        </div>
+                    </div>
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='strong padding-right-12px'>Expiry date:</div> 
+                        <div class='padding-right-12px'>
+                        ${decrypt(medicine.expiry_date)}
+                        </div>
+                    </div>
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='strong padding-right-12px'>Quantity:</div> 
+                        <div class='padding-right-12px'>
+                        ${decrypt(medicine.quantity)}
+                        </div>
+                    </div>
+                    <hr class='width-100'>
+                    `
+            reportElement.appendChild(medicineElement)
+        });
+
+
+        //Side effects
+        const sideEffects = document.createElement('div');
+        sideEffects.className = 'container width-100 padding-5px flex-left'
+        sideEffects.innerHTML = `
+                <div class='padding-top-bottom-10px container flex-dir-row'>
+                    <div class='padding-right-12px'>Side effect starting date:</div> 
+                    <div class='padding-right-12px'>
+                    ${decrypt(report.side_effect_start)}
+                    </div>
+                </div>
+                <div class='padding-top-bottom-10px container flex-dir-row'>
+                    <div class='padding-right-12px'>Is the side effect continuing?:</div> 
+                    <div class='padding-right-12px'>
+                    ${decrypt(report.side_effect_continuing)}
+                    </div>
+                </div>
+                `
+        if (report.side_effect_end) {
+            sideEffects.innerHTML += `
+                        <div class='padding-top-bottom-10px container flex-dir-row'>
+                            <div class='padding-right-12px'>Side effect ending date:</div> 
+                            <div class='padding-right-12px'>
+                            ${decrypt(report.side_effect_end)}
+                            </div>
+                        </div>
+                    `
+        }
+
+        sideEffects.innerHTML += `
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='padding-right-12px'>Side effect severity:</div> 
+                        <div class='padding-right-12px'>
+                        ${decrypt(report.side_effect_severity)}
+                        </div>
+                    </div>
+                    <div class='padding-top-bottom-10px container flex-dir-row'>
+                        <div class='padding-right-12px'>Side effect description:</div> 
+                        <div class='padding-right-12px'>
+                        ${decrypt(report.side_effect_description)}
+                        </div>
+                    </div>
+                `
+
+        //Side effects start
+        reportElement.appendChild(sideEffects)
+
+        //Append the containers to their parents
+        reports.appendChild(reportElement)
+    }
+
+    //Filter functionality
+
+    const dateFrom = document.querySelector('#date-from'),
+        dateTo = document.querySelector('#date-to'),
+        full_name = document.querySelector('#name'),
+        telephone = document.querySelector('#telephone'),
+        // drug = document.querySelector('#drug'),
+        severity = document.querySelector('#severity')
+
+    document.querySelector('#criteriaBtn').addEventListener('click', (e) => {
+        start = 0, end = 10;
+        fetchDataCriteria(start, end)
+        reports.innerHTML = ''
+        console.log(start, end)
+    })
+
+    function fetchDataCriteria(start, end) {
+        if (dateFrom.value.length === 0 && dateTo.value.length === 0 && full_name.value.length === 0 && telephone.value.length === 0 && severity.value.length === 0) {
+            fetchData(start, end);
+            
+        } else {
+            console.log(start,end)
+            fetch("/adr/getReports/criteria", {
+                method: "post",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+
+                //make sure to serialize your JSON body
+                body: JSON.stringify({
+                    dateTo: dateTo.value.toLowerCase(),
+                    dateFrom: dateFrom.value.toLowerCase(),
+                    full_name: full_name.value.toLowerCase(),
+                    telephone: telephone.value.toLowerCase(),
+                    // drug: drug.value.toLowerCase(),
+                    severity: severity.value.toLowerCase(),
+                    start: start,
+                    end: end
+                })
+            })
+                .then(response => response.json())
+                .then((body) => {
+                    console.log(body)
+                    body.forEach(report => {
+                        createReportElement(report)
+                    });
+                });
+        }
+    }
+
+    function decrypt(encrypted) {
+        let decrypted = CryptoJS.AES.decrypt(encrypted, "Secret Passphrase").toString(CryptoJS.enc.Utf8)
+
+        return decrypted.charAt(0).toUpperCase() + decrypted.slice(1);
+    }
+</script>

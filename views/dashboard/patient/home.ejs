@@ -123,9 +123,13 @@
         color: red;
     }
 
-    #emergency {
+    #emergency, #adr {
         margin: 20px 0 0 0 !important;
         width: 50% !important;
+    }
+
+    #adr {
+        margin-left: 10px !important;
     }
 
     @media only screen and (max-width: 767px) and (max-height: 1024px) {
@@ -220,7 +224,10 @@
                     </div>
                 </div>
             </div>
-            <button class="button flex-left" id="emergency">I'm on emergency</button>
+            <div class="container flex-dir-row flex-left width-50">
+                <button class="button" id="emergency">Emergency appointment</button>
+                <button class="button" id="adr">ADR form submission</button>
+            </div>
 
         </div>
         <div class="container padding-2rem width-75vw">
@@ -400,6 +407,10 @@
             .then((body) => {
                 window.location.href = body.url
             });
+    })
+
+    document.querySelector('#adr').addEventListener('click', () => {
+        window.location.href = '/dashboard/emergency/report'
     })
 
     fetch("/getAppointments/p", {

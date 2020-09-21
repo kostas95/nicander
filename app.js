@@ -29,6 +29,7 @@ const Notification = require('./models/Notification')
 const Message = require('./models/Message')
 const Email = require('./models/Email')
 const Report = require('./models/Report')
+const Adr = require('./models/Adr')
 const Review = require('./models/Review')
 const SysReview = require('./models/SysReview')
 var imgModel = require('./models/Image');
@@ -144,6 +145,7 @@ var session = require("express-session");
 const { json } = require('express');
 const e = require('express');
 const { X_OK } = require('constants');
+const { report } = require('process');
 app.use(session({ secret: "cats" }));
 
 
@@ -264,6 +266,16 @@ app.post('/emergency/appointment/registered', ensureAuthenticated, function (req
 //(GET) Emergency-appointment Page Route
 app.get('/emergency/report', forwardAuthenticated, function (req, res) {
    res.render('emergency/adr/emergency-report');
+});
+
+//(GET) Emergency-appointment Page Route PATIENT
+app.get('/dashboard/emergency/report', ensureAuthenticated, function (req, res) {
+   res.render('emergency/adr/emergency-report', {
+      layout: 'dashboard/patient/layout',
+      username: req.user.name,
+      email: req.user.email,
+      id: req.user._id
+   });
 });
 
 //Register & Login Routes
@@ -620,6 +632,22 @@ app.get('/dashboard/emergencies/ignored', ensureAuthenticated, (req, res) => {
       res.render('dashboard/system-doctor/appointments-ignored', {
          layout: 'dashboard/system-doctor/layout',
          username: req.user.name,
+         email: req.user.email,
+         id: req.user._id
+      });
+   } else {
+      res.render('notFound')
+   }
+})
+
+//System doctor emergency appointments ignored
+app.get('/dashboard/reporting-forms', ensureAuthenticated, (req, res) => {
+   if (req.user.type === 'systemDoctor') {
+
+      res.render('dashboard/system-doctor/adr-reports', {
+         layout: 'dashboard/system-doctor/layout',
+         username: req.user.name,
+         surname: req.user.surname,
          email: req.user.email,
          id: req.user._id
       });
@@ -2948,7 +2976,111 @@ app.post('/ignoreEmergency', ensureAuthenticated, (req, res) => {
 //post adr data
 app.post('/adr', (req, res) => {
    console.log(req.body)
-   res.json('got it')
+
+   const newAdr = new Adr({
+      name: req.body.name,
+      surname: req.body.surname,
+      gender: req.body.gender,
+      dob: req.body.dob,
+      reason: req.body.reason,
+      advised_by: req.body.advised_by,
+      address: req.body.address,
+      telephone: req.body.telephone,
+      email: req.body.email,
+      medicines: req.body.medicines,
+      side_effect_start: req.body.side_effect_start,
+      side_effect_end: req.body.side_effect_end,
+      side_effect_continuing: req.body.side_effect_continuing,
+      side_effect_severity: req.body.side_effect_severity,
+      side_effect_description: req.body.side_effect_description
+
+   });
+
+   newAdr.save().then(data => {
+      res.json({
+         msg: 'Adverse reactions report has been sent!'
+      });
+   })
+})
+
+//get ADR reporting forms
+app.post('/adr/getReports', (req, res) => {
+   Adr.find().sort({ 'date': -1 }).limit(req.body.end).exec(function (err, reports) {
+      if (err) {
+         console.log(err)
+      }
+      reports.splice(0, req.body.start)
+      res.json(reports)
+   })
+})
+
+//get ADR reporting forms with criteria
+app.post('/adr/getReports/criteria', (req, res) => {
+   Adr.find().sort({ 'date': -1 }).exec(function (err, reports) {
+      if (err) {
+         console.log(err)
+      }
+      let reportsSend = [];
+      console.log(reports.length)
+      reports.forEach(report => {
+         let includes = true;
+         let name = `${decrypt(report.name).toLowerCase()} ${decrypt(report.surname).toLowerCase()}`
+         //Date of report
+         var reportDate = Date.parse(report.date);
+         //req.body.dateFrom
+
+         if (req.body.dateFrom.length > 0) {
+            var date_from = Date.parse(req.body.dateFrom);
+         } else {
+            var date_from = 0;
+         }
+         if (req.body.dateTo.length > 0) {
+            //req.body.dateTo
+            var date_to = Date.parse(req.body.dateTo);
+         } else {
+            var date_to = Date.parse('12/12/9999');
+         }
+
+         //full name
+         if (!name.includes(req.body.full_name) && req.body.full_name.length > 0) {
+            includes = false
+         }
+         //telephone
+         else if (!decrypt(report.telephone).includes(req.body.telephone) && req.body.telephone.length > 0) {
+            includes = false
+         }
+         //severity
+         else if (decrypt(report.side_effect_severity).toLowerCase() != req.body.severity && req.body.severity.length > 0) {
+            includes = false
+         }
+         //date from
+         else if (reportDate < date_from && req.body.dateFrom.length > 0) {
+            includes = false
+         }
+         //date to
+         else if (reportDate > date_to && req.body.dateTo.length > 0) {
+            includes = false
+         }
+
+         if (includes === true) {
+            reportsSend.push(report)
+         }
+      });
+      if (reportsSend.length > req.body.start) {
+         console.log(reportsSend.length, 'before splice')
+         reportsSend.splice(req.body.end, reportsSend.length - 1)
+         reportsSend.splice(0, req.body.start)
+         console.log(reportsSend.length, 'after splice')
+         res.json(reportsSend)
+      } else {
+         res.json([])
+      }
+   })
+
+   function decrypt(encrypted) {
+      let decrypted = CryptoJS.AES.decrypt(encrypted, "Secret Passphrase").toString(CryptoJS.enc.Utf8)
+      return decrypted
+   }
 })
 
 // Logout
@@ -4001,7 +4133,7 @@ app.get('*', function (req, res) {
                   if (err) {
                      console.log(err)
                   }
-                  
+
                   if (appointment.connectedUsers > 1) {
                      appointment.type = 'completed'
                      appointment.save()

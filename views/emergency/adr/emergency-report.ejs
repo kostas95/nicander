@@ -252,7 +252,7 @@
                 <label for="severity-side-effect"></label>
                 <select name="effect-severity" id="effect-severity">
                     <option value>Select answer</option>
-                    <option value='did not affect daily activities'>Affect daily activities</option>
+                    <option value='did not affect daily activities'>Did not affect daily activities</option>
                     <option value='affect daily activities'>Affect daily activities</option>
                     <option value='admitted to hospital'>Admitted to hospital</option>
                     <option value='death'>Death</option>
@@ -271,6 +271,8 @@
 
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"
+    integrity="sha256-/H4YS+7aYb9kJ5OKhFYPUjSJdrtV6AeyJOtTkw6X72o=" crossorigin="anonymous"></script>
 
 <script>
     // "https://api.fda.gov/drug/event.json?search=patient.drug.medicinalproduct:aerolin&limit=20
@@ -306,38 +308,38 @@
 
         if (index >= 0 && index < formFields.length - 1) {
             if (formFields[index].children[1].id !== 'medicine-section') {
-                Array.from(formFields[index].children[1].children).forEach(element => {
-                    if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+                // Array.from(formFields[index].children[1].children).forEach(element => {
+                //     if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
 
-                        if (element.value.length <= 0) {
-                            stop_ = true
-                        } else {
-                            stop_ = false
-                        }
-                    }
-                })
+                //         if (element.value.length <= 0) {
+                //             stop_ = true
+                //         } else {
+                //             stop_ = false
+                //         }
+                //     }
+                // })
             } else {
-                Array.from(formFields[index].children[1].children).forEach(child => {
-                    Array.from(child.children).forEach(element => {
-                        if (element.id === 'medicine-container') {
-                            if (element.children[0].value.length <= 0) {
-                                stop_ = true
-                            } else {
-                                stop_ = false
-                            }
-                        }
-                        if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
-                            if (element.value.length <= 0) {
-                                stop_ = true
-                            }
-                            else if (element.value.length > 0 && stop_ === true) {
-                                stop_ = true
-                            } else {
-                                stop_ = false
-                            }
-                        }
-                    })
-                })
+                // Array.from(formFields[index].children[1].children).forEach(child => {
+                //     Array.from(child.children).forEach(element => {
+                //         if (element.id === 'medicine-container') {
+                //             if (element.children[0].value.length <= 0) {
+                //                 stop_ = true
+                //             } else {
+                //                 stop_ = false
+                //             }
+                //         }
+                //         if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+                //             if (element.value.length <= 0) {
+                //                 stop_ = true
+                //             }
+                //             else if (element.value.length > 0 && stop_ === true) {
+                //                 stop_ = true
+                //             } else {
+                //                 stop_ = false
+                //             }
+                //         }
+                //     })
+                // })
             }
 
             if (stop_ === false) {
@@ -550,24 +552,24 @@
     //submit form
     document.querySelector('#submit-adr').addEventListener('click', (e) => {
         let report_data = {
-            name: name.value,
-            surname: surname.value,
-            gender: gender.value,
-            dob: dob.value,
-            reason: reason.value,
-            advised_by: advised_by.value,
-            address: address.value,
-            telephone: telephone.value,
-            email: email.value,
+            name: CryptoJS.AES.encrypt(name.value, "Secret Passphrase").toString(),
+            surname: CryptoJS.AES.encrypt(surname.value, "Secret Passphrase").toString(),
+            gender: CryptoJS.AES.encrypt(gender.value, "Secret Passphrase").toString(),
+            dob: CryptoJS.AES.encrypt(dob.value, "Secret Passphrase").toString(),
+            reason: CryptoJS.AES.encrypt(reason.value, "Secret Passphrase").toString(),
+            advised_by: CryptoJS.AES.encrypt(advised_by.value, "Secret Passphrase").toString(),
+            address: CryptoJS.AES.encrypt(address.value, "Secret Passphrase").toString(),
+            telephone: CryptoJS.AES.encrypt(telephone.value, "Secret Passphrase").toString(),
+            email: CryptoJS.AES.encrypt(email.value, "Secret Passphrase").toString(),
             medicines: [],
-            side_effect_start: side_effect_start.value,
-            side_effect_continuing: side_effect_continuing.value,
-            side_effect_severity: side_effect_severity.value,
-            side_effect_description: side_effect_description.value
+            side_effect_start: CryptoJS.AES.encrypt(side_effect_start.value, "Secret Passphrase").toString(),
+            side_effect_continuing: CryptoJS.AES.encrypt(side_effect_continuing.value, "Secret Passphrase").toString(),
+            side_effect_severity: CryptoJS.AES.encrypt(side_effect_severity.value, "Secret Passphrase").toString(),
+            side_effect_description: CryptoJS.AES.encrypt(side_effect_description.value, "Secret Passphrase").toString()
         }
         const side_effect_end = document.querySelector('#new-input-side-effect')
         if (side_effect_end) {
-            report_data.side_effect_end = side_effect_end.value
+            report_data.side_effect_end = CryptoJS.AES.encrypt(side_effect_end.value, "Secret Passphrase").toString()
         }
 
         report_data.medicines.splice(0, medicines.length)
@@ -575,13 +577,14 @@
             Array.from(document.querySelectorAll('.medicine-cont')).forEach(medicine => {
 
                 let info = {
-                    name: medicine.children[1].children[0].value,
-                    quantity: medicine.children[3].value,
-                    expiry_date: medicine.children[5].value,
-                    date_start: medicine.children[7].value,
-                    date_stop: medicine.children[9].value,
-                    dosage: medicine.children[10].value,
+                    name: CryptoJS.AES.encrypt(medicine.children[1].children[0].value, "Secret Passphrase").toString(),
+                    quantity: CryptoJS.AES.encrypt(medicine.children[3].value, "Secret Passphrase").toString(),
+                    expiry_date: CryptoJS.AES.encrypt(medicine.children[5].value, "Secret Passphrase").toString(),
+                    date_start: CryptoJS.AES.encrypt(medicine.children[7].value, "Secret Passphrase").toString(),
+                    date_stop: CryptoJS.AES.encrypt(medicine.children[9].value, "Secret Passphrase").toString(),
+                    dosage: CryptoJS.AES.encrypt(medicine.children[10].value, "Secret Passphrase").toString(),
                 }
+                // console.log(info)
                 report_data.medicines.push(info)
             })
         }
@@ -598,7 +601,16 @@
         })
             .then(response => response.json())
             .then((body) => {
-                alert(body)
+                if (!document.querySelector('.message-log2')) {
+                    const msg = document.createElement('div');
+                    msg.className = 'message-log2'
+                    msg.innerText = `${body.msg}`
+                    document.querySelector('.position-parent').appendChild(msg)
+                    setTimeout(() => {
+                        msg.remove()
+                    }, 5000);
+                    document.querySelector('#submit-adr').disabled = true
+                }
             });
     })
 </script>

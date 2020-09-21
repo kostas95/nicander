@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Patient</title>
-    <link rel="stylesheet" href="/stylesheets/main.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500&family=Roboto&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
 </head>
 <style>
     #navbar>ul {
@@ -110,7 +110,9 @@
             padding: 10px !important;
         }
 
-        #vote, #down, #up {
+        #vote,
+        #down,
+        #up {
             padding: 10px !important;
         }
 
@@ -137,50 +139,65 @@
 </style>
 
 <body>
-    <div id="navbar" class="navbar2">
-        <div class="navbar-decoration"></div>
-        <img src="/img/logo.png" id="logo">
-        <ul>
-            <a href="/dashboard">
-                <li class="navbar-item"><i class="fas fa-home"></i></li>
-            </a>
-            <a href="/dashboard/personal-details">
-                <li class="navbar-item">My personal details</li>
-            </a>
-            <a href="/dashboard/my-appointments">
-                <li class="navbar-item">My appointments</li>
-            </a>
-            <a href="/dashboard/reviews">
-                <li class="navbar-item">Reviews</li>
-            </a>
-            <a href="/dashboard/notifications">
-                <li class="navbar-item">Notifications</li>
-            </a>
-            <li class="navbar-item email"><%= email %>
-                <div class="container" id='dropdown'>
-                    <a href="/logout" class="navbar-item">
-                        Logout <i class="fas fa-sign-out-alt"> </i>
-                    </a>
-                    <!-- <a href="/doctor/login" class="navbar-item">Doctors</a> -->
-                </div>
-            </li>
-        </ul>
-        <div class="navbar-decoration"></div>
+
+    <div class='container'>
+        <div id="navbar" class="navbar2">
+            <div class="navbar-decoration"></div>
+            <img src="/img/logo.png" id="logo">
+            <ul>
+                <a href="/dashboard">
+                    <li class="navbar-item"><i class="fas fa-home"></i></li>
+                </a>
+                <a href="/dashboard/personal-details">
+                    <li class="navbar-item">My personal details</li>
+                </a>
+                <a href="/dashboard/my-appointments">
+                    <li class="navbar-item">My appointments</li>
+                </a>
+                <a href="/dashboard/reviews">
+                    <li class="navbar-item">Reviews</li>
+                </a>
+                <a href="/dashboard/notifications">
+                    <li class="navbar-item">Notifications</li>
+                </a>
+                <li class="navbar-item email"><%= email %>
+                    <div class="container" id='dropdown'>
+                        <a href="/logout" class="navbar-item">
+                            Logout <i class="fas fa-sign-out-alt"> </i>
+                        </a>
+                        <!-- <a href="/doctor/login" class="navbar-item">Doctors</a> -->
+                    </div>
+                </li>
+            </ul>
+            <div class="navbar-decoration"></div>
+        </div>
+        <div id="main-container" class="width-100">
+            <%- body %>
+        </div>
+        
     </div>
 
-    <%- body %>
-
+    <!-- Flash messaging -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
 </body>
-<!-- <footer>
-    <div class="container">
 
-    </div>
-</footer> -->
-
-</html>
 
 <script>
-
+    //Crazy stuff right here, without the piece of code below, the slider is not working
+    document.querySelector('body').addEventListener('click', (e) => {
+        if (e.target.innerText) {
+            true
+        }
+    })
+    
     const uId = '<%= id %>'
     //Prevent form from resubmitting when page refreshes
     if (window.history.replaceState) {
@@ -241,3 +258,4 @@
             }
         });
 </script>
+</html>
