@@ -3083,6 +3083,28 @@ app.post('/adr/getReports/criteria', (req, res) => {
    }
 })
 
+//send Email to patient who sent an adr
+app.post('/adr/email', function (req, res) {
+
+   var mailOptions = {
+      from: 'nicander',
+      to: req.body.email,
+      subject: `Answer to Adverse Reactions report you sent ${req.body.reportDate}`,
+      text: `${req.body.message}`
+   };
+
+   transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+         console.log(error);
+      } else {
+         console.log('Email sent: ' + info.response);
+         res.json({
+            msg: "Email sent successfully."
+         })
+      }
+   });
+})
+
 // Logout
 app.get('/logout', (req, res) => {
    req.logout();

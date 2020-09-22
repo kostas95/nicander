@@ -99,6 +99,10 @@
         background-color: #f0f0f0;
         margin: 1rem 0;
     }
+
+    textarea {
+        font-family: 'Roboto', sans-serif;
+    }
 </style>
 
 <div class="container" id="adr_content">
@@ -200,7 +204,7 @@
         })
             .then(response => response.json())
             .then((body) => {
-                
+
                 if (start === 0 && end === 10) {
                     reports.innerHTML = '';
                 }
@@ -213,8 +217,85 @@
     function createReportElement(report) {
         //Container of report
         const reportElement = document.createElement('div');
-        reportElement.className = 'container width-90 padding-1rem report-element';
+        reportElement.className = 'container width-90 padding-1rem report-element pointer';
+        reportElement.addEventListener('click', () => {
+            //Modal
+            const modal = document.createElement('div');
+            modal.className = 'modal container';
 
+            //Content of modal
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content container align-top2';
+            modalContent.innerHTML = `
+            <div class='container width-100'>
+                <div class='big-h1'>Send e-mail to patient</div>
+                <textarea class='input-field width-100' id='emailMessage' placeholder='Your message here...'></textarea>
+            </div>
+            `
+
+            const sendEmailBtn = document.createElement('button');
+            sendEmailBtn.innerText = 'Send email'
+            sendEmailBtn.className = 'button'
+            sendEmailBtn.addEventListener('click', () => {
+                if (document.querySelector('#emailMessage').value.length > 0) {
+
+                    fetch("/adr/email", {
+                        method: "post",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+
+                        //make sure to serialize your JSON body
+                        body: JSON.stringify({
+                            message: document.querySelector('#emailMessage').value,
+                            email: decrypt(report.email),
+                            reportDate: report.date.substring(0, 10)
+                        })
+                    })
+                        .then(response => response.json())
+                        .then((body) => {
+                            if (document.querySelector('#msg')) {
+                                document.querySelector('#msg').remove()
+                            } else {
+                                document.querySelector('#emailMessage').value = ''
+                                const msg = document.createElement('div');
+                                msg.id = 'msg';
+                                msg.style.margin = '10px';
+                                msg.style.color = 'green';
+                                msg.innerText = `${body.msg}`
+                                modalContent.appendChild(msg)
+                                setTimeout(() => {
+                                    msg.remove()
+                                }, 5000);
+                            }
+                        });
+
+                } else {
+                    
+                    const msg = document.createElement('div');
+                    msg.id = 'err';
+                    msg.style.color = 'red';
+                    msg.style.margin = '10px';
+                    msg.innerText = `Please type in a message before you send`
+                    modalContent.appendChild(msg)
+                    setTimeout(() => {
+                        msg.remove()
+                    }, 5000);
+                }
+            })
+
+            modalContent.appendChild(sendEmailBtn)
+            modal.appendChild(modalContent);
+
+            document.querySelector('body').appendChild(modal)
+
+            //Exit modal
+            document.querySelector('body').addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal'))
+                    modal.remove()
+            })
+        })
 
         //Patient info
         const patientInfo = document.createElement('div');
@@ -399,9 +480,9 @@
     function fetchDataCriteria(start, end) {
         if (dateFrom.value.length === 0 && dateTo.value.length === 0 && full_name.value.length === 0 && telephone.value.length === 0 && severity.value.length === 0) {
             fetchData(start, end);
-            
+
         } else {
-            console.log(start,end)
+            console.log(start, end)
             fetch("/adr/getReports/criteria", {
                 method: "post",
                 headers: {
