@@ -200,6 +200,25 @@
         footer {
             padding: 1rem !important;
         }
+
+        #searchbar-cont, #vote {
+            flex-direction: row !important;
+        }
+
+        #emergency-cont {
+            flex-direction: row !important;
+            margin: 20px 0;
+        }
+
+        #emergency-cont>.button {
+            flex: 1;
+            height: 38px;
+            margin: 0 10px !important;
+        }
+
+        .search-results-items {
+            padding: 5px 0 !important;
+        }
     }
 </style>
 
@@ -224,7 +243,7 @@
                     </div>
                 </div>
             </div>
-            <div class="container flex-dir-row flex-left width-50">
+            <div class="container flex-dir-row flex-left width-50" id="emergency-cont">
                 <button class="button" id="emergency">Emergency appointment</button>
                 <button class="button" id="adr">ADR form submission</button>
             </div>

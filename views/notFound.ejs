@@ -1,32 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicander</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/3c51ae6c1f.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
+</head>
 <style>
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .flex-dir-row {
+        flex-direction: row;
+    }
+
+    .strong {
+        color: #ffffff !important;
+    }
+
     #main-container {
         background-color: #95c2de;
         width: 100% !important;
         height: 76.85vh;
     }
 
+    .main-parent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #95c2de;
+        width: 100vw;
+        height: 100vh;
+    }
+
     .mainbox {
         background-color: #95c2de;
         margin: auto;
-        height: 600px;
-        width: 600px;
-        position: relative;
+        height: 50vh;
+        width: 50vw;
     }
 
     .err {
         color: #ffffff;
         font-family: 'Nunito Sans', sans-serif;
         font-size: 11rem;
-        position: absolute;
-        left: 20%;
-        top: 8%;
     }
 
     .far {
-        position: absolute;
         font-size: 8.5rem;
-        left: 42%;
-        top: 15%;
         color: #ffffff;
     }
 
@@ -34,19 +65,12 @@
         color: #ffffff;
         font-family: 'Nunito Sans', sans-serif;
         font-size: 11rem;
-        position: absolute;
-        left: 68%;
-        top: 8%;
     }
 
     .msg {
         text-align: center;
         font-family: 'Nunito Sans', sans-serif;
         font-size: 1.6rem;
-        position: absolute;
-        left: 16%;
-        top: 45%;
-        width: 75%;
     }
 
     a {
@@ -61,15 +85,38 @@
     footer {
         z-index: 2;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .main-parent {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mainbox {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
 </style>
 <!-- purple x moss 2020 -->
 
-
-<div class="mainbox">
-    <div class="err">4</div>
-    <i class="far fa-question-circle fa-spin"></i>
-    <div class="err2">4</div>
-    <div class="msg">Maybe this page moved? Got deleted? Is hiding out in quarantine? Never existed in the first
-        place?<p>Let's go <a href="/">home</a> and try from there.</p>
+<body>
+    <div class="main-parent">
+        <div class="mainbox container">
+            <div class="container flex-dir-row">
+                <div class="err">4</div>
+                <i class="far fa-question-circle fa-spin"></i>
+                <div class="err2">4</div>
+            </div>
+            <div class="msg">Maybe this page moved? Got deleted? Is hiding out in quarantine? Never existed in the first
+                place?<p>Let's go <a href="/" class="strong">home</a> and try from there.</p>
+            </div>
+        </div>
     </div>
-</div>
+</body>
+
+</html>

@@ -44,12 +44,18 @@
         margin-left: 5px;
     }
 
-    .justify-left{
+    .justify-left {
         justify-content: flex-start !important;
     }
 
     #users {
         padding: 5rem 1rem 1rem 1rem;
+    }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .width-50 {
+            width: 100% !important;
+        }
     }
 </style>
 
@@ -71,7 +77,7 @@
     })
         .then(response => response.json())
         .then((body) => {
-            console.log(body)
+            
             if (body.reports.length === 0) {
                 document.querySelector('#users').innerText = 'There are no reported users at this moment'
             }
@@ -202,7 +208,7 @@
                     reason_div.innerHTML = `<strong class='padding-5px'>Reason:</strong><div> ${report.reason}</div>`;
                     date_div.innerHTML = `<strong class='padding-5px'>Date:</strong> 
                     <div class='container flex-dir-row justify-left'>
-                    <div class='small-date'>${report.date.substring(8, 10)}-${report.date.substring(5, 7)}-${report.date.substring(0, 4)},</div><div class='small-date'>${report.date.substring(11, 16)}</div>
+                    <div class='small-date'>${new Date(report.date).toString().substring(0, 25)}</div>
                     </div>
                     `;
 

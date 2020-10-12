@@ -42,6 +42,39 @@
     #reviews-content {
         border-right: 5px solid #f8f9fa;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .padding-2rem {
+            padding: 1rem;
+        }
+
+        #reviews-content {
+            border: none;
+        }
+
+        #reviews-content,
+        .rating-wrap, .rating-wrap>*,
+        form {
+            padding: 5px;
+            width: 100% !important;
+        }
+
+        .rating-container {
+            padding: 5px;
+        }
+
+        .rating-container>.flex-dir-row:nth-child(3)>.flex-dir-row {
+            flex-direction: row !important;
+        }
+
+        .rating-wrap>.container {
+            height: initial;
+        }
+
+        #rate-textarea {
+            margin-top: 10px;
+        }
+    }
 </style>
 
 <div class="container padding-2rem wrap">

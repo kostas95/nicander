@@ -88,9 +88,46 @@
         overflow: auto;
         border-bottom: 1px solid rgb(224, 224, 224);
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        #mob-wrap {
+            flex-flow: column;
+        }
+
+        #chat-area {
+            order: 2;
+        }
+
+        #diagnosis-area {
+            order: 1;
+        }
+
+        textarea {
+            width: 100%;
+        }
+
+        #submit_diagnosis {
+            width: 150px;
+        }
+
+        .modal-content {
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .margin-left-right-10px {
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        strong {
+            text-align: center;
+        }
+    }
 </style>
 
-<div class="container width-100 padding-1rem flex-dir-row">
+<div class="container width-100 padding-1rem flex-dir-row" id="mob-wrap">
     <!-- Chat Area -->
     <div class="container width-100 padding-1rem" id="chat-area">
 
@@ -208,7 +245,7 @@
                     <div class='diag_head'>Treatment</div>
                     <div class='padding-1rem' id='treatment_content'>${body.diagnosis.treatment}</div>
                     `
-                } else if (!body.diagnosis.diagnosis || !body.diagnosis.comments || !body.diagnosis.treatment){
+                } else if (!body.diagnosis.diagnosis || !body.diagnosis.comments || !body.diagnosis.treatment) {
                     diagnosis.innerHTML = `
                     <div class='diag_head'>Diagnosis</div>
                     <div class='padding-1rem'>Doctor hasn't published a diagnosis yet</div>

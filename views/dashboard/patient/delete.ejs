@@ -10,12 +10,11 @@
 
     #main-container>.container {
         position: absolute;
-        top: 25vh;
     }
 
     #main-container>.container>h1,
     #main-container>.container>div {
-        max-width: 60%;
+        max-width: 80%;
         margin-bottom: 2rem;
     }
 
@@ -51,12 +50,35 @@
         font-size: 1.5rem !important;
     }
 
-    #msg, #msg-modal{
+    #msg,
+    #msg-modal {
         color: red;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        body {
+            overflow: auto;
+        }
+
+        #main-container>.container {
+            top: 0;
+        }
+
+        h1,
+        #message,
+        u {
+            text-align: center;
+            width: 100%;
+            font-size: 20px;
+        }
+
+        button {
+            width: 200px !important;
+        }
+    }
 </style>
-<div class="container" id="main-container">
-    <div class="container">
+<div class="container width-100" id="main-container">
+    <div class="container width-100">
         <div id="msg"><%= msg %></div>
         <h1>Are you sure?</h1>
 
@@ -113,14 +135,14 @@
             let c_password = document.querySelector('#c_password').value;
             let msg = document.querySelector('#msg-modal');
 
-            if(password !== c_password || c_password === '' || password === ''){
-                if(password !== c_password)
-                msg.innerText = 'Password and password confirmation do not match';
-                else if(password === '' || c_password === '')
-                msg.innerText = 'Please fill all fields';
+            if (password !== c_password || c_password === '' || password === '') {
+                if (password !== c_password)
+                    msg.innerText = 'Password and password confirmation do not match';
+                else if (password === '' || c_password === '')
+                    msg.innerText = 'Please fill all fields';
                 e.preventDefault()
             }
-            
+
         })
     })
 

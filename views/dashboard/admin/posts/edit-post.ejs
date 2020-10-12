@@ -1,8 +1,14 @@
 <div class="dashboard-container">
-    <div class="container flex-dir-row padding-2rem">
-        <a href="/dashboard/posts/new-post"><div class="dashboard-headers"><i class="fas fa-plus"></i>New Post</div></a>
-        <a href="/dashboard/posts/edit-post"><div class="dashboard-headers" id="underline"><i class="far fa-edit"></i>Edit Post</div></a>
-        <a href="/dashboard/posts/see-posts"><div class="dashboard-headers"><i class="far fa-eye"></i>See Posts</div></a>
+    <div class="container flex-dir-row padding-2rem" id="buttons-cont">
+        <a href="/dashboard/posts/new-post">
+            <div class="dashboard-headers"><i class="fas fa-plus"></i>New Post</div>
+        </a>
+        <a href="/dashboard/posts/edit-post">
+            <div class="dashboard-headers" id="underline"><i class="far fa-edit"></i>Edit Post</div>
+        </a>
+        <a href="/dashboard/posts/see-posts">
+            <div class="dashboard-headers"><i class="far fa-eye"></i>See Posts</div>
+        </a>
     </div>
     <h2 class="h2-bg"><i class="far fa-edit"></i>Edit post</h2>
     <div class="container flex-dir-row" id='edit-main-cont'>
@@ -93,6 +99,64 @@
         width: 50px;
         font-size: 10px;
         text-align: center;
+    }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .padding-2rem {
+            padding: 1rem;
+        }
+
+        #buttons-cont {
+            flex-direction: row !important;
+        }
+
+        .dashboard-headers {
+            font-size: 14px;
+        }
+
+        #edit-main-cont {
+            width: 100% !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        #display-all-posts {
+            width: 80%;
+            margin: auto !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            max-height: 50vh;
+        }
+
+        #form-container, .form, #cont-100-mob {
+            margin-top: 10px;
+            width: 100% !important;
+        }
+
+        #form-container {
+            border-top: 1px solid black;
+        }
+
+        .post-edit {
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        #postTitle, #postContent, #postAuthor, .button-2, .button, #post {
+            width: 75%;
+        }
+
+        #post {
+            margin: 1rem 0 0 0 !important;
+        }
+
+        label {
+            text-align: center;
+        }
+
+        #writing-palette {
+            flex-direction: row !important;
+        }
     }
 </style>
 <script>

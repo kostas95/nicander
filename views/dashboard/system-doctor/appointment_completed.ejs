@@ -90,6 +90,43 @@
         outline: none;
         font-family: 'Roboto', sans-serif;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        #mob-wrap {
+            flex-flow: column;
+        }
+
+        #chat-area {
+            order: 2;
+        }
+
+        #diagnosis-area {
+            order: 1;
+        }
+
+        textarea {
+            width: 100%;
+        }
+
+        #submit_diagnosis {
+            width: 150px;
+        }
+
+        .modal-content {
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .margin-left-right-10px {
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        strong {
+            text-align: center;
+        }
+    }
 </style>
 
 <div class="container width-100 padding-1rem flex-dir-row">
@@ -184,7 +221,7 @@
                 console.log(body)
                 patient = body.patient
                 doctor = body.doctor
-                body.date = new Date(body.date).toString().substring(0,25)
+                body.date = new Date(body.date).toString().substring(0, 25)
                 body.chat.forEach(data => {
                     createMessageBubble(data, data.from);
                 });

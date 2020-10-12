@@ -98,6 +98,51 @@
         width: 100%;
         align-items: flex-start;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        #wrap-textarea-cont {
+            flex-direction: row !important;
+        }
+
+        #upload-files {
+            flex-direction: row !important;
+        }
+
+        .message-bubble>.padding-5px {
+            align-items: flex-start;
+        }
+
+        .h1 {
+            text-align: center;
+        }
+
+        #calling>.container:nth-child(2) {
+            flex-direction: row !important;
+        }
+
+        #myVideo {
+            width: 100px;
+        }
+
+        #buttons-container {
+            flex-direction: row !important;
+        }
+
+        .files-modal {
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .margin-left-right-10px {
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        strong {
+            text-align: center;
+        }
+    }
 </style>
 
 <div class="container width-100 padding-1rem flex-dir-row">
@@ -131,8 +176,8 @@
                     }
                 </style>
                 <iframe name="hiddenFrame" class="hide"></iframe>
-                <form action="/emergency/appointment/<%= appointment_id %>" id="upload-files" method="POST" target="hiddenFrame"
-                    enctype="multipart/form-data" class="container flex-dir-row">
+                <form action="/emergency/appointment/<%= appointment_id %>" id="upload-files" method="POST"
+                    target="hiddenFrame" enctype="multipart/form-data" class="container flex-dir-row">
                     <label for="file">
                         <i class="far fa-folder-open pointer" title="Choose file"></i>
                     </label>

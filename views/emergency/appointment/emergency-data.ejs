@@ -38,17 +38,35 @@
     }
 
     @media only screen and (max-width: 823px) and (max-height: 1024px) {
-        * {
+        /* * {
+            padding: 0 !important;
+        } */
+
+        #register-container {
+            padding: 1rem !important;
+        }
+
+        #form-container,
+        #log-container {
             padding: 0 !important;
         }
 
-        #reg-container {
-            padding: 1rem !important;
+        #register-container>.container {
+            width: 100%;
         }
 
         #login-header {
             align-items: flex-start;
             padding-left: 1rem !important;
+        }
+
+        #form-container>.container,
+        #form-container>.container>.container,
+        .width-99,
+        .mob-cont,
+        .mob-cont>.container,
+        select {
+            width: 100% !important;
         }
 
         #form-container {
@@ -60,7 +78,7 @@
         .form,
         label,
         .input-field {
-            width: 100%;
+            width: 100% !important;
         }
 
         .form {
@@ -86,6 +104,11 @@
         #haveAccountMsg {
             width: 100%;
             margin: 1rem 0;
+        }
+
+        #submit-btn {
+            width: 50% !important;
+            padding: 10px !important;
         }
 
         footer {
@@ -137,7 +160,7 @@
                 </div>
                 <div class="container flex-dir-row">
                     <div class="container flex-dir-row">
-                        <div class="container">
+                        <div class="container mob-cont">
                             <label class="width-99">Date of birth</label>
                             <div class="container flex-dir-row">
                                 <select name="dd" id="dd"></select>
@@ -146,7 +169,7 @@
                             </div>
                             </select>
                         </div>
-                        <div class="container">
+                        <div class="container mob-cont">
                             <label>Telephone</label>
                             <input type="text" id="telephone" name="telephone" class='input-field'
                                 value="<%= typeof telephone != 'undefined' ? telephone : '' %>">

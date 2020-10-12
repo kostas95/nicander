@@ -45,8 +45,49 @@
         min-height: 93.5vh;
     }
 
-    a{
+    a {
         color: #000
+    }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        body {
+            overflow: auto;
+        }
+
+        .padding-top-5rem {
+            padding: 0 !important;
+        }
+
+        .margin-bottom-1rem,
+        #pos-abs,
+        .margin-bottom-1rem>a>.button,
+        label,
+        .input-field , .width-30, select{
+            width: 100% !important;
+        }
+
+        label {
+            text-align: center;
+        }
+
+        .margin-bottom-1rem>button,
+        .margin-bottom-1rem>a {
+            width: 60% !important;
+        }
+
+        .button {
+            margin-top: 5px !important;
+        }
+
+        .margin-bottom-1rem button,
+        .margin-bottom-1rem>a {
+            margin: 0;
+        }
+
+        .padding-2rem,
+        .padding-2rem>.container {
+            width: 100%;
+        }
     }
 </style>
 <div class="container width-100 padding-top-5rem" id='main-cont'>

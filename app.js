@@ -18,6 +18,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const GridFsStorage = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
+const cron = require('cron');
 const methodOverride = require('method-override');
 // var MongoClient = require('mongodb').MongoClient
 const mongoose = require('mongoose');
@@ -54,6 +55,75 @@ const transporter = nodemailer.createTransport({
       pass: 'NIC4ND3R'
    }
 });
+
+// Set cron job
+var CronJob = cron.CronJob;
+//Execute function every 1 hour
+var job = new CronJob('0 * * * *', function () {
+   findAppointmentAndRemove()
+}, null, true, 'Europe/London');
+job.start();
+
+//Execute function every 10 minutes
+var job2 = new CronJob('*/10 * * * *', function () {
+   clearUploadsFolder()
+}, null, true, 'Europe/London');
+job2.start();
+
+//Find all appointments and check if they're not completed and their appointment date is less than today minus three hours
+//If they are remove them
+function findAppointmentAndRemove() {
+   Appointment.find({}, function (err, appointments) {
+      if (err) {
+         console.log(err)
+      } else {
+         appointments.forEach(appointment => {
+            // console.log(appointment.type)
+            if (appointment.type === 'appointment' || appointment.type === 'request') {
+               var today = new Date();
+               today.setHours(today.getHours() - 3);
+               var dd = String(today.getDate()).padStart(2, '0');
+               var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+               var yyyy = today.getFullYear();
+               var ss = today.getSeconds();
+               var min = today.getMinutes();
+               var hh = today.getHours();
+
+               today = mm + '/' + dd + '/' + yyyy + ' ' + hh + ":" + min + ":" + ss;
+
+               var appointmentDate = Date.parse(appointment.timestamp)
+               var todayMinusThreeHours = Date.parse(today)
+
+               if (appointmentDate < todayMinusThreeHours) {
+                  appointment.remove()
+               }
+            }
+         })
+      }
+   })
+}
+
+// https://medium.com/stackfame/get-list-of-all-files-in-a-directory-in-node-js-befd31677ec5
+// https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback
+function clearUploadsFolder() {
+   //joining path of directory 
+   const directoryPath = path.join(__dirname, '/uploads');
+   //passsing directoryPath and callback function
+   fs.readdir(directoryPath, function (err, files) {
+      //handling error
+      if (err) {
+         return console.log('Unable to scan directory: ' + err);
+      }
+      //listing all files using forEach
+      files.forEach(function (file) {
+         // Do whatever you want to do with the file
+         fs.unlink(`./uploads/${file}`, (err) => {
+            if (err) throw err;
+            console.log(`/uploads/${file} was deleted`);
+         });
+      });
+   });
+}
 
 
 // Express body parser
@@ -100,7 +170,7 @@ const storage = new GridFsStorage({
             }
             const filename = buf.toString('hex') + path.extname(file.originalname);
             //For unregistered users
-            console.log(req.user)
+            // console.log(req.user)
             if (typeof req.user === "undefined") {
                const fileInfo = {
                   filename: filename,
@@ -142,10 +212,10 @@ const _upload = multer({ storage });
 
 // init sessions for passport
 var session = require("express-session");
-const { json } = require('express');
-const e = require('express');
-const { X_OK } = require('constants');
-const { report } = require('process');
+// const { json } = require('express');
+// const e = require('express');
+// const { X_OK } = require('constants');
+// const { report } = require('process');
 app.use(session({ secret: "cats" }));
 
 
@@ -168,7 +238,7 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 
 //Connect flash middleware
-app.use(cookieParser('secretString'));
+// app.use(cookieParser('secretString'));
 app.use(session({ cookie: { maxAge: 60000 } }));
 app.use(flash());
 
@@ -195,7 +265,7 @@ app.get('/about', forwardAuthenticated, (req, res) => {
    res.render('about');
 })
 
-//(GET) About Route
+//(GET) Community Route
 app.get('/community', forwardAuthenticated, (req, res) => {
    res.render('community');
 })
@@ -232,7 +302,7 @@ app.post('/emergency/appointment', forwardAuthenticated, function (req, res) {
 
 //(POST) Emergency-appointment Page Route (registered user)
 app.post('/emergency/appointment/registered', ensureAuthenticated, function (req, res) {
-   console.log(req.body.id)
+   // console.log(req.body.id)
    User.findOne({
       _id: req.body.id
    }, function (err, user) {
@@ -478,7 +548,7 @@ app.get('/dashboard/personal-details', ensureAuthenticated, (req, res) => {
          });
 
       } else {
-         res.render('notFound');
+         res.render('notFound', {layout: false});
       }
    }
 })
@@ -505,7 +575,7 @@ app.get('/dashboard/my-appointments', ensureAuthenticated, (req, res) => {
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -532,7 +602,7 @@ app.get('/dashboard/my-appointments/requests', ensureAuthenticated, (req, res) =
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -559,7 +629,7 @@ app.get('/dashboard/my-appointments/history', ensureAuthenticated, (req, res) =>
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -586,7 +656,7 @@ app.get('/dashboard/my-appointments/cancelled', ensureAuthenticated, (req, res) 
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -605,7 +675,7 @@ app.get('/dashboard/my-appointments/emergencies', ensureAuthenticated, (req, res
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -621,7 +691,7 @@ app.get('/dashboard/emergencies/history', ensureAuthenticated, (req, res) => {
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -636,11 +706,11 @@ app.get('/dashboard/emergencies/ignored', ensureAuthenticated, (req, res) => {
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
-//System doctor emergency appointments ignored
+//System doctor emergency adr
 app.get('/dashboard/reporting-forms', ensureAuthenticated, (req, res) => {
    if (req.user.type === 'systemDoctor') {
 
@@ -652,7 +722,7 @@ app.get('/dashboard/reporting-forms', ensureAuthenticated, (req, res) => {
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -670,7 +740,7 @@ app.get('/dashboard/reviews', ensureAuthenticated, (req, res) => {
             id: req.user._id
          });
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
 })
@@ -854,7 +924,7 @@ app.get('/dashboard/posts/new-post', ensureAuthenticated, function (req, res) {
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -869,7 +939,7 @@ app.get('/dashboard/posts/edit-post', ensureAuthenticated, function (req, res) {
          message: null
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -884,7 +954,7 @@ app.get('/dashboard/posts/see-posts', ensureAuthenticated, function (req, res) {
          message: null
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -898,7 +968,7 @@ app.get('/dashboard/users-management/doctors', ensureAuthenticated, function (re
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -916,7 +986,7 @@ app.get('/dashboard/users-management/system-doctors', ensureAuthenticated, funct
          msg2: null
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -930,7 +1000,7 @@ app.get('/dashboard/users-management/patients', ensureAuthenticated, function (r
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -948,7 +1018,7 @@ app.get('/dashboard/users-management/admins', ensureAuthenticated, function (req
          msg2: null
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -962,7 +1032,7 @@ app.get('/dashboard/reports', ensureAuthenticated, function (req, res) {
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -977,7 +1047,7 @@ app.get('/dashboard/contact-platform', ensureAuthenticated, function (req, res) 
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -992,7 +1062,7 @@ app.get('/dashboard/email-notifications', ensureAuthenticated, function (req, re
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -1007,7 +1077,7 @@ app.get('/dashboard/email-notifications/history', ensureAuthenticated, function 
          id: req.user._id
       });
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -1416,7 +1486,7 @@ app.get('/d/delete', ensureAuthenticated, (req, res) => {
          msg: null
       })
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -1720,7 +1790,7 @@ app.get('/p/delete', ensureAuthenticated, (req, res) => {
          msg: null
       })
    } else {
-      res.render('notFound')
+      res.render('notFound', {layout: false})
    }
 })
 
@@ -2717,13 +2787,14 @@ app.post('/email', ensureAuthenticated, (req, res) => {
 
       transporter.sendMail(mailOptions, function (error, info) {
          if (error) {
-            res.json({
-               msg: 'There was an error while sending the email',
-               type: 'error'
-            })
+            console.log(error)
+            // res.json({
+            //    msg: 'There was an error while sending the email',
+            //    type: 'error'
+            // })
          } else {
-            console.log('Email sent: ' + info.response);
-            console.log(length, count)
+            // console.log('Email sent: ' + info.response);
+            // console.log(length, count)
             if (count === length - 1) {
                res.json({
                   msg: 'Email sent successfully',
@@ -2975,7 +3046,7 @@ app.post('/ignoreEmergency', ensureAuthenticated, (req, res) => {
 
 //post adr data
 app.post('/adr', (req, res) => {
-   console.log(req.body)
+   // console.log(req.body)
 
    const newAdr = new Adr({
       name: req.body.name,
@@ -3021,7 +3092,7 @@ app.post('/adr/getReports/criteria', (req, res) => {
          console.log(err)
       }
       let reportsSend = [];
-      console.log(reports.length)
+      // console.log(reports.length)
       reports.forEach(report => {
          let includes = true;
          let name = `${decrypt(report.name).toLowerCase()} ${decrypt(report.surname).toLowerCase()}`
@@ -3067,10 +3138,10 @@ app.post('/adr/getReports/criteria', (req, res) => {
          }
       });
       if (reportsSend.length > req.body.start) {
-         console.log(reportsSend.length, 'before splice')
+         // console.log(reportsSend.length, 'before splice')
          reportsSend.splice(req.body.end, reportsSend.length - 1)
          reportsSend.splice(0, req.body.start)
-         console.log(reportsSend.length, 'after splice')
+         // console.log(reportsSend.length, 'after splice')
          res.json(reportsSend)
       } else {
          res.json([])
@@ -3133,7 +3204,7 @@ app.get('*', function (req, res) {
       prof_id = req.originalUrl.split(/[/]/)[2];
       User.findOne({ _id: prof_id }, function (err, user) {
          if (err) {
-            res.render('notFound');
+            res.render('notFound', {layout: false});
          } else if (user) {
             imgModel.find({ id: prof_id }, (err, items) => {
                if (err) {
@@ -3150,7 +3221,7 @@ app.get('*', function (req, res) {
                         prof_id: prof_id,
                      })
                   } else {
-                     res.render('notFound')
+                     res.render('notFound', {layout: false})
                   }
                }
                else if (items) {
@@ -3203,7 +3274,7 @@ app.get('*', function (req, res) {
                }
             });
          } else {
-            res.render('notFound')
+            res.render('notFound', {layout: false})
          }
       });
 
@@ -3314,7 +3385,7 @@ app.get('*', function (req, res) {
                prof_id = req.originalUrl.split(/[/]/)[2];
                User.findOne({ _id: prof_id }, function (err, user) {
                   if (err) {
-                     res.render('notFound');
+                     res.render('notFound', {layout: false});
                   } else {
                      res.render('dashboard/patient/report', {
                         layout: 'dashboard/patient/layout',
@@ -3340,7 +3411,7 @@ app.get('*', function (req, res) {
                         reporting_user: req.user._id,
                      }, function (err, user) {
                         if (err) {
-                           res.render('notFound')
+                           res.render('notFound', {layout: false})
                         } else {
                            if (!user) {
 
@@ -3369,10 +3440,10 @@ app.get('*', function (req, res) {
                res.redirect('/unauthorized')
             }
          } else {
-            res.render('notFound')
+            res.render('notFound', {layout: false})
          }
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
    }
    // /appointment/:appointment_id
@@ -3443,7 +3514,7 @@ app.get('*', function (req, res) {
                            })
                         }
                      } else
-                        res.render('notFound')
+                        res.render('notFound', {layout: false})
                   }
                })
             } else if (req.user.emailAuthorized === false) {
@@ -3490,7 +3561,7 @@ app.get('*', function (req, res) {
                            })
                         }
                      } else
-                        res.render('notFound')
+                        res.render('notFound', {layout: false})
                   }
                })
             } else if (req.user.emailAuthorized === false) {
@@ -3795,7 +3866,7 @@ app.get('*', function (req, res) {
          }
 
       } else {
-         res.render('notFound')
+         res.render('notFound', {layout: false})
       }
 
       app.post('/getAppointments/1', ensureAuthenticated, (req, res) => {
@@ -3915,7 +3986,7 @@ app.get('*', function (req, res) {
             })
          }
          else {
-            res.render('notFound')
+            res.render('notFound', {layout: false})
          }
       })
 
@@ -3932,7 +4003,7 @@ app.get('*', function (req, res) {
       })
    }
    else {
-      res.render('notFound');
+      res.render('notFound', {layout: false});
    }
 
    function socketEvents(socket) {

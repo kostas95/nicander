@@ -127,10 +127,10 @@ const AppointmentSchema = new mongoose.Schema({
             required: false
         }
     }],
-    files: {
-        type: String,
-        required: false
-    },
+    // files: {
+    //     type: String,
+    //     required: false
+    // },
     diagnosis: {
         diagnosis: {
             type: String,

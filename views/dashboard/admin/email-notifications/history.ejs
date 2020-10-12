@@ -72,6 +72,12 @@
         flex: 5;
         font-size: 1.2rem;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .width-50 {
+            width: 100% !important;
+        }
+    }
 </style>
 
 <div class="container padding-1rem width-100 content">
@@ -124,7 +130,7 @@
                 container.innerHTML = `
                 <div class='container flex-dir-row padding-1rem width-100'>
                     <i class="fas fa-calendar-alt"></i>
-                    <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                    <div class='big-h1'>${new Date(email.date).toString().substring(0,25)}
                     </div>
                 </div>
                 <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
@@ -151,7 +157,7 @@
                         container.innerHTML = `
                         <div class='container flex-dir-row padding-1rem width-100'>
                             <i class="fas fa-calendar-alt"></i>
-                            <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                            <div class='big-h1'>${new Date(email.date).toString().substring(0,25)}
                             </div>
                         </div>
                         <div class='container flex-dir-row padding-5px width-100 justify-left flex'>
@@ -176,7 +182,7 @@
                         container.innerHTML = `
                         <div class='container flex-dir-row padding-1rem width-100'>
                             <i class="fas fa-calendar-alt"></i>
-                            <div class='big-h1'>${email.date.substring(8, 10)}-${email.date.substring(5, 7)}-${email.date.substring(0, 4)}, ${email.date.substring(11, 16)}
+                            <div class='big-h1'>${new Date(email.date).toString().substring(0,25)}
                             </div>
                         </div>
                         <div class='container flex-dir-row padding-5px width-100 justify-left flex'>

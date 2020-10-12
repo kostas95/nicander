@@ -79,6 +79,17 @@
     #messages {
         padding: 5rem 1rem 1rem 1rem;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .width-50 {
+            width: 100% !important;
+        }
+
+        .modal-content {
+            height: 80vh;
+            justify-content: flex-start;
+        }
+    }
 </style>
 
 <div class="container padding-1rem width-100 message_content">
@@ -135,7 +146,7 @@
                 infoContainer.appendChild(date);
                 date.innerHTML = `
                 <i class="fas fa-calendar-alt"></i>
-                <div class='strong'>${message.date.substring(8, 10)}-${message.date.substring(5, 7)}-${message.date.substring(0, 4)},</div><div class='strong'>${message.date.substring(11, 16)}</div>
+                <div class='strong'>${new Date(message.date).toString().substring(0, 25)}</div>
                 `
                 //Email info
                 const email = document.createElement('div');
@@ -305,7 +316,7 @@
                                 <div class='container flex-dir-row justify-left'>
                                 <i class="fas fa-angle-down"></i>
                                 <div class='padding-5px color'>${reply_item.sender}</div>
-                                <div class='padding-5px color'>${reply_item.date.substring(8, 10)}-${reply_item.date.substring(5, 7)}-${reply_item.date.substring(0, 4)},${reply_item.date.substring(11, 16)}</div>
+                                <div class='padding-5px color'>${new Date(reply_item.date).toString().substring(0, 25)}</div>
                                 </div>
                                 <div class='font'>${CryptoJS.AES.decrypt(reply_item.body, "Secret Passphrase").toString(CryptoJS.enc.Utf8)}</div>
                             `

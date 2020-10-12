@@ -82,10 +82,150 @@
         width: 1rem !important;
         height: 1rem !important;
     }
+
+    @media only screen and (max-width: 1024px) and (max-height: 1366px) {
+        .button-4 {
+            flex: 1;
+        }
+
+        .padding-2rem {
+            padding: 1rem;
+        }
+
+        .flex-dir-row {
+            flex-direction: column !important;
+        }
+
+        @media only screen and (min-width: 833px) and (max-height: 1366px) {
+            #container * {
+                font-size: 14px;
+            }
+        }
+
+        #buttons-cont {
+            flex-direction: row !important;
+        }
+
+        #buttons-cont:nth-child(2) {
+            width: 50% !important;
+        }
+
+        .dashboard-headers {
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .filter-container,
+        .filter-container>.container,
+        #input-container {
+            width: 100% !important;
+        }
+
+        #input-container>.container {
+            flex-direction: row !important;
+        }
+
+        .button-3 {
+            width: 70px !important;
+            font-size: 9px;
+            margin: 2px;
+        }
+
+        input,
+        select {
+            width: 80% !important;
+        }
+
+        .width-75 {
+            width: 100% !important;
+            flex: none;
+        }
+
+        .data-cont-head {
+            flex-direction: row !important;
+            width: 100% !important;
+        }
+
+        #container,
+        #container>.container {
+            width: 100%;
+        }
+
+        .margin-right-25px {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .margin-left-2rem {
+            margin: 0;
+        }
+
+        label {
+            text-align: center;
+        }
+
+        .heading {
+            display: none;
+        }
+
+        .data-cont {
+            padding: 0;
+            flex-direction: row !important;
+        }
+
+        .data-cont>.container {
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            margin: 5px;
+        }
+
+        .data:nth-child(3),
+        .data:nth-child(4) {
+            display: none;
+        }
+
+        .data {
+            padding: 0 !important;
+            font-size: 12px;
+            margin: 0;
+            flex: 1;
+        }
+
+        .del_btn, .change_pwd {
+            padding: 5px 0 !important;
+        }
+
+        .filter-container {
+            border: none;
+        }
+    }
+
+    @media only screen and (max-width: 280px) and (max-height: 653px) {
+        #input-container>.container {
+            flex-direction: column !important;
+        }
+
+        .padding-2rem {
+            padding: 0;
+        }
+
+        .data:nth-child(3),
+        .data:nth-child(4),
+        .data:nth-child(5),
+        .data:nth-child(6),
+        .data:nth-child(7),
+        .data:nth-child(8) {
+            display: none;
+        }
+    }
 </style>
 
 <div class="dashboard-container">
-    <div class="container flex-dir-row padding-2rem">
+    <div class="container flex-dir-row padding-2rem" id="buttons-cont">
         <a href="/dashboard/users-management/doctors">
             <div class="dashboard-headers"><i class="fas fa-user-nurse"></i>Doctors</div>
         </a>
@@ -104,7 +244,7 @@
     </h2>
     <div class="container flex-dir-row width-100">
         <div class="container filter-container">
-            <div class="container flex-dir-row">
+            <div class="container flex-dir-row" id="buttons-cont">
                 <button class="button-3 button-4">Manage Admins</button>
                 <button class="button-3 button-4">Add Admin</button>
             </div>

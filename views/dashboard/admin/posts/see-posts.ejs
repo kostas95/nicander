@@ -1,5 +1,5 @@
 <div class="dashboard-container">
-    <div class="container flex-dir-row padding-2rem">
+    <div class="container flex-dir-row padding-2rem" id="buttons-cont">
         <a href="/dashboard/posts/new-post">
             <div class="dashboard-headers"><i class="fas fa-plus"></i>New Post</div>
         </a>
@@ -76,6 +76,53 @@
         width: 50px;
         font-size: 10px;
         text-align: center;
+    }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        .padding-2rem {
+            padding: 1rem;
+        }
+
+        #buttons-cont {
+            flex-direction: row !important;
+        }
+
+        .dashboard-headers {
+            font-size: 14px;
+        }
+
+        #display-all-posts {
+            width: 80%;
+            margin: auto !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+        }
+
+        .post-edit {
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        #postTitle,
+        #postContent,
+        #postAuthor,
+        .button-2,
+        .button,
+        #post {
+            width: 75%;
+        }
+
+        #post {
+            margin: 1rem 0 0 0 !important;
+        }
+
+        label {
+            text-align: center;
+        }
+
+        #writing-palette {
+            flex-direction: row !important;
+        }
     }
 </style>
 <script>

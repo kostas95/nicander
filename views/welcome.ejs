@@ -154,7 +154,7 @@
         }
 
         #section-2 {
-            margin: 40px 0;
+            margin: 0 0 40px 0;
         }
 
         #section-2 .strong {
@@ -191,14 +191,22 @@
         }
 
         .modal-content {
-            overflow: auto;
-            height: 90vh;
+            height: 80vh;
             width: 100vw;
             padding: 0;
+        }
+        .modal-content>.container {
+            overflow: auto;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
 
         .modal-content>.container {
             padding: 10px !important;
+        }
+
+        .button-2 {
+            font-size: 14px;
         }
     }
 </style>

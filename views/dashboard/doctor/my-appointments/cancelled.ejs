@@ -79,10 +79,43 @@
         margin-bottom: 5px;
         font-size: 15px;
     }
+
+    @media only screen and (max-width: 823px) and (max-height: 1024px) {
+        #buttons-cont {
+            flex-direction: row !important;
+        }
+
+        .head-btn {
+            font-size: 14px;
+            padding: 0.5rem;
+        }
+
+        #cancelled-content-wrap,
+        .appointment-content {
+            width: 100%;
+        }
+
+        .border:nth-child(2) {
+            border-top: 1px solid #cecdcd;
+            border-bottom: 1px solid #cecdcd;
+            border-left: none;
+            border-right: none;
+        }
+
+        #cancelled {
+            border: none;
+            margin: 0;
+            width: 100% !important;
+            padding: 0.5rem;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="container padding-1rem width-100">
-    <div class="container flex-dir-row padding-1rem width-100">
+    <div class="container flex-dir-row padding-1rem width-100" id="buttons-cont">
         <a href="/dashboard/my-appointments">
             <h1 class="padding-1rem pointer head-btn">Appointments</h1>
         </a>
