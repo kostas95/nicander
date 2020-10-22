@@ -349,8 +349,8 @@
         <div class="container width-100 main-page-section" id='section-1'>
             <img src="/img/bg1.png" id='background-image'>
             <div class="container width-100 height-90">
-                <h1 class="animate__animated animate__bounce">Contact the experts easily and quickly!</h1>
-                <div class="delay-1 animate__animated animate__backInLeft container flex-dir-row width-90"
+                <h1 id="animate_header">Contact the experts easily and quickly!</h1>
+                <div class="container flex-dir-row width-90"
                     id="searchbar-cont">
                     <input type="text" class='searchbar  width-100' placeholder="Doctor's name or specialty">
                     <div class="arrow"><i class="fas fa-chevron-down"></i></div>
@@ -438,6 +438,9 @@
         document.querySelector('#loader').style.opacity = 0
         setTimeout(() => {
             document.querySelector('#loader').remove()
+            document.querySelector('#searchbar-cont').className += 'delay-1 animate__animated animate__backInLeft '
+            document.querySelector('#document_header').className += 'animate__animated animate__bounce'
+
         }, 1000);
     })
 
