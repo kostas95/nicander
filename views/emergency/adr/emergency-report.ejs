@@ -335,38 +335,38 @@
 
         if (index >= 0 && index < formFields.length - 1) {
             if (formFields[index].children[1].id !== 'medicine-section') {
-                // Array.from(formFields[index].children[1].children).forEach(element => {
-                //     if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+                Array.from(formFields[index].children[1].children).forEach(element => {
+                    if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
 
-                //         if (element.value.length <= 0) {
-                //             stop_ = true
-                //         } else {
-                //             stop_ = false
-                //         }
-                //     }
-                // })
+                        if (element.value.length <= 0) {
+                            stop_ = true
+                        } else {
+                            stop_ = false
+                        }
+                    }
+                })
             } else {
-                // Array.from(formFields[index].children[1].children).forEach(child => {
-                //     Array.from(child.children).forEach(element => {
-                //         if (element.id === 'medicine-container') {
-                //             if (element.children[0].value.length <= 0) {
-                //                 stop_ = true
-                //             } else {
-                //                 stop_ = false
-                //             }
-                //         }
-                //         if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
-                //             if (element.value.length <= 0) {
-                //                 stop_ = true
-                //             }
-                //             else if (element.value.length > 0 && stop_ === true) {
-                //                 stop_ = true
-                //             } else {
-                //                 stop_ = false
-                //             }
-                //         }
-                //     })
-                // })
+                Array.from(formFields[index].children[1].children).forEach(child => {
+                    Array.from(child.children).forEach(element => {
+                        if (element.id === 'medicine-container') {
+                            if (element.children[0].value.length <= 0) {
+                                stop_ = true
+                            } else {
+                                stop_ = false
+                            }
+                        }
+                        if (element.nodeName === 'INPUT' || element.nodeName === 'SELECT' || element.nodeName === 'TEXTAREA') {
+                            if (element.value.length <= 0) {
+                                stop_ = true
+                            }
+                            else if (element.value.length > 0 && stop_ === true) {
+                                stop_ = true
+                            } else {
+                                stop_ = false
+                            }
+                        }
+                    })
+                })
             }
 
             if (stop_ === false) {
@@ -408,7 +408,7 @@
                     document.querySelector('.position-parent').appendChild(errMsg)
                     setTimeout(() => {
                         errMsg.remove()
-                    }, 5000);
+                    }, 2500);
                 }
             }
 
@@ -635,7 +635,7 @@
                     document.querySelector('.position-parent').appendChild(msg)
                     setTimeout(() => {
                         msg.remove()
-                    }, 5000);
+                    }, 60000);
                     document.querySelector('#submit-adr').disabled = true
                 }
             });
